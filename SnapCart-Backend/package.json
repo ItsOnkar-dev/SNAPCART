@@ -1,0 +1,23 @@
+{
+  "name": "snapcart-backend",
+  "version": "1.0.0",
+  "description": "snapcart backend",
+  "keywords": [
+    "node.js",
+    "express.js",
+    "mongodb"
+  ],
+  "license": "ISC",
+  "author": "Onkar",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mongoose": "^8.10.1",
+    "nodemon": "^3.1.9"
+  }
+}
