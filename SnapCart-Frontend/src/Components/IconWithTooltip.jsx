@@ -8,7 +8,7 @@ const IconWithTooltip = ({ children, tooltip }) => {
         {children}
       </div>
       {/* Tooltip */}
-      <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-500 ease-in-out bottom-full left-1/2 -translate-x-1/2 px-3 py-1 bg-gray-900 text-white tracking-widest text-sm rounded-md whitespace-nowrap">
+      <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-500 ease-in-out bottom-full left-1/2 -translate-x-1/2 px-3 py-1 dark:bg-white dark:text-black bg-gray-900 text-white tracking-widest text-sm rounded-md whitespace-nowrap">
         {tooltip}
       </div>
     </div>
