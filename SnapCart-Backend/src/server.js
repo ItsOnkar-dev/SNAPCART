@@ -1,5 +1,5 @@
 import app from './app.js'
-import AppDataSource from './data-source.js'
+import AppDataSource from './database/data-source.js'
 
 const PORT = 8000;
 

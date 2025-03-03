@@ -1,11 +1,12 @@
 import express from 'express'
-import productRoutes from './routes/products.js'
+import productRoutes from './Routes/products.js'
+import cors from 'cors'
 
 const app = express();
 
-app.use(express.json());
-
-app.use(productRoutes)
+app.use(cors()) // Enable CORS for all requests
+app.use(express.json()); // Parse incoming JSON requests
+app.use(productRoutes) // Add product routes
 
 // Global Express Error Handler
 app.use((err, req, res, next) => {

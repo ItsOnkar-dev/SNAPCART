@@ -1,9 +1,9 @@
 import express from 'express'
-import Product from '../models/ProductModel.js'
-import catchAsync from '../core/catchAsync.js'
+import Product from '../Models/productSchema.js'
+import catchAsync from '../Core/catchAsync.js'
 import {BadRequestError, InternalServerError} from '../core/ApiError.js'
 
-const router = express.Router();
+const router = express.Router(); // Creates a new instance of an Express Router. The Router in Express is like a mini Express application that you can use to handle routes separately instead of defining all routes in server.js.
 
 // Get All products
 router.get('/products', catchAsync(async(req, res) => {
@@ -11,7 +11,6 @@ router.get('/products', catchAsync(async(req, res) => {
   if (!products || products.length === 0) throw new BadRequestError('Products not found');
   res.status(200).json(products);
 }));
-
 
 // Creating the new Product
 router.post('/products', catchAsync(async(req, res) => {
