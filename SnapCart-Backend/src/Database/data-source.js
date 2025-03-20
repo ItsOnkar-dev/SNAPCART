@@ -1,10 +1,11 @@
 import mongoose from 'mongoose'
+import Logger from '../Core/Logger.js'
 
 class AppDataSource{
   static async connect(){
     try { 
       await mongoose.connect('mongodb://127.0.0.1:27017/snapcart_db') 
-      console.log("Successfully connected to database")
+      Logger.info("Successfully connected to database")
     } catch (error) {
       console.log(error, "error while connected to database")
     }
