@@ -34,10 +34,6 @@ html {
 
 @layer base {
   .text-gradient {
-    @apply text-transparent bg-clip-text brightness-105 bg-gradient-to-r from-blue-500 to-cyan-300 hover:bg-gradient-to-r hover:from-cyan-300 hover:to-blue-500;
-  }
-
-  .text-gradient1 {
-    @apply text-transparent bg-clip-text brightness-105 bg-gradient-to-r from-blue-500 to-cyan-500 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-blue-500;
+    @apply text-transparent bg-clip-text brightness-105 bg-gradient-to-r from-cyan-300 to-blue-400 hover:bg-gradient-to-r hover:from-blue-400 hover:to-cyan-300;
   }
 }

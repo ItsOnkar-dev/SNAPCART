@@ -39,13 +39,13 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const styles = useMemo(() => ({
     logoName: "cursor-pointer font-extrabold text-2xl md:text-4xl tracking-widest transition-all duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3",
 
-    listStyles: `transition-all hover:duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3 cursor-pointer hover:brightness-95 hover:text-gradient1 tracking-widest dark:hover:brightness-125`,
+    listStyles: `transition-all hover:duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3 cursor-pointer hover:brightness-95 hover:text-gradient tracking-widest dark:hover:brightness-125`,
 
     inputStyles: (expand) => `block border border-slate-300 dark:border-slate-600 text-sm py-1.5 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${expand ? 'w-[30vw]' : 'w-[25vw]'}`,
 
     mobileInputStyles: (expand) => `block w-full border border-slate-300 dark:border-slate-600 text-sm py-2 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${expand ? 'h-10' : 'h-8'}`,
 
-    activeStyles: "text-gradient1 dark:brightness-125 font-semibold tracking-widest underline underline-offset-8",
+    activeStyles: "text-gradient dark:brightness-125 font-semibold tracking-widest underline underline-offset-8",
 
   }), [isSidebarOpen]);
 
