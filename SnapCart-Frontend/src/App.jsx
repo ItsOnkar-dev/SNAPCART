@@ -8,6 +8,8 @@ import Contact from "./Pages/Contact";
 import Cart from "./Pages/Cart";
 import Wishlist from "./Pages/Wishlist";
 import Profile from "./Pages/Profile";
+import Registration from "./Components/Registration";
+import Register from "./Pages/Register";
 
 const App = () => {
   // Get initial theme from localStorage or system preference
@@ -41,10 +43,13 @@ const App = () => {
   return (
     <div className="min-h-screen bg-white text-gray-900 dark:bg-slate-900 dark:text-white transition-colors duration-300">
       <NavBar isDark={isDark} toggleDarkMode={toggleDarkMode} />
-      <main> {/* Add padding-top to account for fixed navbar */}
+      <main> 
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/register" element={<Registration/>} />
+          <Route path="/login" element={<Register initialMode="login"/>} />
+          <Route path="/signup" element={<Register initialMode="signup" />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/cart" element={<Cart />} />
