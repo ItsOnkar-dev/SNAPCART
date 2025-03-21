@@ -1,5 +1,5 @@
 import express from 'express'
-import Product from '../Models/productSchema.js'
+import Product from '../Models/Product.js'
 import catchAsync from '../Core/catchAsync.js'
 import {BadRequestError, InternalServerError} from '../Core/ApiError.js'
 import Logger from '../Core/Logger.js'
