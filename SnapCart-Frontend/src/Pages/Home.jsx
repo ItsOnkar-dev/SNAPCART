@@ -1,9 +1,9 @@
-import LayOut from "../Components/LayOut"
+import Registration from "../Components/Registration"
 
 const Home = () => {
   return (
     <div className="">
-      <LayOut />
+      <Registration/>
     </div>
   )
 }

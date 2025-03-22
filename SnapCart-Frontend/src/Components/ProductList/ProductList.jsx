@@ -11,9 +11,9 @@ const ProductList = () => {
     // Fetch data from API
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('https://fakestoreapi.com/products')
+        const res = await axios.get('http://localhost:8000/api/products')
         console.log(res)
-        setProducts(res.data)
+        setProducts(res.data.data)
       } catch (error) {
         console.log(error.message)
       }
@@ -27,7 +27,7 @@ const ProductList = () => {
       {
         products.map((product) => (
           <ProductCard
-            key={product.id}
+            key={product._id}
             product={product}
           />
         ))
