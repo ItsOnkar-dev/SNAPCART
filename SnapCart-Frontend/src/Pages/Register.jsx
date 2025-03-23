@@ -2,13 +2,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
 import { ArrowRight, ArrowLeft, Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
 import { FaGoogle, FaApple } from "react-icons/fa";
-import { ToastContainer, toast, Slide } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 
- // Framer Motion variants
- const containerVariants = {
+// Framer Motion variants
+const containerVariants = {
   hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
@@ -59,52 +59,102 @@ const Register = ({ initialMode = "login" }) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // Changed from email to identifier
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
 
-  const [isLogin, setIsLogin] = useState(
-    location.pathname === "/login" || initialMode === "login"
-  );
+  const [isLogin, setIsLogin] = useState(location.pathname === "/login" || initialMode === "login");
 
   useEffect(() => {
-    if (location.pathname === '/login') {
+    if (location.pathname === "/login") {
       setIsLogin(true);
-    } else if (location.pathname === '/signup') {
+    } else if (location.pathname === "/signup") {
       setIsLogin(false);
     }
   }, [location.pathname]);
 
   const toggleForm = useCallback(() => {
-    setIsLogin(prevIsLogin => !prevIsLogin);
-    navigate(isLogin ? "/signup" : "/login");
-  }, [isLogin, navigate]);
+    setIsLogin((prevIsLogin) => {
+      const newMode = !prevIsLogin;
+      navigate(newMode ? "/login" : "/signup");
+      return newMode;
+    });
+  }, [navigate]);
 
-  const handleSubmit = (e) => {
+  const validateForm = () => {
+    if (identifier.trim() === "") {
+      toast.error("Username or Email is required");
+      return false;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return false;
+    }
+
+    if (!isLogin && !name.trim()) {
+      toast.error("Name is required");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
 
-    const newUser = {
-      email: email,
-      password: password,
-      ...(isLogin ? {} : { username: name }),
-    };
+    try {
+      let userData;
+      
+      if (isLogin) {
+        // For login, send both username and email fields with the same value
+        // This ensures the backend always has both fields available
+        userData = {
+          username: identifier,
+          email: identifier,
+          password: password
+        };
+      } else {
+        // For signup
+        userData = {
+          username: name,
+          email: identifier,
+          password: password
+        };
+      }
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log(isLogin ? "Logging in with:" : "Signing up with:", newUser);
-      toast.success(isLogin ? "Login successful! Welcome back!" : "Sign Up successful! Please login to get started..");
+      console.log(isLogin ? "Logging in with:" : "Signing up with:", userData);
+
+      const response = await axios.post(`http://localhost:8000/${isLogin ? "login" : "register"}`, userData);
+
+      toast.success(isLogin ? "Login successful! Welcome back!" : "Sign Up successful! Please login to get started.");
+
+      console.log(response.data);
+
+      // Navigate after successful API response
+      if (isLogin) {
+        navigate("/home");
+      } else {
+        setIsLogin(true);
+        navigate("/login");
+      }
+    } catch (error) {
+      // Handle error more robustly
+      const errorMessage =
+        error.response?.data?.errMsg ||
+        error.response?.data?.msg ||
+        "An error occurred. Please try again.";
+      toast.error(errorMessage);
+      console.error(error);
+    } finally {
       setIsLoading(false);
-
-      setTimeout(() => {
-        if (isLogin) {
-          navigate("/layout");
-        } else {
-          setIsLogin(true);
-          navigate("/login");
-        }
-      }, 1000);
-    }, 2000);
+    }
   };
 
   return (
@@ -136,7 +186,7 @@ const Register = ({ initialMode = "login" }) => {
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}>
                       <label htmlFor='name' className={styles.labelText}>
-                        Full Name
+                        Username
                       </label>
                       <div className={styles.inputContainer}>
                         <div className={styles.inputIcon}>
@@ -148,16 +198,25 @@ const Register = ({ initialMode = "login" }) => {
                   )}
                 </AnimatePresence>
 
-                {/* Email field */}
+                {/* Username/Email field */}
                 <motion.div className={styles.formGroup} variants={itemVariants}>
-                  <label htmlFor='email' className={styles.labelText}>
-                    Email Address
+                  <label htmlFor='identifier' className={styles.labelText}>
+                   {isLogin ? "Username or Email" : "Email Address"}
                   </label>
                   <div className={styles.inputContainer}>
                     <div className={styles.inputIcon}>
                       <Mail size={18} />
                     </div>
-                    <input id='email' type='email' name='email' value={email} placeholder='your@gmail.com' required onChange={(e) => setEmail(e.target.value)} className={styles.inputField} />
+                    <input 
+                      id='identifier' 
+                      type='text' 
+                      name='identifier' 
+                      value={identifier} 
+                      placeholder={isLogin ? 'Enter username or email' : 'your@gmail.com'} 
+                      required 
+                      onChange={(e) => setIdentifier(e.target.value)} 
+                      className={styles.inputField} 
+                    />
                   </div>
                 </motion.div>
 
@@ -180,7 +239,12 @@ const Register = ({ initialMode = "login" }) => {
                       onChange={(e) => setPassword(e.target.value)}
                       className={styles.inputField}
                     />
-                    <button type='button' onClick={() => setShowPassword(!showPassword)} className='absolute right-3 top-3 text-gray-400 hover:text-gray-600'>
+                    <button 
+                      type='button' 
+                      onClick={() => setShowPassword(!showPassword)} 
+                      className='absolute right-3 top-3 text-gray-400 hover:text-gray-600'
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
@@ -234,7 +298,7 @@ const Register = ({ initialMode = "login" }) => {
                 </motion.div>
 
                 {/* Social login options */}
-                <motion.div className='mt-6 pt-6 border-t border-gray-200' variants={itemVariants}>
+                <motion.div className='mt-6 pt-6 border-t border-gray-200 dark:border-gray-700' variants={itemVariants}>
                   <div className='text-center text-sm text-gray-500 dark:text-gray-400 mb-4'>Or continue with</div>
                   <div className='flex items-center justify-center space-x-2'>
                     <motion.button
@@ -264,21 +328,6 @@ const Register = ({ initialMode = "login" }) => {
           </AnimatePresence>
         </div>
       </motion.div>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={true}
-        closeOnClick={true}
-        draggable
-        theme="light"
-        transition={Slide}
-        toastClassName={() => "relative min-h-16 flex items-center justify-between p-6 rounded-lg shadow-xl dark:bg-slate-900 dark:text-white bg-white text-slate-800 text-sm overflow-hidden cursor-pointer border border-gray-300 dark:border-gray-500"}
-        bodyClassName={() => "flex-1"}
-        progressClassName={() => 
-          "Toastify__progress-bar Toastify__progress-bar--animated Toastify__progress-bar--default h-1 bg-gradient-to-r from-cyan-500 via-rose-500 to-purple-500"
-        }
-      />
     </>
   );
 };

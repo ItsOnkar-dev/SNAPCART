@@ -1,11 +1,15 @@
-import Registration from "../Components/Registration"
+import ImageCarousel from "../Components/ImageCarousel";
+import ProductList from "../Components/ProductList/ProductList";
 
 const Home = () => {
   return (
-    <div className="">
-      <Registration/>
-    </div>
-  )
-}
+    <>
+      <main className="flex flex-col gap-20 px-4 md:px-10 py-28 md:py-36">
+        <ImageCarousel />
+        <ProductList />
+      </main>
+    </>
+  );
+};
 
-export default Home
+export default Home;

@@ -70,7 +70,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             <ul className="flex items-center gap-10">
               {navItems.map((item) => (
                 <li key={item.id} className={styles.listStyles}>
-                  <NavLink to={item.title === "Home" ? "/" : `/${item.title.toLowerCase()}`} className={({ isActive }) =>
+                  <NavLink to={item.title === "Home" ? "/home" : `/${item.title.toLowerCase()}`} className={({ isActive }) =>
                     `${isActive ? styles.activeStyles : ""}`
                   }>
                     {item.title}
@@ -147,7 +147,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
         <div className={`fixed top-0 left-0 h-full w-72 bg-white z-50 transform transition-transform duration-500 ease-in-out xl:hidden dark:bg-slate-900 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <div className="px-6 py-4">
             <div className='flex items-center justify-between mb-8'>
-              <div className={`${styles.logoName}`} onClick={() => navigate('/')}>
+              <div className={`${styles.logoName}`} onClick={() => navigate('/home')}>
                 <span className="text-gradient">Snap</span>
                 <span className="text-gray-600 dark:text-white">Cart</span>
               </div>
@@ -158,7 +158,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             <ul className="space-y-4">
               {navItems.map((item) => (
                 <li key={item.id} className={styles.listStyles}>
-                  <NavLink to={item.title === "Home" ? "/" : `/${item.title.toLowerCase()}`} className={({ isActive }) =>
+                  <NavLink to={item.title === "Home" ? "/home" : `/${item.title.toLowerCase()}`} className={({ isActive }) =>
                     `${isActive ? styles.activeStyles : ""}`
                   }>
                     {item.title}
