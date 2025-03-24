@@ -1,11 +1,12 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useContext } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { ArrowRight, ArrowLeft, Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
 import { FaGoogle, FaApple } from "react-icons/fa";
 import { toast } from "react-toastify";
+import UserContext from '../context/User/UserContext'
 
 // Framer Motion variants
 const containerVariants = {
@@ -65,6 +66,8 @@ const Register = ({ initialMode = "login" }) => {
 
   const [isLogin, setIsLogin] = useState(location.pathname === "/login" || initialMode === "login");
 
+  const userContext = useContext(UserContext)
+
   useEffect(() => {
     if (location.pathname === "/login") {
       setIsLogin(true);
@@ -120,6 +123,9 @@ const Register = ({ initialMode = "login" }) => {
           email: identifier,
           password: password
         };
+
+        userContext.login(userData)
+        
       } else {
         // For signup
         userData = {

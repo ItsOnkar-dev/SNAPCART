@@ -1,11 +1,13 @@
 /* eslint-disable react/prop-types */
-import { useCallback, useContext, useMemo, useState } from 'react';
+import { useCallback, useContext, useMemo, useState } from "react";
+import Logo from "../assets/Logo.png";
 import { MdFavoriteBorder, MdOutlineShoppingBasket, MdMenu, MdClose, MdNightlight, MdLightMode } from "react-icons/md";
+import { HelpCircle, Globe, Twitter, Instagram, Facebook, Github } from "lucide-react";
 import { AiOutlineUser } from "react-icons/ai";
 import IconWithTooltip from "./IconWithTooltip";
 import { GoSearch } from "react-icons/go";
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import CartContext from '../context/CartContext';
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import CartContext from "../context/Cart/CartContext";
 
 const NavBar = ({ isDark, toggleDarkMode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -17,16 +19,19 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const location = useLocation();
   const cartContext = useContext(CartContext);
 
+  // Check if we're on the authentication page
+  const isAuthPage = location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup";
+
   const navItems = [
     { id: 1, title: "Home" },
     { id: 2, title: "Products" },
     { id: 3, title: "About" },
-    { id: 4, title: "Contact" }
+    { id: 4, title: "Contact" },
   ];
 
   const toggleSidebar = useCallback(() => {
-    setIsSidebarOpen(prev => {
-      document.body.style.overflow = !prev ? 'hidden' : 'auto';
+    setIsSidebarOpen((prev) => {
+      document.body.style.overflow = !prev ? "hidden" : "auto";
       return !prev;
     });
   }, []);
@@ -36,43 +41,114 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const handleMobileSearchFocus = () => setExpandMobileInput(true);
   const handleMobileSearchBlur = () => setExpandMobileInput(false);
 
-  const styles = useMemo(() => ({
-    logoName: "cursor-pointer font-extrabold text-2xl md:text-4xl tracking-widest transition-all duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3",
+  const styles = useMemo(
+    () => ({
+      navbar: "fixed w-full p-4 sm:px-10 lg:px-28 z-30 bg-white dark:bg-slate-900 transition-colors duration-300 border-b border-gray-200 dark:border-slate-700",
+      logoName: "cursor-pointer font-extrabold text-2xl tracking-wide uppercase transition-all duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3",
+      listStyles: `transition-all hover:duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3 cursor-pointer hover:brightness-95 hover:text-gradient1 dark:text-gradient tracking-widest dark:hover:brightness-125`,
+      inputStyles: (expand) =>
+        `block border border-slate-300 dark:border-slate-600 text-sm py-1.5 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${
+          expand ? "w-[30vw]" : "w-[25vw]"
+        }`,
+      mobileInputStyles: (expand) =>
+        `block w-full border border-slate-300 dark:border-slate-600 text-sm py-2 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${
+          expand ? "h-10" : "h-8"
+        }`,
+      activeStyles: "text-gradient1 dark:text-gradient dark:brightness-125 font-semibold tracking-widest underline underline-offset-8",
+    }),
+    []
+  );
 
-    listStyles: `transition-all hover:duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3 cursor-pointer hover:brightness-95 hover:text-gradient tracking-widest dark:hover:brightness-125`,
+  // Render auth navbar
+  if (isAuthPage) {
+    return (
+      <nav className={`${styles.navbar}`}>
+        <div className='flex items-center justify-between'>
+          {/* Logo */}
+          <div className='flex items-center gap-2'>
+            <img src={Logo} alt='Logo' className='w-6' />
+            <div className={styles.logoName} onClick={() => navigate("/")}>
+              <span className='text-gradient1 dark:text-gradient'>Snap</span>
+              <span className='text-gray-800 dark:text-white'>Cart</span>
+            </div>
+          </div>
 
-    inputStyles: (expand) => `block border border-slate-300 dark:border-slate-600 text-sm py-1.5 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${expand ? 'w-[30vw]' : 'w-[25vw]'}`,
+          {/* Auth Nav Icons */}
+          <div className='flex items-center gap-3 sm:gap-6'>
+            <IconWithTooltip tooltip='Help Center'>
+              <div className={styles.iconButton}>
+                <HelpCircle className='w-5 h-5 text-gray-600 dark:text-gray-300' />
+              </div>
+            </IconWithTooltip>
 
-    mobileInputStyles: (expand) => `block w-full border border-slate-300 dark:border-slate-600 text-sm py-2 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${expand ? 'h-10' : 'h-8'}`,
+            <IconWithTooltip tooltip='Language'>
+              <div className={styles.iconButton}>
+                <Globe className='w-5 h-5 text-gray-600 dark:text-gray-300' />
+              </div>
+            </IconWithTooltip>
 
-    activeStyles: "text-gradient dark:brightness-125 font-semibold tracking-widest underline underline-offset-8",
+            <div className='flex items-center gap-3 sm:gap-6 border-l border-gray-200 dark:border-gray-700 pl-3 ml-1'>
+              <IconWithTooltip tooltip='Twitter'>
+                <div className={styles.iconButton}>
+                  <Twitter className='w-5 h-5 text-gray-600 dark:text-gray-300' />
+                </div>
+              </IconWithTooltip>
 
-  }), [isSidebarOpen]);
+              <IconWithTooltip tooltip='Instagram'>
+                <div className={styles.iconButton}>
+                  <Instagram className='w-5 h-5 text-gray-600 dark:text-gray-300' />
+                </div>
+              </IconWithTooltip>
+
+              <IconWithTooltip tooltip='Facebook'>
+                <div className={styles.iconButton}>
+                  <Facebook className='w-5 h-5 text-gray-600 dark:text-gray-300' />
+                </div>
+              </IconWithTooltip>
+
+              <IconWithTooltip tooltip='Github'>
+                <div className={styles.iconButton}>
+                  <Github className='w-5 h-5 text-gray-600 dark:text-gray-300' />
+                </div>
+              </IconWithTooltip>
+            </div>
+
+            <IconWithTooltip tooltip={isDark ? "Light Mode" : "Dark Mode"}>
+              <div className={styles.iconButton} onClick={toggleDarkMode}>
+                {isDark ? <MdLightMode className='w-5 h-5 text-yellow-400' /> : <MdNightlight className='w-5 h-5 text-gray-600' />}
+              </div>
+            </IconWithTooltip>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <>
       {/* Main Navbar */}
-      <nav className="fixed w-full py-4 px-4 md:px-10 z-30 bg-white dark:bg-slate-900 transition-colors duration-300 border-b border-gray-200 dark:border-slate-700">
-        <div className="flex items-center justify-between">
+      <nav className={styles.navbar}>
+        <div className='flex items-center justify-between'>
           {/* Mobile Menu Button */}
-          <button className="xl:hidden" onClick={toggleSidebar}>
-            <MdMenu className="text-2xl" />
+          <button className='xl:hidden' onClick={toggleSidebar}>
+            <MdMenu className='text-2xl' />
           </button>
 
           {/* Logo */}
-          <div className={`${styles.logoName}`} onClick={() => navigate('/')}>
-            <span className="text-gradient">Snap</span>
-            <span className="text-gray-600 hover:text-black dark:text-white">Cart</span>
+          <div className='flex items-center gap-2 cursor-pointer'>
+            <img src={Logo} alt='Logo' className='w-6' />
+            <div className={`${styles.logoName}`} onClick={() => navigate("/")}>
+              <span className='text-gradient1 dark:text-gradient'>Snap</span>
+              <span className='text-gray-600 hover:text-black dark:text-white'>Cart</span>
+            </div>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden xl:block">
-            <ul className="flex items-center gap-10">
+          <div className='hidden xl:block'>
+            <ul className='flex items-center gap-10'>
               {navItems.map((item) => (
                 <li key={item.id} className={styles.listStyles}>
-                  <NavLink to={item.title === "Home" ? "/home" : `/${item.title.toLowerCase()}`} className={({ isActive }) =>
-                    `${isActive ? styles.activeStyles : ""}`
-                  }>
+                  <NavLink to={item.title === "Home" ? "/home" : `/${item.title.toLowerCase()}`} className={({ isActive }) => `${isActive ? styles.activeStyles : ""}`}>
                     {item.title}
                   </NavLink>
                 </li>
@@ -81,109 +157,119 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
           </div>
 
           {/* Search and Icons */}
-          <div className="flex items-center gap-4 lg:gap-10">
+          <div className='flex items-center gap-4 lg:gap-10'>
             {/* Search Bar - Desktop */}
-            <div className="hidden lg:flex items-center relative">
-              <input
-                type="text"
-                placeholder="What are you looking for?"
-                className={styles.inputStyles(expandInput)}
-                onFocus={handleSearchFocus}
-                onBlur={handleSearchBlur}
-              />
-              <GoSearch className="absolute right-3 text-lg text-slate-500 cursor-pointer" />
+            <div className='hidden lg:flex items-center relative'>
+              <input type='text' placeholder='What are you looking for?' className={styles.inputStyles(expandInput)} onFocus={handleSearchFocus} onBlur={handleSearchBlur} />
+              <GoSearch className='absolute right-3 text-lg text-slate-500 cursor-pointer' />
             </div>
 
             {/* Search Icon - Mobile */}
-            <button
-              className="lg:hidden"
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-            >
-              <GoSearch className="text-xl text-slate-500 dark:text-slate-300 dark:hover:text-white hover:text-black" />
+            <button className='lg:hidden' onClick={() => setIsSearchOpen(!isSearchOpen)}>
+              <GoSearch className='text-xl text-slate-500 dark:text-slate-300 dark:hover:text-white hover:text-black' />
             </button>
 
             {/* Action Icons */}
-            <div className="flex items-center gap-4 xl:gap-6 text-xl lg:text-2xl">
-              <IconWithTooltip tooltip="Favorites" className="hidden sm:block">
-                <MdFavoriteBorder
-                  onClick={() => navigate('/wishlist')}
-                  className={location.pathname === "/wishlist" ? "text-pink-600 font-bold" : ""}
-                />
+            <div className='flex items-center gap-4 xl:gap-6 text-xl lg:text-2xl'>
+              <IconWithTooltip tooltip='Favorites' className='hidden sm:block'>
+                <MdFavoriteBorder onClick={() => navigate("/wishlist")} className={location.pathname === "/wishlist" ? "text-pink-600 font-bold" : ""} />
               </IconWithTooltip>
-              <IconWithTooltip tooltip="Cart">
-                <NavLink to="/cart"
-                  className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "")}>
+              <IconWithTooltip tooltip='Cart'>
+                <NavLink to='/cart' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "")}>
                   <div className='relative'>
-                    <span className='absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full px-1.5 py-0.5'>
-                      {cartContext.cartLength}
-                    </span>
+                    <span className='absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full px-1.5 py-0.5'>{cartContext.cartLength}</span>
                     <MdOutlineShoppingBasket />
                   </div>
                 </NavLink>
               </IconWithTooltip>
-              <IconWithTooltip tooltip="Profile">
-                <AiOutlineUser
-                  onClick={() => navigate('/profile')}
-                  className={location.pathname === "/profile" ? "text-pink-600 font-bold" : ""}
-                />
+              <IconWithTooltip tooltip='Profile'>
+                <AiOutlineUser onClick={() => navigate("/profile")} className={location.pathname === "/profile" ? "text-pink-600 font-bold" : ""} />
               </IconWithTooltip>
               <div onClick={toggleDarkMode} className='cursor-pointer text-slate-500 dark:text-slate-300 hover:dark:text-white hover:text-black'>
-                {
-                  isDark ? <MdLightMode /> : <MdNightlight />
-                }
+                {isDark ? <MdLightMode /> : <MdNightlight />}
               </div>
             </div>
           </div>
         </div>
 
-        {isSidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity xl:hidden"
-            onClick={toggleSidebar}
-          />
-        )}
+        {isSidebarOpen && <div className='fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity xl:hidden' onClick={toggleSidebar} />}
 
         {/* Mobile Sidebar */}
-        <div className={`fixed top-0 left-0 h-full w-72 bg-white z-50 transform transition-transform duration-500 ease-in-out xl:hidden dark:bg-slate-900 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <div className="px-6 py-4">
-            <div className='flex items-center justify-between mb-8'>
-              <div className={`${styles.logoName}`} onClick={() => navigate('/home')}>
-                <span className="text-gradient">Snap</span>
-                <span className="text-gray-600 dark:text-white">Cart</span>
+        <div
+          className={`fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-500 ease-in-out xl:hidden dark:bg-slate-900 ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}>
+          <div className='flex items-center justify-between mb-8'>
+            <div className='flex items-center gap-2 cursor-pointer'>
+              <img src={Logo} alt='Logo' className='w-6' />
+              <div
+                className={`${styles.logoName}`}
+                onClick={() => {
+                  navigate("/home");
+                  toggleSidebar();
+                }}>
+                <span className='text-gradient1 dark:text-gradient'>Snap</span>
+                <span className='text-gray-600 hover:text-black dark:text-white'>Cart</span>
               </div>
-              <button onClick={toggleSidebar}>
-                <MdClose className="text-3xl" />
-              </button>
             </div>
-            <ul className="space-y-4">
-              {navItems.map((item) => (
-                <li key={item.id} className={styles.listStyles}>
-                  <NavLink to={item.title === "Home" ? "/home" : `/${item.title.toLowerCase()}`} className={({ isActive }) =>
-                    `${isActive ? styles.activeStyles : ""}`
-                  }>
-                    {item.title}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
+            <button onClick={toggleSidebar}>
+              <MdClose className='text-3xl' />
+            </button>
+          </div>
+          <ul className='space-y-6'>
+            {navItems.map((item) => (
+              <li key={item.id} className={styles.listStyles} onClick={toggleSidebar}>
+                <NavLink to={item.title === "Home" ? "/home" : `/${item.title.toLowerCase()}`} className={({ isActive }) => `${isActive ? styles.activeStyles : ""}`}>
+                  {item.title}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+
+          <div className='mt-8 pt-6 border-t border-gray-200 dark:border-slate-700 '>
+            <div className='space-y-3'>
+              <div
+                className='flex items-center gap-3 py-2 cursor-pointer'
+                onClick={() => {
+                  navigate("/wishlist");
+                  toggleSidebar();
+                }}>
+                <MdFavoriteBorder className='text-xl' />
+                <span>Favorites</span>
+              </div>
+              <div
+                className='flex items-center gap-3 py-2 cursor-pointer'
+                onClick={() => {
+                  navigate("/profile");
+                  toggleSidebar();
+                }}>
+                <AiOutlineUser className='text-xl' />
+                <span>Profile</span>
+              </div>
+              <div className='flex items-center gap-3 py-2 cursor-pointer' onClick={toggleDarkMode}>
+                {isDark ? (
+                  <>
+                    <MdLightMode className='text-xl text-yellow-400' />
+                    <span>Light Mode</span>
+                  </>
+                ) : (
+                  <>
+                    <MdNightlight className='text-xl' />
+                    <span>Dark Mode</span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Mobile Search Bar */}
-        <div
-          className={`overflow-hidden transition-all duration-500 ease-in-out xl:hidden ${isSearchOpen ? "max-h-20 opacity-100 py-4" : "max-h-0 opacity-0 py-0"}`}>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="What are you looking for?"
-              className={styles.mobileInputStyles(expandMobileInput)}
-              onFocus={handleMobileSearchFocus}
-              onBlur={handleMobileSearchBlur}
-            />
-            <GoSearch className="absolute right-5 top-1/2 -translate-y-1/2 text-lg text-slate-500" />
+        <div className={`overflow-hidden transition-all duration-500 ease-in-out xl:hidden ${isSearchOpen ? "max-h-20 opacity-100 py-4" : "max-h-0 opacity-0 py-0"}`}>
+          <div className='relative'>
+            <input type='text' placeholder='What are you looking for?' className={styles.mobileInputStyles(expandMobileInput)} onFocus={handleMobileSearchFocus} onBlur={handleMobileSearchBlur} />
+            <GoSearch className='absolute right-5 top-1/2 -translate-y-1/2 text-lg text-slate-500' />
           </div>
         </div>
-
       </nav>
     </>
   );

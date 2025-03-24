@@ -36,4 +36,7 @@ html {
   .text-gradient {
     @apply text-transparent bg-clip-text brightness-105 bg-gradient-to-r from-cyan-500 to-purple-500 hover:bg-gradient-to-r hover:from-purple-600 hover:to-cyan-500 dark:from-cyan-400 dark:to-purple-300 dark:hover:from-purple-300 dark:hover:to-cyan-400;
   }
+  .text-gradient1 {
+    @apply text-transparent bg-clip-text brightness-105 bg-gradient-to-r from-purple-700 to-cyan-400 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-purple-700 dark:from-cyan-400 dark:to-purple-300 dark:hover:from-purple-300 dark:hover:to-cyan-400;
+  }
 }

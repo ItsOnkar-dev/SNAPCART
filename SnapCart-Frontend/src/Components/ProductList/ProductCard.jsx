@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 
 import { useContext } from "react";
-import CartContext from "../../context/CartContext";
+import CartContext from "../../context/Cart/CartContext";
 
 const ProductCard = ({ product }) => {
 
