@@ -97,28 +97,22 @@ const Register = ({ initialMode = "login" }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault();    
+    setIsLoading(true);
 
     if (!validateForm()) {
       return;
     }
 
-    setIsLoading(true);
-
     try {
       let userData;
-
       if (isLogin) {
-        // For login, send both username and email fields with the same value
-        // This ensures the backend always has both fields available
         userData = {
           username: name,
           password: password,
         };
-
         userContext.login(userData);
       } else {
-        // For signup
         userData = {
           username: name,
           email: email,
@@ -126,12 +120,9 @@ const Register = ({ initialMode = "login" }) => {
         };
       }
 
-      console.log(isLogin ? "Logging in with:" : "Signing up with:", userData);
+      // console.log(isLogin ? "Logging in with:" : "Signing up with:", userData);
 
       const response = await axios.post(`http://localhost:8000/${isLogin ? "login" : "register"}`, userData);
-
-      toast.success(isLogin ? "Login successful! Welcome back!" : "Sign Up successful! Please login to get started.");
-
       console.log(response.data);
 
       // Navigate after successful API response
@@ -142,10 +133,8 @@ const Register = ({ initialMode = "login" }) => {
         navigate("/login");
       }
     } catch (error) {
-      // Handle error more robustly
       const errorMessage = error.response?.data?.errMsg || error.response?.data?.msg || "An error occurred. Please try again.";
-      toast.error(errorMessage);
-      console.error(error);
+      console.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

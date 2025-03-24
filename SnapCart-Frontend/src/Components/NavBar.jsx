@@ -8,6 +8,7 @@ import IconWithTooltip from "./IconWithTooltip";
 import { GoSearch } from "react-icons/go";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import CartContext from "../context/Cart/CartContext";
+import UserContext from "../context/User/UserContext";
 
 const NavBar = ({ isDark, toggleDarkMode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -17,7 +18,9 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
   const navigate = useNavigate();
   const location = useLocation();
+
   const cartContext = useContext(CartContext);
+  const { isLoggedIn } = useContext(UserContext);
 
   // Check if we're on the authentication page
   const isAuthPage = location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup";
@@ -43,19 +46,23 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
   const styles = useMemo(
     () => ({
-      navbar: `fixed w-full p-4 sm:px-10 lg:px-28 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 ${isSidebarOpen ? "backdrop-blur-xl inset-0": "backdrop-blur-xl"}`,
-      sidebar: `fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-700 ease-in-out xl:hidden dark:bg-[rgb(15,23,42)] ${ isSidebarOpen ? "translate-x-0" : "-translate-x-full" }`,
+      navbar: `fixed w-full p-4 sm:px-10 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 ${
+        isSidebarOpen ? "backdrop-blur-xl inset-0" : "backdrop-blur-xl"
+      }`,
+      sidebar: `fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-700 ease-in-out xl:hidden dark:bg-[rgb(15,23,42)] ${
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      }`,
       logoName: "cursor-pointer font-extrabold text-2xl tracking-wide uppercase transition-all duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3",
-      listStyles: `transition-all hover:duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3 cursor-pointer hover:brightness-95 hover:text-gradient1 dark:text-gradient tracking-widest dark:hover:brightness-125`,
+      listStyles: `transition-all hover:duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3 cursor-pointer tracking-wide`,
       inputStyles: (expand) =>
         `block border border-slate-300 dark:border-slate-600 text-sm py-1.5 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${
-          expand ? "w-[30vw]" : "w-[25vw]"
+          expand ? "w-[25vw]" : "w-[20vw]"
         }`,
       mobileInputStyles: (expand) =>
         `block w-full border border-slate-300 dark:border-slate-600 text-sm py-2 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${
           expand ? "h-10" : "h-8"
         }`,
-      activeStyles: "text-gradient1 dark:text-gradient dark:brightness-125 font-semibold tracking-widest underline underline-offset-8",
+      activeStyles: "text-gradient1 dark:text-gradient dark:brightness-125 font-semibold tracking-wide underline underline-offset-8",
     }),
     [isSidebarOpen]
   );
@@ -149,7 +156,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             <ul className='flex items-center gap-10'>
               {navItems.map((item) => (
                 <li key={item.id} className={styles.listStyles}>
-                  <NavLink to={item.title === "Home" ? "/home" : `/${item.title.toLowerCase()}`} className={({ isActive }) => `${isActive ? styles.activeStyles : ""}`}>
+                  <NavLink to={item.title === "Home" ? "/home" : `/${item.title.toLowerCase()}`} className={({ isActive }) => `${isActive ? styles.activeStyles : "text-slate-600 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white"}`}>
                     {item.title}
                   </NavLink>
                 </li>
@@ -187,8 +194,22 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 <AiOutlineUser onClick={() => navigate("/profile")} className={location.pathname === "/profile" ? "text-pink-600 font-bold" : ""} />
               </IconWithTooltip>
               <div onClick={toggleDarkMode} className='cursor-pointer text-slate-500 dark:text-slate-300 hover:dark:text-white hover:text-black'>
-                {isDark ? <MdLightMode /> : <MdNightlight />}
+              {isDark ? (
+                <>
+                  <MdLightMode className='text-xl text-yellow-400' />
+                </>
+              ) : (
+                <>
+                  <MdNightlight className='text-xl' />
+                </>
+              )}
               </div>
+              {
+                isLoggedIn &&
+                <button 
+                  className='bg-red-500 text-white font-semibold text-sm rounded-md px-6 py-1.5 hidden sm:block'>Log Out
+                </button>
+              }
             </div>
           </div>
         </div>
@@ -204,71 +225,78 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
         </div>
       </nav>
       {/* Mobile Sidebar */}
-      <div
-          className={styles.sidebar}>
-          <div className='flex items-center justify-between mb-8'>
-            <div className='flex items-center gap-2 cursor-pointer'>
-              <img src={Logo} alt='Logo' className='w-6' />
-              <div
-                className={`${styles.logoName}`}
-                onClick={() => {
-                  navigate("/home");
-                  toggleSidebar();
-                }}>
-                <span className='text-gradient1 dark:text-gradient'>Snap</span>
-                <span className='text-gray-600 hover:text-black dark:text-white'>Cart</span>
-              </div>
+      <div className={styles.sidebar}>
+        <div className='flex items-center justify-between mb-8'>
+          <div className='flex items-center gap-2 cursor-pointer'>
+            <img src={Logo} alt='Logo' className='w-6' />
+            <div
+              className={`${styles.logoName}`}
+              onClick={() => {
+                navigate("/home");
+                toggleSidebar();
+              }}>
+              <span className='text-gradient1 dark:text-gradient'>Snap</span>
+              <span className='text-gray-600 hover:text-black dark:text-white'>Cart</span>
             </div>
-            <button onClick={toggleSidebar}>
-              <MdClose className='text-3xl' />
-            </button>
           </div>
-          <ul className='space-y-6'>
-            {navItems.map((item) => (
-              <li key={item.id} className={styles.listStyles} onClick={toggleSidebar}>
-                <NavLink to={item.title === "Home" ? "/home" : `/${item.title.toLowerCase()}`} className={({ isActive }) => `${isActive ? styles.activeStyles : ""}`}>
-                  {item.title}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+          <button onClick={toggleSidebar}>
+            <MdClose className='text-3xl' />
+          </button>
+        </div>
+        <ul className='space-y-6'>
+          {navItems.map((item) => (
+            <li key={item.id} className={styles.listStyles} onClick={toggleSidebar}>
+              <NavLink to={item.title === "Home" ? "/home" : `/${item.title.toLowerCase()}`} className={({ isActive }) => `${isActive ? styles.activeStyles : "text-slate-600 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white"}`}>
+                {item.title}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
 
-          <div className='mt-8 pt-6 border-t border-gray-200 dark:border-slate-700 '>
-            <div className='space-y-3'>
-              <div
-                className='flex items-center gap-3 py-2 cursor-pointer'
-                onClick={() => {
-                  navigate("/wishlist");
-                  toggleSidebar();
-                }}>
-                <MdFavoriteBorder className='text-xl' />
-                <span>Favorites</span>
-              </div>
-              <div
-                className='flex items-center gap-3 py-2 cursor-pointer'
-                onClick={() => {
-                  navigate("/profile");
-                  toggleSidebar();
-                }}>
-                <AiOutlineUser className='text-xl' />
-                <span>Profile</span>
-              </div>
-              <div className='flex items-center gap-3 py-2 cursor-pointer' onClick={toggleDarkMode}>
-                {isDark ? (
-                  <>
-                    <MdLightMode className='text-xl text-yellow-400' />
-                    <span>Light Mode</span>
-                  </>
-                ) : (
-                  <>
-                    <MdNightlight className='text-xl' />
-                    <span>Dark Mode</span>
-                  </>
-                )}
-              </div>
+        <div className='my-8 py-6 border-t border-gray-200 dark:border-slate-700'>
+          <div className='space-y-7'>
+            <div
+              className='flex items-center gap-3 cursor-pointer text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+              onClick={() => {
+                navigate("/wishlist");
+                toggleSidebar();
+              }}>
+              <MdFavoriteBorder className='text-xl' />
+              <span>Favorites</span>
             </div>
+            <div
+              className='flex items-center gap-3 cursor-pointer text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+              onClick={() => {
+                navigate("/profile");
+                toggleSidebar();
+              }}>
+              <AiOutlineUser className='text-xl' />
+              <span>Profile</span>
+            </div>
+            <div 
+              className='flex items-center gap-3 cursor-pointer text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white' 
+              onClick={toggleDarkMode}>
+              {isDark ? (
+                <>
+                  <MdLightMode className='text-xl text-yellow-400' />
+                  <span>Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <MdNightlight className='text-xl' />
+                  <span>Dark Mode</span>
+                </>
+              )}
+            </div>
+            {
+              isLoggedIn &&
+              <button 
+                className='bg-red-500 text-white font-semibold text-sm rounded-md px-8 py-1.5 sm:hidden'>Log Out
+              </button>
+            }
           </div>
         </div>
+      </div>
     </>
   );
 };

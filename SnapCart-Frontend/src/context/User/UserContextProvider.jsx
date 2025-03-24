@@ -12,12 +12,13 @@ const UserContextProvider = ({children}) => {
   const login = async (userCredentials) => {
     try {
       const response = await axios.post('http://localhost:8000/login', userCredentials)
-      console.log(response.data)
+      // console.log(response.data)
       window.localStorage.setItem('token', response.data?.token)
       toast.success(response.data?.msg)
       setIsLoggedIn(true)
     } catch (error) {
       console.error(error)
+      toast.error(error.response.data?.errMsg)
     }
   }
 
