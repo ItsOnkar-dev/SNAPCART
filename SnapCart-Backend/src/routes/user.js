@@ -14,7 +14,7 @@ const JWT_SECRET_KEY = "JWTSecretKey";
 // Rate limiting middleware
 const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 5, // 15 login attempts per window per IP
+  max: 15, // 15 login attempts per window per IP
   message: "Too many login attempts, please try again later",
 });
 
@@ -72,15 +72,15 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, email, password } = req.body;
+    const { username, password } = req.body;
 
     // Check if there's at least one identifier (username or email) and password
-    if ((!username && !email) || !password) {
+    if (!username || !password) {
       return res.status(400).json({ msg: "Please enter all required credentials" });
     }
 
     // Find user with a single database call
-    const user = username ? await UserRepo.findByUsername(username) : await UserRepo.findByEmail(email);
+    const user = await UserRepo.findByUsername(username)
 
     // Check if user exists - using generic message for security
     if (!user) {
