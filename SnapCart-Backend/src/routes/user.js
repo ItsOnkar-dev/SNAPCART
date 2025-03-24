@@ -55,7 +55,7 @@ router.post(
     const { password: _, ...userWithoutPassword } = newUser;
 
     res.status(201).json({
-      msg: "User registered successfully",
+      msg: "Signed Up successful! Please login to get started.",
       user: userWithoutPassword,
     });
   })
@@ -100,7 +100,7 @@ router.post(
     const { password: _, ...userWithoutPassword } = user;
 
     res.status(200).json({
-      msg: "User logged in successfully",
+      msg: "Logged in successfully, Welcome back!",
       user: userWithoutPassword,
       token: jwtToken,
     });
