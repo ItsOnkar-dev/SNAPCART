@@ -4,9 +4,12 @@ import { validationResult } from "express-validator";
 import rateLimit from "express-rate-limit";
 import UserRepo from "../Repositories/UserRepo.js";
 import catchAsync from "../Core/catchAsync.js";
-import { BadRequestError } from "../Core/ApiError.js";
+import { AuthenticationError, BadRequestError } from "../Core/ApiError.js";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
+
+const JWT_SECRET_KEY = "JWTSecretKey";
 
 // Rate limiting middleware
 const loginLimiter = rateLimit({
@@ -81,21 +84,26 @@ router.post(
 
     // Check if user exists - using generic message for security
     if (!user) {
-      throw new BadRequestError("No user found with the provided username or email");
+      throw new AuthenticationError("No user found with the provided credentials");
     }
 
     // Verify password (assuming you have a password verification function)
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new BadRequestError("Invalid Password");
+      throw new AuthenticationError("Invalid Username/Password");
     }
+
+    // Generate JWT token
+    const jwtToken = jwt.sign({ userId: user._id }, JWT_SECRET_KEY, { expiresIn: "24h" });
 
     // Before sending the response, remove the password from response
     const { password: _, ...userWithoutPassword } = user;
 
-    res.status(200).json({ 
-      msg: "User logged in successfully", 
-      user: userWithoutPassword });
+    res.status(200).json({
+      msg: "User logged in successfully",
+      user: userWithoutPassword,
+      token: jwtToken,
+    });
   })
 );
 

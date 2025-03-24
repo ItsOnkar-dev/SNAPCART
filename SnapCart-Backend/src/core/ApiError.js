@@ -8,8 +8,15 @@ export class BadRequestError extends Error{
 
 export class InternalServerError extends Error{
   constructor(message = 'Internal Server Error') {
-      super(message); // Calls the Error class constructor with the given message.
+      super(message); 
       this.status = 500;
+  }
+}
+
+export class AuthenticationError extends Error{
+  constructor(message = 'Authentication Error') {
+      super(message); 
+      this.status = 401;
   }
 }
 
