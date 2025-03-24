@@ -43,7 +43,8 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
   const styles = useMemo(
     () => ({
-      navbar: "fixed w-full p-4 sm:px-10 lg:px-28 z-30 bg-white dark:bg-slate-900 transition-colors duration-300 border-b border-gray-200 dark:border-slate-700",
+      navbar: `fixed w-full p-4 sm:px-10 lg:px-28 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 ${isSidebarOpen ? "backdrop-blur-xl inset-0": "backdrop-blur-xl"}`,
+      sidebar: `fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-700 ease-in-out xl:hidden dark:bg-[rgb(15,23,42)] ${ isSidebarOpen ? "translate-x-0" : "-translate-x-full" }`,
       logoName: "cursor-pointer font-extrabold text-2xl tracking-wide uppercase transition-all duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3",
       listStyles: `transition-all hover:duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3 cursor-pointer hover:brightness-95 hover:text-gradient1 dark:text-gradient tracking-widest dark:hover:brightness-125`,
       inputStyles: (expand) =>
@@ -56,7 +57,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
         }`,
       activeStyles: "text-gradient1 dark:text-gradient dark:brightness-125 font-semibold tracking-widest underline underline-offset-8",
     }),
-    []
+    [isSidebarOpen]
   );
 
   // Render auth navbar
@@ -87,7 +88,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
               </div>
             </IconWithTooltip>
 
-            <div className='flex items-center gap-3 sm:gap-6 border-l border-gray-200 dark:border-gray-700 pl-3 ml-1'>
+            <div className='sm:flex items-center gap-3 sm:gap-6 border-l border-gray-200 dark:border-gray-700 pl-3 ml-1 hidden'>
               <IconWithTooltip tooltip='Twitter'>
                 <div className={styles.iconButton}>
                   <Twitter className='w-5 h-5 text-gray-600 dark:text-gray-300' />
@@ -137,7 +138,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
           {/* Logo */}
           <div className='flex items-center gap-2 cursor-pointer'>
             <img src={Logo} alt='Logo' className='w-6' />
-            <div className={`${styles.logoName}`} onClick={() => navigate("/")}>
+            <div className={`${styles.logoName}`} onClick={() => navigate("/home")}>
               <span className='text-gradient1 dark:text-gradient'>Snap</span>
               <span className='text-gray-600 hover:text-black dark:text-white'>Cart</span>
             </div>
@@ -192,13 +193,19 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
           </div>
         </div>
 
-        {isSidebarOpen && <div className='fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity xl:hidden' onClick={toggleSidebar} />}
+        {isSidebarOpen && <div className='fixed inset-0 bg-black bg-opacity-80 dark:bg-opacity-40 z-40 transition-opacity xl:hidden' onClick={toggleSidebar} />}
 
-        {/* Mobile Sidebar */}
-        <div
-          className={`fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-500 ease-in-out xl:hidden dark:bg-slate-900 ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}>
+        {/* Mobile Search Bar */}
+        <div className={`overflow-hidden transition-all duration-500 ease-in-out xl:hidden ${isSearchOpen ? "max-h-20 opacity-100 py-4" : "max-h-0 opacity-0 py-0"}`}>
+          <div className='relative'>
+            <input type='text' placeholder='What are you looking for?' className={styles.mobileInputStyles(expandMobileInput)} onFocus={handleMobileSearchFocus} onBlur={handleMobileSearchBlur} />
+            <GoSearch className='absolute right-5 top-1/2 -translate-y-1/2 text-lg text-slate-500' />
+          </div>
+        </div>
+      </nav>
+      {/* Mobile Sidebar */}
+      <div
+          className={styles.sidebar}>
           <div className='flex items-center justify-between mb-8'>
             <div className='flex items-center gap-2 cursor-pointer'>
               <img src={Logo} alt='Logo' className='w-6' />
@@ -262,15 +269,6 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             </div>
           </div>
         </div>
-
-        {/* Mobile Search Bar */}
-        <div className={`overflow-hidden transition-all duration-500 ease-in-out xl:hidden ${isSearchOpen ? "max-h-20 opacity-100 py-4" : "max-h-0 opacity-0 py-0"}`}>
-          <div className='relative'>
-            <input type='text' placeholder='What are you looking for?' className={styles.mobileInputStyles(expandMobileInput)} onFocus={handleMobileSearchFocus} onBlur={handleMobileSearchBlur} />
-            <GoSearch className='absolute right-5 top-1/2 -translate-y-1/2 text-lg text-slate-500' />
-          </div>
-        </div>
-      </nav>
     </>
   );
 };

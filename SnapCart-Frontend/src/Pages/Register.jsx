@@ -6,7 +6,7 @@ import axios from "axios";
 import { ArrowRight, ArrowLeft, Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
 import { FaGoogle, FaApple } from "react-icons/fa";
 import { toast } from "react-toastify";
-import UserContext from '../context/User/UserContext'
+import UserContext from "../context/User/UserContext";
 
 // Framer Motion variants
 const containerVariants = {
@@ -60,13 +60,13 @@ const Register = ({ initialMode = "login" }) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [identifier, setIdentifier] = useState(""); // Changed from email to identifier
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [name, setName] = useState("");
 
   const [isLogin, setIsLogin] = useState(location.pathname === "/login" || initialMode === "login");
 
-  const userContext = useContext(UserContext)
+  const userContext = useContext(UserContext);
 
   useEffect(() => {
     if (location.pathname === "/login") {
@@ -85,21 +85,14 @@ const Register = ({ initialMode = "login" }) => {
   }, [navigate]);
 
   const validateForm = () => {
-    if (identifier.trim() === "") {
-      toast.error("Username or Email is required");
-      return false;
-    }
-
     if (password.length < 6) {
       toast.error("Password must be at least 6 characters");
       return false;
     }
-
     if (!isLogin && !name.trim()) {
       toast.error("Name is required");
       return false;
     }
-
     return true;
   };
 
@@ -114,24 +107,22 @@ const Register = ({ initialMode = "login" }) => {
 
     try {
       let userData;
-      
+
       if (isLogin) {
         // For login, send both username and email fields with the same value
         // This ensures the backend always has both fields available
         userData = {
-          username: identifier,
-          email: identifier,
-          password: password
+          username: name,
+          password: password,
         };
 
-        userContext.login(userData)
-        
+        userContext.login(userData);
       } else {
         // For signup
         userData = {
           username: name,
-          email: identifier,
-          password: password
+          email: email,
+          password: password,
         };
       }
 
@@ -152,10 +143,7 @@ const Register = ({ initialMode = "login" }) => {
       }
     } catch (error) {
       // Handle error more robustly
-      const errorMessage =
-        error.response?.data?.errMsg ||
-        error.response?.data?.msg ||
-        "An error occurred. Please try again.";
+      const errorMessage = error.response?.data?.errMsg || error.response?.data?.msg || "An error occurred. Please try again.";
       toast.error(errorMessage);
       console.error(error);
     } finally {
@@ -165,8 +153,15 @@ const Register = ({ initialMode = "login" }) => {
 
   return (
     <>
-      <motion.div variants={containerVariants} initial='hidden' animate='visible' exit='exit' className='min-h-screen flex items-center justify-center p-4'>
-        <div className='w-full max-w-md relative'>
+      <motion.div
+        variants={containerVariants}
+        initial='hidden'
+        animate='visible'
+        exit='exit'
+        className='min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-white to-purple-100 dark:from-slate-950 dark:to-blue-950 backdrop-blur-3xl'>
+        <div className='w-full max-w-md relative sm:mt-10'>
+          <div className='absolute -top-10 -left-10 w-20 h-20 bg-purple-200 dark:bg-purple-900 rounded-full blur-xl opacity-60 animate-pulse'></div>
+          <div className='absolute -bottom-8 -right-8 w-16 h-16 bg-blue-200 dark:bg-blue-900 rounded-full blur-xl opacity-60 animate-pulse'></div>
           {/* Main card */}
           <AnimatePresence mode='wait'>
             <motion.div key={isLogin ? "login" : "signup"} className={styles.cardContainer} variants={containerVariants} initial='hidden' animate='visible' exit='exit'>
@@ -206,23 +201,33 @@ const Register = ({ initialMode = "login" }) => {
 
                 {/* Username/Email field */}
                 <motion.div className={styles.formGroup} variants={itemVariants}>
-                  <label htmlFor='identifier' className={styles.labelText}>
-                   {isLogin ? "Username or Email" : "Email Address"}
+                  <label htmlFor='email' className={styles.labelText}>
+                    {isLogin ? "Username" : "Email Address"}
                   </label>
                   <div className={styles.inputContainer}>
-                    <div className={styles.inputIcon}>
-                      <Mail size={18} />
-                    </div>
-                    <input 
-                      id='identifier' 
-                      type='text' 
-                      name='identifier' 
-                      value={identifier} 
-                      placeholder={isLogin ? 'Enter username or email' : 'your@gmail.com'} 
-                      required 
-                      onChange={(e) => setIdentifier(e.target.value)} 
-                      className={styles.inputField} 
-                    />
+                    {isLogin ? (
+                      <div className={styles.inputIcon}>
+                        <User size={18} />
+                      </div>
+                    ) : (
+                      <div className={styles.inputIcon}>
+                        <Mail size={18} />
+                      </div>
+                    )}
+                    {isLogin ? (
+                      <input id='name' type='text' name='username' value={name} placeholder='John Doe' required={!isLogin} onChange={(e) => setName(e.target.value)} className={styles.inputField} />
+                    ) : (
+                      <input
+                        id='email'
+                        type='text'
+                        name='email'
+                        value={email}
+                        placeholder={isLogin ? "Enter username" : "your@gmail.com"}
+                        required
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={styles.inputField}
+                      />
+                    )}
                   </div>
                 </motion.div>
 
@@ -245,12 +250,11 @@ const Register = ({ initialMode = "login" }) => {
                       onChange={(e) => setPassword(e.target.value)}
                       className={styles.inputField}
                     />
-                    <button 
-                      type='button' 
-                      onClick={() => setShowPassword(!showPassword)} 
+                    <button
+                      type='button'
+                      onClick={() => setShowPassword(!showPassword)}
                       className='absolute right-3 top-3 text-gray-400 hover:text-gray-600'
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
+                      aria-label={showPassword ? "Hide password" : "Show password"}>
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>

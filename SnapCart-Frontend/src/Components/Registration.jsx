@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Sparkles, ShoppingBag, Truck, Shield, Award, Check, Gift, TrendingUp } from "lucide-react";
+import { ShoppingBag, Truck, Shield, Award, Check, Gift, TrendingUp } from "lucide-react";
 import Logo from "../assets/Logo.png";
 
 const Registration = () => {
@@ -41,27 +41,27 @@ const Registration = () => {
   }, [features.length]);
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-white to-purple-100 dark:from-slate-950 dark:to-blue-950 overflow-hidden backdrop-blur-3xl">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-10 md:gap-24 w-full max-w-7xl py-24 mx-auto relative">
+    <main className="min-h-screen flex items-center justify-center p-4 sm:px-10 bg-gradient-to-br from-white to-purple-100 dark:from-slate-950 dark:to-blue-950 overflow-hidden backdrop-blur-3xl">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-24 w-full max-w-7xl py-24 mx-auto relative">
         {/* Dynamic background elements */}
         <div className="absolute -z-10 top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-purple-300 to-blue-300 dark:from-purple-800 dark:to-blue-800 rounded-full blur-3xl opacity-20"></div>
         <div className="absolute -z-10 bottom-1/4 right-1/4 w-32 h-32 bg-gradient-to-r from-pink-300 to-orange-300 dark:from-pink-800 dark:to-orange-800 rounded-full blur-3xl opacity-20"></div>
         
         {/* Left side content */}
-        <div className="flex flex-col gap-6 w-full relative">
+        <div className="flex flex-col text-center lg:text-start gap-4 w-full relative">
           {/* Main text with improved typography */}
-          <div className="text-2xl sm:text-4xl font-semibold text-center md:text-start">
+          <div className="text-3xl sm:text-4xl font-semibold">
             <h1>
               <span>Welcome to </span>
               <span>SnapCart</span>
             </h1>
             
-            <div className="text-gradient1 dark:text-gradient text-2xl sm:text-4xl font-bold">
+            <div className="text-gradient1 dark:text-gradient text-3xl sm:text-4xl font-bold">
               Your Ultimate Shopping Destination!
             </div>
             
             {/* Animated promo section */}
-            <p className={`text-slate-500 dark:text-white/70 text-lg mt-6 transition-all duration-300 max-w-lg`}>
+            <p className={`text-slate-500 dark:text-white/70 text-lg sm:text-xl mt-4 transition-all duration-300 lg:max-w-xl`}>
               Start your shopping journey now and grab your favorites before they are gone! ✨
             </p>
             
@@ -71,7 +71,7 @@ const Registration = () => {
           </div>
           
           {/* Trending now section */}
-          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur rounded-xl md:max-w-xl px-10 py-5 mt-4 shadow-lg border border-purple-100 dark:border-purple-900/30">
+          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur rounded-xl lg:max-w-xl px-10 py-5 mt-4 shadow-lg border border-purple-100 dark:border-purple-900/30">
             <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 mb-2 text-lg font-semibold">
               <TrendingUp className="w-4 h-4" />
               <h3>Trending Now</h3>
@@ -86,7 +86,7 @@ const Registration = () => {
           </div>
           
           {/* Features showcase with improved styling */}
-          <div className="py-6 md:max-w-xl">
+          <div className="py-6 lg:max-w-xl text-start">
             <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-xl shadow-lg p-8 transform transition-all duration-500 border border-purple-100 dark:border-purple-900/30">
               {features.map((feature, index) => (
                 <div key={index} className={`flex items-center gap-4 transition-all duration-500 ${index === activeFeature ? "opacity-100 transform scale-100" : "opacity-0 absolute top-8 left-8 transform scale-95"}`}>
@@ -128,15 +128,10 @@ const Registration = () => {
           <div className="absolute -bottom-8 -right-8 w-16 h-16 bg-blue-200 dark:bg-blue-900 rounded-full blur-xl opacity-60 animate-pulse"></div>
 
           {/* Main card with improved visual appeal */}
-          <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-2xl shadow-xl p-12 mb-10 border border-purple-200 dark:border-purple-800/50 overflow-hidden z-10">
-            
-            {/* Sparkle effect in corner */}
-            <div className="absolute top-4 right-4">
-              <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
-            </div>
+          <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-2xl shadow-xl px-4 py-12 sm:p-12 sm:mb-10 border border-purple-200 dark:border-purple-800/50 overflow-hidden z-10">
             
             {/* Logo and heading section */}
-            <div className="flex flex-col items-center gap-6 mb-8 relative">
+            <div className="flex flex-col items-center gap-4 sm:gap-6 mb-6 sm:mb-8 relative">
               <div className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600/10 to-blue-500/10 px-10 py-2 rounded-full">
                 <img src={Logo} alt="Logo" className="w-6 h-6 drop-shadow-md" />
                 <h1 className="cursor-pointer font-extrabold text-2xl tracking-wide uppercase transition-all duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3">
@@ -146,12 +141,10 @@ const Registration = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-yellow-500" />
-                <h2 className="text-xl bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-400 dark:to-blue-400 font-semibold">Welcome to your shopping journey</h2>
-                <Sparkles className="w-4 h-4 text-yellow-500" />
+                <h2 className="text-xl bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-400 dark:to-blue-400 font-semibold text-center">Welcome to your shopping journey</h2>
               </div>
 
-              <p className="text-gray-500 dark:text-gray-300 text-center max-w-xs">
+              <p className="text-gray-500 dark:text-gray-300 text-center max-w-xs font-semibold sm:font-normal">
                 Join thousands of happy shoppers finding amazing deals every day
               </p>
             </div>

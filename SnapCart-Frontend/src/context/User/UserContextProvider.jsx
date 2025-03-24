@@ -3,6 +3,7 @@
 import { useState } from "react"
 import axios from 'axios'
 import UserContext from "./UserContext"
+import { toast } from "react-toastify";
 
 const UserContextProvider = ({children}) => {
 
@@ -12,6 +13,9 @@ const UserContextProvider = ({children}) => {
     try {
       const response = await axios.post('http://localhost:8000/login', userCredentials)
       console.log(response.data)
+      window.localStorage.setItem('token', response.data?.token)
+      toast.success(response.data?.msg)
+      setIsLoggedIn(true)
     } catch (error) {
       console.error(error)
     }
