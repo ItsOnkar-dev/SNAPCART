@@ -20,6 +20,13 @@ export class AuthenticationError extends Error{
   }
 }
 
+export class AuthorizationError extends Error{
+  constructor(message = 'Authorization Error') {
+      super(message);
+      this.status = 401;
+  }
+}
+
 // Easier Way to Write the above code;
 // You can use a single generic class to handle different types of errors instead of defining separate classes:
 

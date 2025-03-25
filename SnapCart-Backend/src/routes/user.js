@@ -6,10 +6,11 @@ import UserRepo from "../Repositories/UserRepo.js";
 import catchAsync from "../Core/catchAsync.js";
 import { AuthenticationError, BadRequestError } from "../Core/ApiError.js";
 import jwt from "jsonwebtoken";
+import isLoggedIn from "../Middlewares/Auth.js";
 
 const router = express.Router();
 
-const JWT_SECRET_KEY = "JWTSecretKey";
+const JWT_SECRET_KEY = "JWTKJDGFSDFHDGSVFSDUFSDBFS";
 
 // Rate limiting middleware
 const loginLimiter = rateLimit({
@@ -94,7 +95,7 @@ router.post(
     }
 
     // Generate JWT token
-    const jwtToken = jwt.sign({ userId: user._id }, JWT_SECRET_KEY, { expiresIn: "24h" });
+    const jwtToken = jwt.sign({ userId: user._id }, JWT_SECRET_KEY);
 
     // Before sending the response, remove the password from response
     const { password: _, ...userWithoutPassword } = user;
@@ -106,5 +107,10 @@ router.post(
     });
   })
 );
+
+// Profile
+router.get('/profile', isLoggedIn, (req, res) => {
+  res.send("Profile")
+})
 
 export default router;
