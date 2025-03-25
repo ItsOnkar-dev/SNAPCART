@@ -20,7 +20,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const location = useLocation();
 
   const cartContext = useContext(CartContext);
-  const { isLoggedIn } = useContext(UserContext);
+  const { isLoggedIn, logout } = useContext(UserContext);
 
   // Check if we're on the authentication page
   const isAuthPage = location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup";
@@ -38,6 +38,11 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       return !prev;
     });
   }, []);
+
+  const handleLogOut = () => {
+    logout()
+    navigate('/')
+  }
 
   const handleSearchFocus = () => setExpandInput(true);
   const handleSearchBlur = () => setExpandInput(false);
@@ -206,7 +211,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
               </div>
               {
                 isLoggedIn &&
-                <button 
+                <button onClick={handleLogOut}
                   className='bg-red-500 text-white font-semibold text-sm rounded-md px-6 py-1.5 hidden sm:block'>Log Out
                 </button>
               }
