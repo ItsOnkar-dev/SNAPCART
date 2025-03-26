@@ -122,7 +122,7 @@ const Register = ({ initialMode = "login" }) => {
 
       // console.log(isLogin ? "Logging in with:" : "Signing up with:", userData);
 
-      const response = await axios.post(`http://localhost:8000/${isLogin ? "login" : "register"}`, userData);
+      const response = await axios.post(`http://localhost:8000/auth/${isLogin ? "login" : "register"}`, userData);
       console.log(response.data);
 
       // Navigate after successful API response

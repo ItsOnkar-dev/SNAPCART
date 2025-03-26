@@ -12,12 +12,13 @@ const UserContextProvider = ({ children }) => {
   const fetchUserProfile = async () => {
     const token = window.localStorage.getItem("token");
     if (!token) {
+       console.error("No token found in local storage, please login to get started");
       setIsLoggedIn(false);
       return;
     }
 
     try {
-      const response = await axios.get("http://localhost:8000/profile", {
+      const response = await axios.get("http://localhost:8000/auth/profile", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -37,7 +38,7 @@ const UserContextProvider = ({ children }) => {
 
   const login = async (userCredentials) => {
     try {
-      const response = await axios.post("http://localhost:8000/login", userCredentials);
+      const response = await axios.post("http://localhost:8000/auth/login", userCredentials);
       console.log("Profile Fetched", response.data)
       window.localStorage.setItem("token", response.data?.token);
       toast.success(response.data?.msg);
