@@ -9,6 +9,10 @@ class UserRepo{
     return await User.findOne({email})
   }
 
+  static async findByUserId(userId){
+    return await User.findById(userId)
+  }
+
   static async CreateUser(username, hash, email){
     return await User.create({username, password: hash, email})
   }

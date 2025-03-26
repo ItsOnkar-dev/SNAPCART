@@ -15,12 +15,11 @@ const isLoggedIn = (req, res, next) => {
     // Extract token and verify
     try {
         const token = authHeader.replace('Bearer ', '').trim();
-    
         if (!token) {
             console.error('Empty token');
             return next(new AuthorizationError('Invalid token format'));
         }
-
+        
         const { userId } = jwt.verify(token, JWT_SECRET_KEY);
         req.userId = userId;
 

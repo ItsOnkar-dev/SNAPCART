@@ -109,8 +109,26 @@ router.post(
 );
 
 // Profile
-router.get('/profile', isLoggedIn, (req, res) => {
-  res.send("Profile")
-})
+router.get('/profile', isLoggedIn, catchAsync(async (req, res) => {
+  console.log('Profile Route - User ID:', req.userId);
+
+  const { userId } = req;
+  // Find user by ID from the token, excluding password
+  const user = await UserRepo.findByUserId(userId);
+  
+  if (!user) {
+      console.error('User not found for ID:', req.userId);
+      throw new AuthenticationError("User not found, Please login again to continue");
+  }
+
+  // Remove sensitive information before sending
+  const { password, ...userWithoutPassword } = user;
+
+  res.status(200).json({
+    username: user.username,
+    email: user.email,
+    user: userWithoutPassword,
+  });
+}));
 
 export default router;
