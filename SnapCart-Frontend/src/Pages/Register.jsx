@@ -4,7 +4,8 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { ArrowRight, ArrowLeft, Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
-import { FaGoogle, FaApple } from "react-icons/fa";
+import { FaGoogle, FaApple, FaShoppingBag } from "react-icons/fa";
+import { FaSackDollar } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import UserContext from "../context/User/UserContext";
 
@@ -43,6 +44,7 @@ const styles = {
   inputIcon: "absolute left-3 text-gray-400",
   labelText: "text-sm font-medium text-gray-700 dark:text-white block",
   formGroup: "space-y-2",
+  radioButtons: "cursor-pointer relative px-4 py-1 rounded-lg border-2 text-center transition-all duration-300 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-600 dark:hover:border-gray-200 hover:border-gray-600",
   gradientButton:
     "w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-2 rounded-lg shadow-md hover:from-indigo-500 hover:to-purple-500 transition-colors flex items-center justify-center",
   socialButton:
@@ -63,6 +65,7 @@ const Register = ({ initialMode = "login" }) => {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [role, setRole] = useState("");
 
   const [isLogin, setIsLogin] = useState(location.pathname === "/login" || initialMode === "login");
 
@@ -97,7 +100,7 @@ const Register = ({ initialMode = "login" }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();    
+    e.preventDefault();
     setIsLoading(true);
 
     if (!validateForm()) {
@@ -110,14 +113,23 @@ const Register = ({ initialMode = "login" }) => {
         userData = {
           username: name,
           password: password,
+          role: role || "Buyer", // Default to buyer if no role is specified during login
         };
         userContext.login(userData);
       } else {
+        // Ensure role is required for signup
+        if (!role) {
+          toast.error("Please select a role (Seller or Buyer)");
+          setIsLoading(false);
+          return;
+        }
+
         userData = {
           username: name,
           email: email,
           password: password,
-        };
+          role: role, 
+        }; 
       }
 
       // console.log(isLogin ? "Logging in with:" : "Signing up with:", userData);
@@ -130,11 +142,13 @@ const Register = ({ initialMode = "login" }) => {
         navigate("/home");
       } else {
         setIsLogin(true);
+        toast.success(response.data.msg)
         navigate("/login");
       }
     } catch (error) {
       const errorMessage = error.response?.data?.errMsg || error.response?.data?.msg || "An error occurred. Please try again.";
-      console.error(errorMessage);
+      console.log(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -247,6 +261,44 @@ const Register = ({ initialMode = "login" }) => {
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                  {!isLogin && (
+                    <motion.div variants={itemVariants} className='flex items-center gap-6 py-2'>
+                      <motion.label
+                        className={`${styles.radioButtons} ${role === "Seller" ? "text-purple-800 dark:text-purple-200 border-purple-500 dark:border-purple-500" : ""}`}
+                        whileTap={{ scale: 0.95 }}>
+                        <input 
+                          type='radio' 
+                          name='role' 
+                          value='Seller' 
+                          checked={role === "Seller"} 
+                          onChange={(e) => setRole(e.target.value)} className='hidden' 
+                        />
+                        <div className='flex gap-2 items-center'>
+                          <FaSackDollar/>
+                          <span>Seller</span>
+                        </div>
+                      </motion.label>
+
+                      <motion.label
+                        className={`${styles.radioButtons} ${role === "Buyer" ? "text-indigo-700 dark:text-indigo-200 border-indigo-500 dark:border-indigo-500" : ""}`}
+                        whileTap={{ scale: 0.95 }}>
+                        <input 
+                          type='radio' 
+                          name='role' 
+                          value='Buyer' 
+                          checked={role === "Buyer"} 
+                          onChange={(e) => setRole(e.target.value)} className='hidden' 
+                        />
+                        <div className='flex gap-2 items-center'>
+                          <FaShoppingBag/>
+                          <span className={`${role === "buyer" ? "text-indigo-800 dark:text-indigo-200" : "text-gray-700 dark:text-gray-300"}`}>Buyer</span>
+                        </div>
+                      </motion.label>
+                    </motion.div>
+                  )}
                 </motion.div>
 
                 {/* Forgot password (login only) */}
