@@ -19,10 +19,6 @@ const loginLimiter = rateLimit({
   message: "Too many login attempts, please try again later",
 });
 
-router.get("/user", (req, res) => {
-  res.send("User Route");
-});
-
 // User Register
 router.post(
   "/register",
@@ -33,9 +29,9 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, password, email } = req.body;
+    const { username, password, email, role } = req.body;
 
-    if (!username || !password || !email) {
+    if (!username || !password || !email || !role) {
       return res.status(400).json({ msg: "Please enter all required credentials" });
     }
 
@@ -44,13 +40,13 @@ router.post(
     const existingUserByEmail = await UserRepo.findByEmail(email);
 
     if (existingUserByUsername || existingUserByEmail) {
-      throw new BadRequestError(`User with the ${existingUserByUsername ? `username :- ${username}` : `email :- ${email}`} already exists`);
+      throw new BadRequestError(`${existingUserByUsername ? `Username` : `Email`} already exists`);
     }
 
     // To hash a password using bcrypt, you can use the hash() function. The first argument is the password you want to hash, and the second argument is ( saltRounds) the number of rounds you want to use. When you are hashing your data, the module will go through a series of rounds to give you a secure hash. The higher the number of rounds, the more secure the password will be.
     const passwordHash = await bcrypt.hash(password, 12);
 
-    const newUser = await UserRepo.CreateUser(username, passwordHash, email);
+    const newUser = await UserRepo.CreateUser(username, passwordHash, email, role);
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = newUser;
@@ -83,7 +79,6 @@ router.post(
     // Find user with a single database call
     const user = await UserRepo.findByUsername(username)
 
-    // Check if user exists - using generic message for security
     if (!user) {
       throw new AuthenticationError("No user found with the provided credentials");
     }
@@ -110,8 +105,6 @@ router.post(
 
 // Profile
 router.get('/profile', isLoggedIn, catchAsync(async (req, res) => {
-  console.log('Profile Route - User ID:', req.userId);
-
   const { userId } = req;
   // Find user by ID from the token, excluding password
   const user = await UserRepo.findByUserId(userId);
@@ -125,8 +118,6 @@ router.get('/profile', isLoggedIn, catchAsync(async (req, res) => {
   const { password, ...userWithoutPassword } = user;
 
   res.status(200).json({
-    username: user.username,
-    email: user.email,
     user: userWithoutPassword,
   });
 }));
