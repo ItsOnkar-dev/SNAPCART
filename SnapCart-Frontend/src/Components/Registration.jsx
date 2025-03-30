@@ -42,7 +42,7 @@ const Registration = () => {
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4 sm:px-10 bg-gradient-to-br from-white to-purple-100 dark:from-slate-950 dark:to-blue-950 overflow-hidden backdrop-blur-3xl">
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-24 w-full max-w-7xl py-24 mx-auto relative">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-24 w-full max-w-7xl pt-24 mx-auto relative">
         {/* Dynamic background elements */}
         <div className="absolute -z-10 top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-purple-300 to-blue-300 dark:from-purple-800 dark:to-blue-800 rounded-full blur-3xl opacity-20"></div>
         <div className="absolute -z-10 bottom-1/4 right-1/4 w-32 h-32 bg-gradient-to-r from-pink-300 to-orange-300 dark:from-pink-800 dark:to-orange-800 rounded-full blur-3xl opacity-20"></div>

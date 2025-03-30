@@ -1,20 +1,17 @@
 /* eslint-disable react/prop-types */
 import { useCallback, useContext, useMemo, useState } from "react";
 import Logo from "../assets/Logo.png";
+import SearchBar from "./SearchBar";
 import { MdFavoriteBorder, MdOutlineShoppingBasket, MdMenu, MdClose, MdNightlight, MdLightMode } from "react-icons/md";
 import { HelpCircle, Globe, Twitter, Instagram, Facebook, Github } from "lucide-react";
 import { AiOutlineUser } from "react-icons/ai";
 import IconWithTooltip from "./IconWithTooltip";
-import { GoSearch } from "react-icons/go";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import CartContext from "../context/Cart/CartContext";
 import UserContext from "../context/User/UserContext";
 
 const NavBar = ({ isDark, toggleDarkMode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [expandInput, setExpandInput] = useState(false);
-  const [expandMobileInput, setExpandMobileInput] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,10 +41,6 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
     navigate('/')
   }
 
-  const handleSearchFocus = () => setExpandInput(true);
-  const handleSearchBlur = () => setExpandInput(false);
-  const handleMobileSearchFocus = () => setExpandMobileInput(true);
-  const handleMobileSearchBlur = () => setExpandMobileInput(false);
 
   const styles = useMemo(
     () => ({
@@ -57,16 +50,8 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       sidebar: `fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-700 ease-in-out xl:hidden dark:bg-[rgb(15,23,42)] ${
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`,
-      logoName: "cursor-pointer font-extrabold text-2xl tracking-wide uppercase transition-all duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3",
+      logoName: "cursor-pointer font-extrabold text-2xl tracking-wide uppercase",
       listStyles: `transition-all hover:duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3 cursor-pointer tracking-wide`,
-      inputStyles: (expand) =>
-        `block border border-slate-300 dark:border-slate-600 text-sm py-1.5 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${
-          expand ? "w-[25vw]" : "w-[20vw]"
-        }`,
-      mobileInputStyles: (expand) =>
-        `block w-full border border-slate-300 dark:border-slate-600 text-sm py-2 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${
-          expand ? "h-10" : "h-8"
-        }`,
       activeStyles: "text-gradient1 dark:text-gradient dark:brightness-125 font-semibold tracking-wide underline underline-offset-8",
     }),
     [isSidebarOpen]
@@ -148,7 +133,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
           </button>
 
           {/* Logo */}
-          <div className='flex items-center gap-2 cursor-pointer'>
+          <div className='flex items-center gap-2 cursor-pointer transition-all duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3'>
             <img src={Logo} alt='Logo' className='w-6' />
             <div className={`${styles.logoName}`} onClick={() => navigate("/home")}>
               <span className='text-gradient1 dark:text-gradient'>Snap</span>
@@ -172,15 +157,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
           {/* Search and Icons */}
           <div className='flex items-center gap-4 lg:gap-10'>
             {/* Search Bar - Desktop */}
-            <div className='hidden lg:flex items-center relative'>
-              <input type='text' placeholder='What are you looking for?' className={styles.inputStyles(expandInput)} onFocus={handleSearchFocus} onBlur={handleSearchBlur} />
-              <GoSearch className='absolute right-3 text-lg text-slate-500 cursor-pointer' />
-            </div>
-
-            {/* Search Icon - Mobile */}
-            <button className='lg:hidden' onClick={() => setIsSearchOpen(!isSearchOpen)}>
-              <GoSearch className='text-xl text-slate-500 dark:text-slate-300 dark:hover:text-white hover:text-black' />
-            </button>
+            <SearchBar/>
 
             {/* Action Icons */}
             <div className='flex items-center gap-4 xl:gap-6 text-xl lg:text-2xl'>
@@ -196,12 +173,12 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 </NavLink>
               </IconWithTooltip>
               <IconWithTooltip tooltip='Profile'>
-                <AiOutlineUser onClick={() => navigate("/profile")} className={location.pathname === "/profile" ? "text-pink-600 font-bold" : ""} />
+                <AiOutlineUser onClick={() => navigate("/profile")} className={location.pathname === "/profile" ? "text-cyan-300 font-bold" : ""} />
               </IconWithTooltip>
               <div onClick={toggleDarkMode} className='cursor-pointer text-slate-500 dark:text-slate-300 hover:dark:text-white hover:text-black'>
               {isDark ? (
                 <>
-                  <MdLightMode className='text-xl text-yellow-400' />
+                  <MdLightMode className='text-xl text-yellow-300' />
                 </>
               ) : (
                 <>
@@ -220,15 +197,8 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
         </div>
 
         {isSidebarOpen && <div className='fixed inset-0 bg-black bg-opacity-80 dark:bg-opacity-40 z-40 transition-opacity xl:hidden' onClick={toggleSidebar} />}
-
-        {/* Mobile Search Bar */}
-        <div className={`overflow-hidden transition-all duration-500 ease-in-out xl:hidden ${isSearchOpen ? "max-h-20 opacity-100 py-4" : "max-h-0 opacity-0 py-0"}`}>
-          <div className='relative'>
-            <input type='text' placeholder='What are you looking for?' className={styles.mobileInputStyles(expandMobileInput)} onFocus={handleMobileSearchFocus} onBlur={handleMobileSearchBlur} />
-            <GoSearch className='absolute right-5 top-1/2 -translate-y-1/2 text-lg text-slate-500' />
-          </div>
-        </div>
       </nav>
+
       {/* Mobile Sidebar */}
       <div className={styles.sidebar}>
         <div className='flex items-center justify-between mb-8'>

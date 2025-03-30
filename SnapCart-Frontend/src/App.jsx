@@ -66,7 +66,10 @@ const App = () => {
           hideProgressBar={false}
           newestOnTop={true}
           closeOnClick={true}
+          closeButton={true}
           draggable
+          pauseOnFocusLoss
+          pauseOnHover={false}
           theme="light"
           transition={Slide}
           toastClassName={() =>
