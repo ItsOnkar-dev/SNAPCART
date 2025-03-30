@@ -17,7 +17,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const location = useLocation();
 
   const cartContext = useContext(CartContext);
-  const { isLoggedIn, logout } = useContext(UserContext);
+  const { isLoggedIn, logout, user } = useContext(UserContext);
 
   // Check if we're on the authentication page
   const isAuthPage = location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup";
@@ -44,7 +44,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
   const styles = useMemo(
     () => ({
-      navbar: `fixed w-full p-4 sm:px-10 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 ${
+      navbar: `fixed w-full p-4 md:px-10 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 ${
         isSidebarOpen ? "backdrop-blur-xl inset-0" : "backdrop-blur-xl"
       }`,
       sidebar: `fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-700 ease-in-out xl:hidden dark:bg-[rgb(15,23,42)] ${
@@ -175,6 +175,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
               <IconWithTooltip tooltip='Profile'>
                 <AiOutlineUser onClick={() => navigate("/profile")} className={location.pathname === "/profile" ? "text-cyan-300 font-bold" : ""} />
               </IconWithTooltip>
+          
               <div onClick={toggleDarkMode} className='cursor-pointer text-slate-500 dark:text-slate-300 hover:dark:text-white hover:text-black'>
               {isDark ? (
                 <>
@@ -185,6 +186,13 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                   <MdNightlight className='text-xl' />
                 </>
               )}
+              </div>
+              <div className="text-slate-800 dark:text-white text-sm">
+                {
+                  isLoggedIn && <NavLink to='/profile'>
+                    <h3>{user.user._doc.username}</h3>
+                  </NavLink>
+                }
               </div>
               {
                 isLoggedIn &&
