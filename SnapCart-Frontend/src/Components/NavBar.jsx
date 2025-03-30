@@ -8,7 +8,6 @@ import { AiOutlineUser } from "react-icons/ai";
 import IconWithTooltip from "./IconWithTooltip";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import CartContext from "../context/Cart/CartContext";
-import UserContext from "../context/User/UserContext";
 
 const NavBar = ({ isDark, toggleDarkMode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -17,7 +16,6 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const location = useLocation();
 
   const cartContext = useContext(CartContext);
-  const { isLoggedIn, logout, user } = useContext(UserContext);
 
   // Check if we're on the authentication page
   const isAuthPage = location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup";
@@ -35,12 +33,6 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       return !prev;
     });
   }, []);
-
-  const handleLogOut = () => {
-    logout()
-    navigate('/')
-  }
-
 
   const styles = useMemo(
     () => ({
@@ -173,7 +165,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 </NavLink>
               </IconWithTooltip>
               <IconWithTooltip tooltip='Profile'>
-                <AiOutlineUser onClick={() => navigate("/profile")} className={location.pathname === "/profile" ? "text-cyan-300 font-bold" : ""} />
+                <AiOutlineUser onClick={() => navigate("/profile")} className={location.pathname === "/profile" ? "text-cyan-400 font-bold border-2 border-cyan-400 rounded-full" : "border-2 border-gray-400 rounded-full"} />
               </IconWithTooltip>
           
               <div onClick={toggleDarkMode} className='cursor-pointer text-slate-500 dark:text-slate-300 hover:dark:text-white hover:text-black'>
@@ -187,19 +179,6 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 </>
               )}
               </div>
-              <div className="text-slate-800 dark:text-white text-sm">
-                {
-                  isLoggedIn && <NavLink to='/profile'>
-                    <h3>{user.user._doc.username}</h3>
-                  </NavLink>
-                }
-              </div>
-              {
-                isLoggedIn &&
-                <button onClick={handleLogOut}
-                  className='bg-red-500 text-white font-semibold text-sm rounded-md px-6 py-1.5 hidden sm:block'>Log Out
-                </button>
-              }
             </div>
           </div>
         </div>
@@ -271,12 +250,6 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 </>
               )}
             </div>
-            {
-              isLoggedIn &&
-              <button 
-                className='bg-red-500 text-white font-semibold text-sm rounded-md px-8 py-1.5 sm:hidden'>Log Out
-              </button>
-            }
           </div>
         </div>
       </div>
