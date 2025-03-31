@@ -5,13 +5,12 @@ import { User, ShoppingBag, Package, Heart, CreditCard, Settings, LogOut, AlertC
 import { toast } from "react-toastify";
 
 const Profile = () => {
-  const { isLoggedIn, logout, user, updatePassword, deletedAccount, downloadUserData  } = useContext(UserContext);
+  const { isLoggedIn, logout, user, updatePassword, deletedAccount, downloadUserData } = useContext(UserContext);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [showUsernameTooltip, setShowUsernameTooltip] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [passwordError, setPasswordError] = useState("");
-
 
   // Password state
   const [passwordData, setPasswordData] = useState({
@@ -19,6 +18,14 @@ const Profile = () => {
     newPassword: "",
     confirmPassword: "",
   });
+
+  const tabs = [
+    { id: "profile", label: "Profile", icon: User },
+    { id: "orders", label: "Orders", icon: Package },
+    { id: "wishlist", label: "Wishlist", icon: Heart },
+    { id: "payment", label: "Payment", icon: CreditCard },
+    { id: "settings", label: "Settings", icon: Settings },
+  ];
 
   // Check if user data is loaded
   useEffect(() => {
@@ -35,10 +42,10 @@ const Profile = () => {
   };
 
   const handleDelete = () => {
-    deletedAccount()
-    navigate("/")
-  }
- 
+    deletedAccount();
+    navigate("/");
+  };
+
   const handlePasswordChange = (e) => {
     setPasswordData({
       ...passwordData,
@@ -115,28 +122,29 @@ const Profile = () => {
   const userData = user && user.user && user.user._doc ? user.user._doc : {};
 
   const styles = {
-    label: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1",
+    label: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
     input: "w-full px-4 py-2 rounded-md focus:outline-none text-gray-700 dark:bg-slate-600 dark:text-white/80",
-    navTab: "flex items-center px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-black dark:text-gray-300 dark:hover:text-white",
+    navTab: "flex items-center gap-2 px-6 py-4 text-gray-600 hover:text-black dark:text-gray-300 dark:hover:text-white",
+    activeNavTab: "border-b-4 border-cyan-500 text-black dark:text-white",
   };
 
   return (
-    <div className='container mx-auto px-4 py-24 max-w-6xl'>
+    <div className='container mx-auto px-4 md:px-10 py-24 max-w-6xl'>
       {/* Header Section */}
       <div className='bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6'>
-        <div className='flex flex-col sm:flex-row items-center justify-between'>
-          <div className='flex items-center mb-4 md:mb-0'>
+        <div className='flex flex-wrap items-center justify-between gap-10'>
+          <div className='flex items-center gap-2'>
             <div className='w-20 h-20 bg-gray-300 rounded-full overflow-hidden mr-4'>
               {userData.avatar ? (
                 <img src={userData.avatar} alt='Profile' className='w-full h-full object-cover' />
               ) : (
-                <div className='w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold'>{userData.username?.charAt(0).toUpperCase() || '?'}</div>
+                <div className='w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold'>{userData.username?.charAt(0).toUpperCase() || "?"}</div>
               )}
             </div>
             <div>
               <h1 className='text-2xl font-bold text-gray-800 dark:text-white'>{userData.name || userData.username || "User"}</h1>
-              <p className='text-gray-600 dark:text-gray-300'>{userData.email || 'No email provided'}</p>
-              <p className='text-sm text-gray-500 dark:text-gray-400'>Member since {userData.createdAt ? new Date(userData.createdAt).toLocaleDateString() : 'N/A'}</p>
+              <p className='text-gray-600 dark:text-gray-300'>{userData.email || "No email provided"}</p>
+              <p className='text-sm text-gray-500 dark:text-gray-400'>Member since {userData.createdAt ? new Date(userData.createdAt).toLocaleDateString() : "N/A"}</p>
             </div>
           </div>
           <div>
@@ -150,43 +158,13 @@ const Profile = () => {
 
       {/* Tab Navigation */}
       <div className='bg-white dark:bg-gray-800 rounded-lg shadow-md mb-6'>
-        <div className='flex overflow-x-auto'>
-          <button onClick={() => setActiveTab("profile")} className={`${styles.navTab} ${activeTab === "profile" ? "border-cyan-500 text-cyan-500" : ""}`}>
-            <User size={18} className='mr-2' />
-            Profile
-          </button>
-          <button
-            onClick={() => setActiveTab("orders")}
-            className={`flex items-center px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-black dark:text-gray-300 dark:hover:text-white ${
-              activeTab === "orders" ? "border-cyan-500 text-cyan-500" : "border-transparent text-gray-600 dark:text-gray-300"
-            }`}>
-            <Package size={18} className='mr-2' />
-            Orders
-          </button>
-          <button
-            onClick={() => setActiveTab("wishlist")}
-            className={`flex items-center px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-black dark:text-gray-300 dark:hover:text-white ${
-              activeTab === "wishlist" ? "border-cyan-500 text-cyan-500" : "border-transparent text-gray-600 dark:text-gray-300"
-            }`}>
-            <Heart size={18} className='mr-2' />
-            Wishlist
-          </button>
-          <button
-            onClick={() => setActiveTab("payment")}
-            className={`flex items-center px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-black dark:text-gray-300 dark:hover:text-white ${
-              activeTab === "payment" ? "border-cyan-500 text-cyan-500" : "border-transparent text-gray-600 dark:text-gray-300"
-            }`}>
-            <CreditCard size={18} className='mr-2' />
-            Payment
-          </button>
-          <button
-            onClick={() => setActiveTab("settings")}
-            className={`flex items-center px-6 py-4 border-b-2 border-transparent text-gray-500 hover:text-black dark:text-gray-300 dark:hover:text-white ${
-              activeTab === "settings" ? "border-cyan-500 text-cyan-500" : "border-transparent text-gray-600 dark:text-gray-300"
-            }`}>
-            <Settings size={18} className='mr-2' />
-            Settings
-          </button>
+        <div className='flex items-center justify-between overflow-x-auto whitespace-nowrap scrollbar-hide'>
+          {tabs.map((tab) => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`${styles.navTab} ${activeTab === tab.id ? "border-b-4 border-cyan-500 text-white" : ""}`}>
+              <tab.icon size={18} />
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -494,8 +472,12 @@ const Profile = () => {
               <div>
                 <h3 className='text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300'>Account Actions</h3>
                 <div className='flex flex-col sm:flex-row items-start gap-6 sm:items-center justify-between py-2'>
-                  <button className='bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-md px-6 py-2'  onClick={downloadUserData}>Download My Data</button>
-                  <button className='bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md px-6 py-2' onClick={handleDelete}>Delete Account</button>
+                  <button className='bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-md px-6 py-2' onClick={downloadUserData}>
+                    Download My Data
+                  </button>
+                  <button className='bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md px-6 py-2' onClick={handleDelete}>
+                    Delete Account
+                  </button>
                 </div>
               </div>
             </div>

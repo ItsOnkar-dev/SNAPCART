@@ -32,6 +32,15 @@ html {
   background: none;
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
+  scrollbar-width: none;      /* Hide scrollbar for Firefox */
+}
+
 @layer base {
   .text-gradient {
     @apply text-transparent bg-clip-text brightness-105 bg-gradient-to-r from-cyan-500 to-purple-500 hover:bg-gradient-to-r hover:from-purple-600 hover:to-cyan-500 dark:from-cyan-400 dark:to-purple-300 dark:hover:from-purple-300 dark:hover:to-cyan-400;
