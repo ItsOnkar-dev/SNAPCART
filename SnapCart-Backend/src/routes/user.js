@@ -15,8 +15,15 @@ const JWT_SECRET_KEY = "JWTKJDGFSDFHDGSVFSDUFSDBFS";
 // Rate limiting middleware
 const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 15, // 15 login attempts per window per IP
+  max: 25, // 15 login attempts per window per IP
   message: "Too many login attempts, please try again later",
+});
+
+// Password update rate limiter
+const passwordUpdateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 password update attempts per window per IP
+  message: "Too many password update attempts, please try again later",
 });
 
 // User Register
@@ -120,6 +127,78 @@ router.get('/profile', isLoggedIn, catchAsync(async (req, res) => {
   res.status(200).json({
     user: userWithoutPassword,
   });
+}));
+
+// Update Password
+router.put(
+  '/update-password', 
+  isLoggedIn, 
+  passwordUpdateLimiter,
+  catchAsync(async (req, res) => {
+    const { userId } = req;
+    const { currentPassword, newPassword } = req.body;
+
+    // Validate input
+    if (!currentPassword || !newPassword) {
+      throw new BadRequestError("Current password and new password are required");
+    }
+
+    // Password strength validation
+    if (newPassword.length < 8) {
+      throw new BadRequestError("New password must be at least 8 characters long");
+    }
+
+    if (currentPassword === newPassword) {
+      throw new BadRequestError("New password should not be your current password, please create new one");
+    }
+
+    // Find user
+    const user = await UserRepo.findByUserId(userId);
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      throw new BadRequestError("Current password is incorrect");
+    }
+
+    // Hash new password
+    const newPasswordHash = await bcrypt.hash(newPassword, 12);
+
+    // Update user's password in the database
+    // You'll need to add this method to your UserRepo
+    await UserRepo.updatePassword(userId, newPasswordHash);
+
+    res.status(200).json({
+      msg: "Password updated successfully! Please login with your new password."
+    });
+  })
+);
+
+router.delete('/delete-account', isLoggedIn, catchAsync(async (req, res) => {
+  try {
+    const {userId} = req;
+
+     // Find user before deleting (for confirmation logs)
+     const user = await UserRepo.findByUserId(userId);
+     if (!user) {
+       throw new AuthenticationError("User not found, unable to delete account.");
+     }
+
+    // Delete the user from the database
+    const deletedUser = await UserRepo.deleteUser(userId);
+    if (!deletedUser) {
+      throw new Error("Account deletion failed, please try again.");
+    }
+    console.log("Deleted User:", deletedUser)
+
+    res.status(200).json({ status: "success", message: "Account deleted successfully", deletedData: deletedUser });
+  } catch (error) {
+    console.error("Error deleting account:", error);
+    res.status(500).json({ errMsg: "Failed to delete account. Please try again." });
+  }
 }));
 
 export default router;
