@@ -165,10 +165,10 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 </NavLink>
               </IconWithTooltip>
               <IconWithTooltip tooltip='Profile'>
-                <AiOutlineUser onClick={() => navigate("/profile")} className={location.pathname === "/profile" ? "text-cyan-400 font-bold border-2 border-cyan-400 rounded-full" : "border-2 border-gray-400 rounded-full"} />
+                <AiOutlineUser onClick={() => navigate("/profile")} className={location.pathname === "/profile" ? "hidden md:block text-cyan-600 dark:text-cyan-400 font-bold border-2 dark:border-cyan-300 border-cyan-500 rounded-full" : "border-2 border-gray-400 rounded-full"} />
               </IconWithTooltip>
           
-              <div onClick={toggleDarkMode} className='cursor-pointer text-slate-500 dark:text-slate-300 hover:dark:text-white hover:text-black'>
+              <div onClick={toggleDarkMode} className='hidden md:block cursor-pointer text-slate-500 dark:text-slate-300 hover:dark:text-white hover:text-black'>
               {isDark ? (
                 <>
                   <MdLightMode className='text-xl text-yellow-300' />

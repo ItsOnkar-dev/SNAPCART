@@ -46,7 +46,36 @@ const UserContextProvider = ({ children }) => {
       setUser(response.data)
     } catch (error) {
       console.error(error);
-      toast.error(error.response.data?.errMsg);
+      // toast.error(error.response.data?.errMsg);
+    }
+  }; 
+
+  const updatePassword = async (currentPassword, newPassword) => {
+    const token = window.localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Authentication required. Please login.");
+    }
+
+    try {
+      const response = await axios.put(
+        "http://localhost:8000/auth/update-password",
+        { currentPassword, newPassword },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      // Return success response
+      return response.data;
+    } catch (error) {
+      // Handle specific error messages from the server
+      if (error.response && error.response.data && error.response.data.errMsg) {
+        throw new Error(error.response.data.errMsg);
+      }
+      // Generic error handling
+      throw new Error("Failed to update password. Please try again.");
     }
   };
 
@@ -62,11 +91,43 @@ const UserContextProvider = ({ children }) => {
     }
   };
 
+  const deletedAccount = async () => {
+    const token = window.localStorage.getItem("token");
+    if (!token) {
+      toast.error("Authentication required. Please login.");
+      return;
+    }
+  
+    if (!window.confirm("Are you sure you want to delete your account? This action is irreversible!")) {
+      return; // Stop execution if the user cancels
+    }
+  
+    try {
+      const response = await axios.delete("http://localhost:8000/auth/delete-account", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      // Remove user session and clear local storage
+      window.localStorage.removeItem("token");
+      setIsLoggedIn(false);
+      setUser(null);
+      toast.success(response.data?.msg || "Account deleted successfully");
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      toast.error(error.response?.data?.errMsg || "Failed to delete account. Please try again.");
+    }
+  };
+  
+
   const context = {
     isLoggedIn: isLoggedIn,
+    user: user,
     login: login,
     logout: logout,
-    user: user,
+    updatePassword: updatePassword,
+    deletedAccount: deletedAccount,
   };
 
   return <UserContext.Provider value={context}>{children}</UserContext.Provider>;
