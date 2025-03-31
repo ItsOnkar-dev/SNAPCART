@@ -18,24 +18,11 @@ class UserRepo{
   }
 
   static async updatePassword(userId, newPasswordHash){
-    try {
-      // Assuming you're using MongoDB and mongoose
-      // Replace this with your actual database update logic
-      const updatedUser = await User.findByIdAndUpdate(
-        userId,
-        { password: newPasswordHash },
-        { new: true } // Return the updated document
-      );
-      
-      if (!updatedUser) {
-        throw new Error("Failed to update password");
-      }
-      
-      return updatedUser;
-    } catch (error) {
-      console.error("Error updating password:", error);
-      throw error;
-    }
+    return await User.findByIdAndUpdate(
+      userId, 
+      { password: newPasswordHash },
+      { new: true }
+    );
   }
 
   static async deleteUser(userId) {

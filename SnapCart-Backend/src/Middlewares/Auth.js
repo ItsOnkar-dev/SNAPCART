@@ -1,8 +1,10 @@
 import jwt from 'jsonwebtoken';
 import { AuthorizationError } from '../Core/ApiError.js';
+import dotenv from "dotenv";
 
-// TODO: Move Environment variable file
-const JWT_SECRET_KEY = "JWTKJDGFSDFHDGSVFSDUFSDBFS";
+dotenv.config()
+
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "JWTKJDGFSDFHDGSVFSDUFSDBFS";
 
 const isLoggedIn = (req, res, next) => {
     
@@ -25,7 +27,9 @@ const isLoggedIn = (req, res, next) => {
 
         return next(); //this will call the next middleware function in the stack
     } catch (err) {
-        // Fallback error
+        if (err.name === "TokenExpiredError") {
+            return next(new AuthorizationError("Session expired. Please login again."));
+        }
         return next(new AuthorizationError('Invalid Token. Please login to continue'));
     }
 }
