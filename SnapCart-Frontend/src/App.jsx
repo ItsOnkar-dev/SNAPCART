@@ -17,12 +17,12 @@ const App = () => {
 
   // Get initial theme from localStorage or system preference
   const getInitialTheme = () => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("theme");
       if (savedTheme) {
-        return savedTheme === 'dark';
+        return savedTheme === "dark";
       }
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
     }
     return false;
   };
@@ -31,18 +31,17 @@ const App = () => {
 
   // Update theme in localStorage and document class
   useEffect(() => {
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    localStorage.setItem("theme", isDark ? "dark" : "light");
     if (isDark) {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   }, [isDark]);
 
   const toggleDarkMode = useCallback(() => {
-    setIsDark(prev => !prev);
+    setIsDark((prev) => !prev);
   }, []);
-
 
   return (
     <div className='min-h-screen bg-white text-gray-900 dark:bg-slate-900 dark:text-white transition-colors duration-300'>
@@ -61,7 +60,7 @@ const App = () => {
           <Route path='/profile' element={<Profile />} />
         </Routes>
         <ToastContainer
-          position="top-right"
+          position='top-right'
           autoClose={3000}
           hideProgressBar={false}
           newestOnTop={true}
@@ -70,15 +69,13 @@ const App = () => {
           draggable
           pauseOnFocusLoss
           pauseOnHover={false}
-          theme="light"
+          theme='light'
           transition={Slide}
           toastClassName={() =>
             "relative min-h-16 flex items-center justify-between p-6 rounded-lg shadow-xl dark:bg-slate-900 dark:text-white bg-white text-slate-800 text-sm overflow-hidden cursor-pointer border border-gray-300 dark:border-gray-500"
           }
           bodyClassName={() => "flex-1"}
-          progressClassName={() =>
-            "Toastify__progress-bar Toastify__progress-bar--animated Toastify__progress-bar--default h-1 bg-gradient-to-r from-indigo-600 via-cyan-400 to-purple-600"
-          }
+          progressClassName={() => "Toastify__progress-bar Toastify__progress-bar--animated Toastify__progress-bar--default h-1 bg-gradient-to-r from-indigo-600 via-cyan-400 to-purple-600"}
         />
       </main>
     </div>

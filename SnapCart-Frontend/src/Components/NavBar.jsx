@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useCallback, useContext, useMemo, useState } from "react";
+import {useState, useContext, useMemo, useCallback } from "react";
 import Logo from "../assets/Logo.png";
 import SearchBar from "./SearchBar";
 import { MdFavoriteBorder, MdOutlineShoppingBasket, MdMenu, MdClose, MdNightlight, MdLightMode } from "react-icons/md";
@@ -10,7 +10,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import CartContext from "../context/Cart/CartContext";
 
 const NavBar = ({ isDark, toggleDarkMode }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,12 +27,17 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
     { id: 4, title: "Contact" },
   ];
 
-  const toggleSidebar = useCallback(() => {
-    setIsSidebarOpen((prev) => {
-      document.body.style.overflow = !prev ? "hidden" : "auto";
-      return !prev;
-    });
-  }, []);
+   const toggleSidebar = useCallback(() => {
+      setIsSidebarOpen((prev) => {
+        document.body.style.overflow = !prev ? "hidden" : "auto";
+        return !prev;
+      });
+    }, []);
+
+    const toggleTheme = () => {
+      toggleDarkMode(),
+      toggleSidebar()
+    }
 
   const styles = useMemo(
     () => ({
@@ -120,7 +125,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       <nav className={styles.navbar}>
         <div className='flex items-center justify-between'>
           {/* Mobile Menu Button */}
-          <button className='xl:hidden' onClick={toggleSidebar}>
+          <button className='lg:hidden' onClick={toggleSidebar}>
             <MdMenu className='text-2xl' />
           </button>
 
@@ -134,7 +139,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className='hidden xl:block'>
+          <div className='hidden lg:block'>
             <ul className='flex items-center gap-10'>
               {navItems.map((item) => (
                 <li key={item.id} className={styles.listStyles}>
@@ -147,14 +152,14 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
           </div>
 
           {/* Search and Icons */}
-          <div className='flex items-center gap-4 lg:gap-10'>
-            {/* Search Bar - Desktop */}
+          <div className='flex items-center gap-4 md:gap-6 xl:gap-10'>
+            {/* Search Bar */}
             <SearchBar/>
 
             {/* Action Icons */}
-            <div className='flex items-center gap-4 xl:gap-6 text-xl lg:text-2xl'>
+            <div className='flex items-center gap-4 md:gap-6 text-xl lg:text-2xl'>
               <IconWithTooltip tooltip='Favorites' className='hidden sm:block'>
-                <MdFavoriteBorder onClick={() => navigate("/wishlist")} className={location.pathname === "/wishlist" ? "text-pink-600 font-bold" : ""} />
+                <MdFavoriteBorder onClick={() => navigate("/wishlist")} className={location.pathname === "/wishlist" ? "text-pink-600 font-bold" : "hidden md:block "} />
               </IconWithTooltip>
               <IconWithTooltip tooltip='Cart'>
                 <NavLink to='/cart' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "")}>
@@ -165,10 +170,10 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 </NavLink>
               </IconWithTooltip>
               <IconWithTooltip tooltip='Profile'>
-                <AiOutlineUser onClick={() => navigate("/profile")} className={location.pathname === "/profile" ? "hidden md:block text-cyan-600 dark:text-cyan-400 font-bold border-2 dark:border-cyan-300 border-cyan-500 rounded-full" : "border-2 border-gray-400 rounded-full"} />
+                <AiOutlineUser onClick={() => navigate("/profile")} className={location.pathname === "/profile" ? "hidden md:block text-cyan-600 dark:text-cyan-400 font-bold border-2 dark:border-cyan-300 border-cyan-500 rounded-full" : "hidden md:block border-2 border-gray-400 rounded-full"} />
               </IconWithTooltip>
           
-              <div onClick={toggleDarkMode} className='hidden md:block cursor-pointer text-slate-500 dark:text-slate-300 hover:dark:text-white hover:text-black'>
+              <div onClick={toggleDarkMode} className='hidden sm:block cursor-pointer text-slate-500 dark:text-slate-300 hover:dark:text-white hover:text-black'>
               {isDark ? (
                 <>
                   <MdLightMode className='text-xl text-yellow-300' />
@@ -237,7 +242,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             </div>
             <div 
               className='flex items-center gap-3 cursor-pointer text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white' 
-              onClick={toggleDarkMode}>
+              onClick={toggleTheme}>
               {isDark ? (
                 <>
                   <MdLightMode className='text-xl text-yellow-400' />

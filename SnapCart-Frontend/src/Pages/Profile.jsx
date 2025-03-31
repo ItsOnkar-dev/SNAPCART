@@ -5,13 +5,13 @@ import { User, ShoppingBag, Package, Heart, CreditCard, Settings, LogOut, AlertC
 import { toast } from "react-toastify";
 
 const Profile = () => {
-  const { isLoggedIn, logout, user, updatePassword, deletedAccount } = useContext(UserContext);
+  const { isLoggedIn, logout, user, updatePassword, deletedAccount, downloadUserData  } = useContext(UserContext);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [showUsernameTooltip, setShowUsernameTooltip] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [passwordError, setPasswordError] = useState("");
-  
+
 
   // Password state
   const [passwordData, setPasswordData] = useState({
@@ -49,7 +49,6 @@ const Profile = () => {
   };
 
   const handlePasswordUpdate = async () => {
-    // Validate passwords
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
       setPasswordError("All password fields are required");
       return;
@@ -86,7 +85,7 @@ const Profile = () => {
       navigate("/login");
     } catch (error) {
       setPasswordError(error.message || "Failed to update password");
-      toast.error("Password update failed");
+      toast.error(error.message || "Failed to update password");
     }
   };
 
@@ -495,7 +494,7 @@ const Profile = () => {
               <div>
                 <h3 className='text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300'>Account Actions</h3>
                 <div className='flex flex-col sm:flex-row items-start gap-6 sm:items-center justify-between py-2'>
-                  <button className='bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-md px-6 py-2'>Download My Data</button>
+                  <button className='bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-md px-6 py-2'  onClick={downloadUserData}>Download My Data</button>
                   <button className='bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md px-6 py-2' onClick={handleDelete}>Delete Account</button>
                 </div>
               </div>

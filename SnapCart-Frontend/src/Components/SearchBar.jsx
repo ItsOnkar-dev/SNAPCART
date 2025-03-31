@@ -23,7 +23,7 @@ const SearchBar = () => {
     () => ({
       inputStyles: (expand) =>
         `block border border-slate-300 dark:border-slate-600 text-sm py-1.5 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${
-          expand ? "w-[45vw] lg:w-[25vw]" : "w-[40vw] lg:w-[20vw]"
+          expand ? "w-[27vw]" : "w-[22vw]"
         }`,
       mobileInputStyles: (expand) =>
         `block w-full border border-slate-300 dark:border-slate-600 text-sm py-2 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${
@@ -36,7 +36,7 @@ const SearchBar = () => {
   return (
     <>
       {/* Desktop Search Bar */}
-      <div className="hidden sm:flex items-center relative">
+      <div className="hidden xl:flex items-center relative">
         <input
           type="text"
           placeholder="What are you looking for?"
@@ -48,13 +48,13 @@ const SearchBar = () => {
       </div>
 
       {/* Mobile Search Icon */}
-      <button className="sm:hidden" onClick={toggleMobileSearch}>
+      <button className="xl:hidden" onClick={toggleMobileSearch}>
         <GoSearch className="text-xl text-slate-500 dark:text-slate-300 dark:hover:text-white hover:text-black" />
       </button>
 
       {/* Mobile Search Bar Container */}
       <div 
-        className={`absolute left-0 right-0 px-4 bg-white dark:bg-[rgb(15,23,42)] transition-all duration-300 z-20 lg:hidden ${
+        className={`absolute left-0 right-0 px-4 md:px-10 bg-white dark:bg-[rgb(15,23,42)] transition-all duration-300 z-20 xl:hidden ${
           isSearchOpen 
             ? "top-full opacity-100 h-16 border-b border-gray-200 dark:border-slate-800" 
             : "top-[-100%] opacity-0 h-0"
