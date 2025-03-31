@@ -123,15 +123,14 @@ const Profile = () => {
 
   const styles = {
     label: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",
-    input: "w-full px-4 py-2 rounded-md focus:outline-none text-gray-700 dark:bg-slate-600 dark:text-white/80",
+    input: "w-full px-4 py-2 rounded-md focus:outline-none bg-gray-200 text-gray-700 dark:bg-slate-600 dark:text-white/80",
     navTab: "flex items-center gap-2 px-6 py-4 text-gray-600 hover:text-black dark:text-gray-300 dark:hover:text-white",
-    activeNavTab: "border-b-4 border-cyan-500 text-black dark:text-white",
   };
 
   return (
     <div className='container mx-auto px-4 md:px-10 py-24 max-w-6xl'>
       {/* Header Section */}
-      <div className='bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6'>
+      <div className='bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6'>
         <div className='flex flex-wrap items-center justify-between gap-10'>
           <div className='flex items-center gap-2'>
             <div className='w-20 h-20 bg-gray-300 rounded-full overflow-hidden mr-4'>
@@ -157,10 +156,10 @@ const Profile = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className='bg-white dark:bg-gray-800 rounded-lg shadow-md mb-6'>
+      <div className='bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md mb-6'>
         <div className='flex items-center justify-between overflow-x-auto whitespace-nowrap scrollbar-hide'>
           {tabs.map((tab) => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`${styles.navTab} ${activeTab === tab.id ? "border-b-4 border-cyan-500 text-white" : ""}`}>
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`${styles.navTab} ${activeTab === tab.id ? "border-b-4 border-cyan-500 text-black dark:text-white" : ""}`}>
               <tab.icon size={18} />
               {tab.label}
             </button>
@@ -169,7 +168,7 @@ const Profile = () => {
       </div>
 
       {/* Content Area */}
-      <div className='bg-white dark:bg-gray-800 rounded-lg shadow-md p-6'>
+      <div className='bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md p-6'>
         {activeTab === "profile" && (
           <div>
             <h2 className='text-xl font-bold mb-4 text-gray-800 dark:text-white'>Personal Information</h2>
@@ -183,7 +182,7 @@ const Profile = () => {
                 <div className='relative' onMouseEnter={() => setShowUsernameTooltip(true)} onMouseLeave={() => setShowUsernameTooltip(false)}>
                   <input
                     type='text'
-                    className='w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-slate-600 dark:text-white/80 focus:outline-none cursor-not-allowed'
+                    className='w-full px-4 py-2 rounded-md bg-gray-300 dark:bg-slate-700 dark:text-white/80 focus:outline-none cursor-not-allowed'
                     value={userData.username}
                     disabled
                   />
@@ -398,12 +397,12 @@ const Profile = () => {
 
         {activeTab === "settings" && (
           <div className=''>
-            <h2 className='text-xl font-bold mb-4 text-gray-800 dark:text-white'>Account Settings</h2>
+            <h2 className='text-xl font-bold mb-6 text-gray-800 dark:text-white'>Account Settings</h2>
 
             <div className='space-y-12'>
               <div>
-                <h3 className='text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300'>Password</h3>
-                <div className='space-y-4'>
+                <h3 className='text-lg font-semibold mb-6 text-gray-700 dark:text-gray-300'>Password</h3>
+                <div className='space-y-6'>
                   {passwordError && <p className='text-red-500 text-sm'>{passwordError}</p>}
                   <div>
                     <label className={styles.label}>Current Password</label>
