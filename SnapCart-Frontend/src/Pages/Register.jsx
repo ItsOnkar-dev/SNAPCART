@@ -40,7 +40,7 @@ const itemVariants = {
 
 const styles = {
   inputContainer: "flex items-center relative",
-  inputField: "pl-10 w-full px-3 py-2 bg-gray-50 dark:bg-slate-900 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none transition-all",
+  inputField: "pl-10 w-full px-3 py-2 bg-gray-100 dark:bg-slate-900 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none",
   inputIcon: "absolute left-3 text-gray-400",
   labelText: "text-sm font-medium text-gray-700 dark:text-white block",
   formGroup: "space-y-2",
@@ -52,7 +52,7 @@ const styles = {
   socialButtonInner: "flex items-center justify-center gap-2",
   toggleLink: "dark:text-indigo-300 text-indigo-500 dark:hover:text-indigo-400",
   headerGradient: "bg-gradient-to-r from-purple-500 to-indigo-500 p-6 text-white",
-  cardContainer: "rounded-xl shadow-xl overflow-hidden dark:border border-slate-600",
+  cardContainer: "rounded-xl shadow-xl overflow-hidden border border-gray-300 dark:border-slate-600",
   formContainer: "p-6 space-y-4 bg-white dark:bg-slate-900 dark:text-white",
 };
 
@@ -162,9 +162,7 @@ const Register = ({ initialMode = "login" }) => {
         animate='visible'
         exit='exit'
         className='min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-white to-purple-100 dark:from-slate-950 dark:to-blue-950 backdrop-blur-3xl'>
-        <div className='w-full max-w-md relative sm:mt-10'>
-          <div className='absolute -top-10 -left-10 w-20 h-20 bg-purple-200 dark:bg-purple-900 rounded-full blur-xl opacity-60 animate-pulse'></div>
-          <div className='absolute -bottom-8 -right-8 w-16 h-16 bg-blue-200 dark:bg-blue-900 rounded-full blur-xl opacity-60 animate-pulse'></div>
+        <div className='w-full max-w-lg py-16 lg:py-20 overflow-hidden'>
           {/* Main card */}
           <AnimatePresence mode='wait'>
             <motion.div key={isLogin ? "login" : "signup"} className={styles.cardContainer} variants={containerVariants} initial='hidden' animate='visible' exit='exit'>

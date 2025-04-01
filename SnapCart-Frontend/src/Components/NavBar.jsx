@@ -44,6 +44,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       navbar: `fixed w-full p-4 md:px-10 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 ${
         isSidebarOpen ? "backdrop-blur-xl inset-0" : "backdrop-blur-xl"
       }`,
+      authNavbar: "fixed w-full p-4 md:px-10 xl:px-32 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 backdrop-blur-xl",
       sidebar: `fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-700 ease-in-out xl:hidden dark:bg-[rgb(15,23,42)] ${
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`,
@@ -57,7 +58,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   // Render auth navbar
   if (isAuthPage) {
     return (
-      <nav className={`${styles.navbar}`}>
+      <nav className={`${styles.authNavbar}`}>
         <div className='flex items-center justify-between'>
           {/* Logo */}
           <div className='flex items-center gap-2'>

@@ -56,7 +56,7 @@ const Registration = () => {
               <span>SnapCart</span>
             </h1>
             
-            <div className="text-gradient1 dark:text-gradient text-3xl sm:text-4xl font-bold">
+            <div className="text-gradient1 dark:text-gradient text-2xl sm:text-3xl lg:text-4xl font-bold">
               Your Ultimate Shopping Destination!
             </div>
             
