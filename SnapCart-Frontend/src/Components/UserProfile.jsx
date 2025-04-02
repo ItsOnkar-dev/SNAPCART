@@ -37,6 +37,13 @@ const UserProfile = ({ isOpen, onClose }) => {
     }
   }, [user, isLoggedIn]);
 
+  const handleLogin = () => {
+    handleClose()
+    setTimeout(() => {
+      navigate("/login");
+    }, 300);
+  }
+
   const handleLogOut = () => {
     setIsVisible(false);
     setTimeout(() => {
@@ -73,21 +80,23 @@ const UserProfile = ({ isOpen, onClose }) => {
     );
   }
 
+  // Animation classes based on visibility state
+  const modalClasses = `
+    fixed z-50 right-0
+    transition-all duration-500 ease-in-out
+    ${isVisible ? 'opacity-100 transform translate-y-6' : 'opacity-0 transform -translate-y-6 pointer-events-none'}
+  `;
+
   // If user is not logged in, show login prompt
   if (!isLoggedIn || !user) {
     return (
-      <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"} transition-opacity duration-300`}>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full">
-          <h2 className="text-2xl font-bold mb-4 text-center">Please login to view your profile</h2>
+      <div className={modalClasses}>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-10 max-w-md w-full">
+          <h2 className="text-xl font-bold mb-4 text-center">Please login to view your profile</h2>
           <div className="flex justify-center">
-            <button 
-              onClick={() => {
-                handleClose();
-                setTimeout(() => {
-                  navigate("/login");
-                }, 300);
-              }} 
-              className="bg-cyan-600 text-white font-semibold rounded-md px-6 py-2 hover:bg-cyan-700 transition-colors duration-200"
+            <button
+              onClick={handleLogin}
+              className="bg-cyan-600 text-white text-sm font-semibold rounded-md px-10 py-2 hover:bg-cyan-700 transition-colors duration-200"
             >
               Login
             </button>
@@ -101,27 +110,20 @@ const UserProfile = ({ isOpen, onClose }) => {
 
   const userData = user && user.user && user.user._doc ? user.user._doc : {};
 
-  // Animation classes based on visibility state
-  const modalClasses = `
-    fixed z-50 right-8
-    transition-all duration-500 ease-in-out
-    ${isVisible ? 'opacity-100 transform translate-y-6' : 'opacity-0 transform -translate-y-4 pointer-events-none'}
-  `;
-
   return (
     <div className={modalClasses}>
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-md w-full p-10 transform transition-transform duration-300 ease-in-out">
         {/* Modal Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-800 dark:text-white">Your Profile</h2>
-          <button 
-            onClick={handleClose} 
+          <button
+            onClick={handleClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white transition-colors duration-200"
           >
             <X size={24} />
           </button>
         </div>
-        
+
         {/* User Info */}
         <div className="flex items-center mb-6">
           <div className="w-16 h-16 bg-gray-300 rounded-full overflow-hidden mr-4">
@@ -142,7 +144,7 @@ const UserProfile = ({ isOpen, onClose }) => {
         </div>
 
         <div className="border-b-2 border-gray-200 dark:border-gray-700 "></div>
-        
+
         {/* Navigation Tabs */}
         <div className="space-y-2 py-4">
           {tabs.map((tab, index) => (
@@ -159,7 +161,7 @@ const UserProfile = ({ isOpen, onClose }) => {
         </div>
 
         <div className="border-t-2 border-gray-200 dark:border-gray-700 "></div>
-        
+
         {/* Logout Button */}
         <div className="pt-6">
           <button

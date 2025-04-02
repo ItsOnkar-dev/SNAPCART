@@ -3,7 +3,7 @@ import { useState, useEffect, useContext, useMemo, useCallback, useRef } from "r
 import Logo from "../assets/Logo.png";
 import SearchBar from "./SearchBar";
 import { MdFavoriteBorder, MdOutlineShoppingBasket, MdMenu, MdClose, MdNightlight, MdLightMode } from "react-icons/md";
-import { ChevronDown, HelpCircle, Globe, Twitter, Instagram, Facebook, Github } from "lucide-react";
+import { ChevronDown, HelpCircle, Globe, Twitter, Instagram, Facebook, Github, LogOut } from "lucide-react";
 import { AiOutlineUser } from "react-icons/ai";
 import IconWithTooltip from "./IconWithTooltip";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -21,8 +21,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const cartContext = useContext(CartContext);
-  const { user } = useContext(UserContext);
-
+  const { user, logout } = useContext(UserContext);
 
   // Check if we're on the authentication page
   const isAuthPage = location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup";
@@ -54,7 +53,6 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
     };
   }, []);
 
-
   const toggleSidebar = useCallback(() => {
     setIsSidebarOpen((prev) => {
       document.body.style.overflow = !prev ? "hidden" : "auto";
@@ -63,8 +61,12 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   }, []);
 
   const toggleTheme = () => {
-    toggleDarkMode(),
-      toggleSidebar();
+    toggleDarkMode(), toggleSidebar();
+  };
+
+  const handleLogOut = () => {
+    logout();
+    navigate("/");
   };
 
   const styles = useMemo(
@@ -76,7 +78,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       sidebar: `fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-700 ease-in-out xl:hidden dark:bg-[rgb(15,23,42)] ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`,
       logoName: "cursor-pointer font-extrabold text-2xl tracking-wide uppercase",
-      listStyles: `transition-all hover:duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3 cursor-pointer tracking-wide`,
+      listStyles: `transition-all hover:duration-300 ease-in-out hover:skew-x-3 hover:skew-y-1 cursor-pointer tracking-wide`,
       activeStyles: "text-gradient1 dark:text-gradient dark:brightness-125 font-semibold tracking-wide underline underline-offset-8",
     }),
     [isSidebarOpen]
@@ -182,19 +184,19 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
           </div>
 
           {/* Search and Icons */}
-          <div className='flex items-center gap-4 md:gap-6 xl:gap-10'>
+          <div className='flex items-center md:gap-6 '>
             {/* Search Bar */}
             <SearchBar />
 
             {/* Action Icons */}
             <div className='flex items-center gap-4 md:gap-6 text-xl lg:text-2xl'>
               <IconWithTooltip tooltip='Favorites'>
-                <NavLink to='/wishlist' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "hidden md:block")}>
+                <NavLink to='/wishlist' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "hidden md:block text-black/60 dark:text-white/80")}>
                   <MdFavoriteBorder />
                 </NavLink>
               </IconWithTooltip>
               <IconWithTooltip tooltip='Cart'>
-                <NavLink to='/cart' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "")}>
+                <NavLink to='/cart' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "text-black/60 dark:text-white/80")}>
                   <div className='relative'>
                     <span className='absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full px-1.5 py-0.5'>{cartContext.cartLength}</span>
                     <MdOutlineShoppingBasket />
@@ -202,55 +204,38 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 </NavLink>
               </IconWithTooltip>
 
-              <div onClick={toggleDarkMode} className='hidden sm:block cursor-pointer text-slate-500 dark:text-slate-300 hover:dark:text-white hover:text-black transition-transform duration-500 ease-in-out'>
+              <div onClick={toggleDarkMode} className='hidden sm:block cursor-pointer transition-transform duration-500 ease-in-out'>
                 <span className={`transition-transform duration-700 ease-in-out ${isDark ? "rotate-90" : "rotate-0"}`}>
-                  {isDark ? (
-                    <MdLightMode className='text-xl text-cyan-300' />
-                  ) : (
-                    <MdNightlight className='text-xl' />
-                  )}
+                  {isDark ? <MdLightMode className='text-xl text-cyan-300 hover:text-cyan-200' /> : <MdNightlight className='text-xl text-black/60 hover:text-black ' />}
                 </span>
               </div>
 
-              <div ref={profileModalRef} onMouseEnter={handleProfileHover} onMouseLeave={handleProfileLeave} className="relative">
-                <IconWithTooltip tooltip='Profile'>
-                  <div ref={profileIconRef}
-                    className={`${location.pathname === "/profile"
-                      ? "hidden md:flex gap-2 items-center text-cyan-600 dark:text-cyan-400 font-bold"
-                      : "dark:text-gray-300 hidden md:flex items-center gap-2"
-                      }`}
-                  >
-                    <AiOutlineUser />
-                    <h3 className="text-sm font-bold text-gray-800 dark:text-gray-300">
-                      {userData.name || userData.username || "User"}
-                    </h3>
-                    <span className={`transition-transform duration-500 ease-in-out text-gray-800  dark:text-gray-200 ${isProfileModalOpen ? "rotate-180 opacity-100" : "opacity-80"
-                      }`}>
-                      <ChevronDown size={18} />
-                    </span>
-                  </div>
-                </IconWithTooltip>
+              <div ref={profileModalRef} onMouseEnter={handleProfileHover} onMouseLeave={handleProfileLeave}>
+                <div
+                  ref={profileIconRef}
+                  className={`${location.pathname === "/profile"
+                    ? "hidden md:flex gap-2 items-center text-cyan-500 dark:text-cyan-400 font-bold"
+                    : "hidden md:flex items-center gap-2 cursor-pointer text-black/80 dark:text-white/80"
+                    }`}> 
+                  <AiOutlineUser />
+                  <h3 className='text-sm'>{userData.name || userData.username || "User"}</h3>
+                  <span className={`transition-transform duration-500 ease-in-out ${isProfileModalOpen ? "rotate-180 opacity-100" : "opacity-80"}`}>
+                    <ChevronDown size={18} />
+                  </span>
+                </div>
 
-                {isProfileModalOpen && (
-                  <div className="absolute">
-                    <UserProfile
-                      isOpen={isProfileModalOpen}
-                      onClose={() => setIsProfileModalOpen(false)}
-                    />
-                  </div>
-                )}
+                {isProfileModalOpen && <UserProfile isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />}
               </div>
             </div>
           </div>
         </div>
 
         {isSidebarOpen && <div className='fixed inset-0 bg-black bg-opacity-80 dark:bg-opacity-40 z-40 transition-opacity xl:hidden' onClick={toggleSidebar} />}
-
       </nav>
 
       {/* Mobile Sidebar */}
       <div className={styles.sidebar}>
-        <div className='flex items-center justify-between mb-8 md:mb-10'>
+        <div className='flex items-center justify-between'>
           <div className='flex items-center gap-2 cursor-pointer'>
             <img src={Logo} alt='Logo' className='w-6' />
             <div
@@ -264,10 +249,10 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             </div>
           </div>
           <button onClick={toggleSidebar}>
-            <MdClose className='text-3xl' />
+            <MdClose className='text-2xl hover:scale-105' />
           </button>
         </div>
-        <ul className='space-y-6 md:space-y-8'>
+        <ul className='space-y-7 py-10'>
           {navItems.map((item) => (
             <li key={item.id} className={styles.listStyles} onClick={toggleSidebar}>
               <NavLink
@@ -279,7 +264,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
           ))}
         </ul>
 
-        <div className='block md:hidden my-8 py-6 border-t border-gray-200 dark:border-slate-700'>
+        <div className='block md:hidden py-8 md:py-10 border-t border-gray-200 dark:border-slate-700'>
           <div className='space-y-7'>
             <div
               className='flex items-center gap-3 cursor-pointer text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
@@ -313,6 +298,14 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
               )}
             </div>
           </div>
+        </div>
+        <div className='py-8 md:py-10 border-t border-gray-200 dark:border-slate-700'>
+          <button
+            onClick={handleLogOut}
+            className='w-full flex items-center gap-3 text-sm px-4 py-3 text-white bg-red-500 hover:bg-red-700 rounded-md transition-all duration-300 transform hover:translate-y-1'>
+            <LogOut size={18} />
+            <span>Log Out</span>
+          </button>
         </div>
       </div>
     </>
