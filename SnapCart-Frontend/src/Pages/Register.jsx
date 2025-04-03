@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useContext } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import { ArrowRight, ArrowLeft, Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Mail, Lock, User, Eye, EyeOff, Loader2, ShoppingBag, Truck, Shield, Award, TrendingUp } from "lucide-react";
 import { FaGoogle, FaApple, FaShoppingBag } from "react-icons/fa";
 import { FaSackDollar } from "react-icons/fa6";
 import { toast } from "react-toastify";
@@ -38,6 +38,33 @@ const itemVariants = {
   },
 };
 
+const features = [
+  {
+    icon: <ShoppingBag className="w-6 h-6" />,
+    title: "Endless Selection",
+    description: "Discover millions of products from trusted brands worldwide",
+  },
+  {
+    icon: <Truck className="w-6 h-6" />,
+    title: "Fast Delivery",
+    description: "Get your products delivered to your doorstep in record time",
+  },
+  {
+    icon: <Shield className="w-6 h-6" />,
+    title: "Secure Shopping",
+    description: "Shop with confidence with our buyer protection guarantee",
+  },
+  {
+    icon: <Award className="w-6 h-6" />,
+    title: "Best Deals",
+    description: "Save big with exclusive discounts and flash sales every day",
+  },
+];
+
+
+// Products currently trending
+const trendingItems = ["Smart Watches", "Premium Headphones", "Eco Friendly Products", "Home Decor"];
+
 const styles = {
   inputContainer: "flex items-center relative",
   inputField: "pl-10 w-full px-3 py-2 bg-gray-100 dark:bg-slate-900 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none",
@@ -66,6 +93,7 @@ const Register = ({ initialMode = "login" }) => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
+  const [activeFeature, setActiveFeature] = useState(0);
 
   const [isLogin, setIsLogin] = useState(location.pathname === "/login" || initialMode === "login");
 
@@ -128,8 +156,8 @@ const Register = ({ initialMode = "login" }) => {
           username: name,
           email: email,
           password: password,
-          role: role, 
-        }; 
+          role: role,
+        };
       }
 
       // console.log(isLogin ? "Logging in with:" : "Signing up with:", userData);
@@ -146,7 +174,7 @@ const Register = ({ initialMode = "login" }) => {
         navigate("/login");
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.errMsg || error.response?.data?.msg || "An error occurred. Please try again.";
+      const errorMessage = error.response?.data?.errMsg || error.response?.data || "An error occurred. Please try again.";
       console.log(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -154,18 +182,106 @@ const Register = ({ initialMode = "login" }) => {
     }
   };
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveFeature((prev) => (prev + 1) % features.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [features.length]);
+
   return (
     <>
-      <motion.div
-        variants={containerVariants}
-        initial='hidden'
-        animate='visible'
-        exit='exit'
-        className='min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-white to-purple-100 dark:from-slate-950 dark:to-blue-950 backdrop-blur-3xl'>
-        <div className='w-full max-w-lg py-16 lg:py-20 overflow-hidden'>
-          {/* Main card */}
-          <AnimatePresence mode='wait'>
-            <motion.div key={isLogin ? "login" : "signup"} className={styles.cardContainer} variants={containerVariants} initial='hidden' animate='visible' exit='exit'>
+    <main className="min-h-screen flex items-center justify-center p-4 sm:px-10 bg-gradient-to-br from-white to-purple-100 dark:from-slate-950 dark:to-blue-950 overflow-hidden backdrop-blur-3xl">
+      <AnimatePresence mode="wait">
+          <motion.div 
+            key="registration"
+            initial="hidden"
+            animate="visible" 
+            exit="exit"
+            variants={containerVariants}
+            className="flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-24 w-full max-w-7xl pt-24 mx-auto relative"
+          >
+            {/* Dynamic background elements */}
+            <div className="absolute -z-10 top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-purple-300 to-blue-300 dark:from-purple-800 dark:to-blue-800 rounded-full blur-3xl opacity-20"></div>
+            <div className="absolute -z-10 bottom-1/4 right-1/4 w-32 h-32 bg-gradient-to-r from-pink-300 to-orange-300 dark:from-pink-800 dark:to-orange-800 rounded-full blur-3xl opacity-20"></div>
+            
+            {/* Left side content */}
+            <div className="flex flex-col text-center lg:text-start gap-4 w-full relative">
+              {/* Main text with improved typography */}
+              <div className="text-3xl sm:text-4xl font-semibold">
+                <h1>
+                  <span>Welcome to </span>
+                  <span>SnapCart</span>
+                </h1>
+                
+                <div className="text-gradient1 dark:text-gradient text-2xl sm:text-3xl lg:text-4xl font-bold">
+                  Your Ultimate Shopping Destination!
+                </div>
+                
+                {/* Animated promo section */}
+                <p className={`text-slate-500 dark:text-white/70 text-lg sm:text-xl mt-4 transition-all duration-300 lg:max-w-xl`}>
+                  Start your shopping journey now and grab your favorites before they are gone! ✨
+                </p>
+                
+                <h2 className="text-2xl sm:text-3xl mt-6 text-gradient1 dark:text-gradient">
+                  Discover. Shop. Enjoy.
+                </h2>
+              </div>
+              
+              {/* Trending now section */}
+              <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur rounded-xl lg:max-w-xl px-10 py-5 mt-4 shadow-lg border border-purple-100 dark:border-purple-900/30">
+                <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 mb-2 text-lg font-semibold">
+                  <TrendingUp className="w-4 h-4" />
+                  <h3>Trending Now</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {trendingItems.map((item, idx) => (
+                    <span key={idx} className="bg-purple-100 dark:bg-purple-900/30 text-indigo-600 dark:text-indigo-400 px-3 py-1 rounded-full text-sm hover:bg-purple-200 dark:hover:bg-purple-800/50 transition-colors cursor-pointer">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Features showcase with improved styling */}
+              <div className="py-6 lg:max-w-xl text-start">
+                <div className="relative bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-xl shadow-lg p-8 transform transition-all duration-500 border border-purple-100 dark:border-purple-900/30">
+                  {features.map((feature, index) => (
+                    <div key={index} className={`flex items-center gap-4 transition-all duration-500 ${index === activeFeature ? "opacity-100 transform scale-100" : "opacity-0 absolute top-8 left-8 transform scale-95"}`}>
+                      <div className="p-3 bg-gradient-to-br from-purple-500 to-blue-500 text-white rounded-lg shadow-md">
+                        {feature.icon}
+                      </div>
+                      <div>
+                        <h3 className="text-xl text-gray-800 dark:text-white font-semibold">{feature.title}</h3>
+                        <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Enhanced dots indicator */}
+                <div className="flex justify-center gap-2 mt-4">
+                  {features.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveFeature(index)}
+                      className={`rounded-full transition-all flex items-center justify-center ${
+                        index === activeFeature 
+                          ? "bg-gradient-to-r from-purple-600 to-blue-500 w-8 h-3 shadow-md" 
+                          : "bg-gray-300 dark:bg-gray-600 w-3 h-3 hover:bg-gray-400 dark:hover:bg-gray-500"
+                      }`}
+                      aria-label={`Feature ${index + 1}`}
+                    >
+                      {index === activeFeature && <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {/* Right side - Registration card */}
+            <div className="w-full max-w-lg relative pb-12 md:pb-0">
+              <motion.div key={isLogin ? "login" : "signup"} className={styles.cardContainer} variants={containerVariants} initial='hidden' animate='visible' exit='exit'>
               {/* Header */}
               <motion.div className={styles.headerGradient} variants={itemVariants}>
                 <NavLink to='/' className='inline-flex items-center gap-1 text-sm mb-4'>
@@ -374,9 +490,11 @@ const Register = ({ initialMode = "login" }) => {
                 </motion.div>
               </form>
             </motion.div>
-          </AnimatePresence>
-        </div>
-      </motion.div>
+            </div>
+          
+          </motion.div>
+      </AnimatePresence>
+    </main>
     </>
   );
 };
