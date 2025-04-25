@@ -8,12 +8,14 @@ import { toast } from "react-toastify";
 const UserContextProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchUserProfile = async () => {
     const token = window.localStorage.getItem("token");
     if (!token) {
-      console.error("No token found in local storage, please login to get started");
+      console.log("No token found in local storage, please login to get started");
       setIsLoggedIn(false);
+      setIsLoading(false);
       return;
     }
 
@@ -27,8 +29,14 @@ const UserContextProvider = ({ children }) => {
       setIsLoggedIn(true);
       setUser(response.data);
     } catch (error) {
-      setIsLoggedIn(false);
       console.log("Error fetching profile:", error);
+      // If the token is invalid, remove it
+      if (error.response && (error.response.status === 401 || error.response.status === 500)) {
+        window.localStorage.removeItem("token");
+        setIsLoggedIn(false);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -36,17 +44,37 @@ const UserContextProvider = ({ children }) => {
     fetchUserProfile();
   }, []);
 
+  // Standard login
   const login = async (userCredentials) => {
     try {
       const response = await axios.post("http://localhost:8000/auth/login", userCredentials);
-      console.log("Profile Fetched", response.data);
+      console.log("Login successful:", response.data);
       window.localStorage.setItem("token", response.data?.token);
-      toast.success(response.data?.msg);
+      toast.success(response.data?.msg || "Login successful");
       setIsLoggedIn(true);
-      setUser(response.data);
+      setUser(response.data); // Directly set the user from response data
+      return true;
     } catch (error) {
-      console.error(error);
-      // toast.error(error.response.data?.errMsg);
+      console.error("Login error:", error);
+      toast.error(error.response?.data?.errMsg || "Login failed. Please try again.");
+      return false;
+    }
+  };
+
+  // Handle OAuth success (called from OAuthSuccess component)
+  const handleOAuthSuccess = async (token, userData) => {
+    try {
+      if(token && userData) {
+        window.localStorage.setItem("token", token);
+        setIsLoggedIn(true);
+        setUser(userData); // Set user data directly
+        toast.success("Google Authentication Successful");
+        return true;
+      }
+    } catch (error) {
+      console.error("Error handling OAuth success:", error);
+      toast.error("Failed to process authentication. Please try again.");
+      return false;
     }
   };
 
@@ -66,6 +94,7 @@ const UserContextProvider = ({ children }) => {
           },
         }
       );
+      toast.success("Password updated successfully");
       return response.data;
     } catch (error) {
       console.error("Password update error:", error);
@@ -80,15 +109,15 @@ const UserContextProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
+  const logout = () => {
     try {
       window.localStorage.removeItem("token");
       setIsLoggedIn(false);
       setUser(null);
       toast.success("Logged out successfully");
     } catch (error) {
-      console.error(error);
-      toast.error("Error Logging out");
+      console.error("Logout error:", error);
+      toast.error("Error logging out");
     }
   };
 
@@ -157,13 +186,15 @@ const UserContextProvider = ({ children }) => {
   };
 
   const context = {
-    isLoggedIn: isLoggedIn,
-    user: user,
-    login: login,
-    logout: logout,
-    updatePassword: updatePassword,
-    deletedAccount: deletedAccount,
-    downloadUserData: downloadUserData,
+    isLoggedIn,
+    user,
+    isLoading,
+    login,
+    logout,
+    updatePassword,
+    deletedAccount,
+    downloadUserData,
+    handleOAuthSuccess
   };
 
   return <UserContext.Provider value={context}>{children}</UserContext.Provider>;

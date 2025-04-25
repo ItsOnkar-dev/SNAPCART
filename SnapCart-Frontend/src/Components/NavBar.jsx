@@ -17,6 +17,8 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const profileIconRef = useRef(null);
   const profileModalRef = useRef(null);
   const hoverTimeoutRef = useRef(null);
+  const [displayName, setDisplayName] = useState('User');
+  const [userAvatar, setUserAvatar] = useState('');
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,7 +28,18 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   // Check if we're on the authentication page
   const isAuthPage = location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup";
 
-  const userData = user && user.user && user.user._doc ? user.user._doc : {};
+  // Update displayName whenever user data changes
+  useEffect(() => {
+    if (user && user.user) {
+      const userData = user.user._doc || user.user;
+      // Prioritize the actual name field, fall back to username
+      setDisplayName(userData.name || userData.username || "User");
+      setUserAvatar(userData.avatar || '');
+    } else {
+      setDisplayName("User");
+      setUserAvatar('');
+    }
+  }, [user]);
 
   const navItems = [
     { id: 1, title: "Home" },
@@ -80,7 +93,6 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       logoName: "cursor-pointer font-extrabold text-2xl tracking-wide uppercase",
       listStyles: `transition-all hover:duration-300 ease-in-out hover:skew-x-3 hover:skew-y-1 cursor-pointer tracking-wide`,
       activeStyles: "brightness-125 font-semibold tracking-wide underline underline-offset-8 decoration-2 transition-all duration-300",
-
     }),
     [isSidebarOpen]
   );
@@ -217,9 +229,15 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                   className={`${location.pathname === "/profile"
                     ? "hidden md:flex gap-2 items-center text-cyan-500 dark:text-cyan-300 font-bold cursor-pointer"
                     : "hidden md:flex items-center gap-2 cursor-pointer text-black/80 dark:text-white/80"
-                    }`}> 
-                  <AiOutlineUser />
-                  <h3 className='text-sm'>{userData.name || userData.username || "User"}</h3>
+                    }`}>
+                  {userAvatar ? (
+                    <img src={userAvatar} alt="User" className="w-8 object-cover rounded-full"/>
+                  ) : (
+                    <div className="w-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold">
+                      {displayName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <h3 className='text-sm'>{displayName}</h3>
                   <span className={`transition-transform duration-500 ease-in-out ${isProfileModalOpen ? "rotate-180 opacity-100" : "opacity-80"}`}>
                     <ChevronDown size={18} />
                   </span>

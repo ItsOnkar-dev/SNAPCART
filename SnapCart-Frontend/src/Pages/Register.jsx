@@ -97,6 +97,11 @@ const Register = ({ initialMode = "login" }) => {
 
   const [isLogin, setIsLogin] = useState(location.pathname === "/login" || initialMode === "login");
 
+  const handleGoogleSignIn = () => {
+    // Redirect to backend Google OAuth endpoint
+    window.location.href = 'http://localhost:8000/auth/google';
+  };
+
   const userContext = useContext(UserContext);
 
   useEffect(() => {
@@ -469,11 +474,12 @@ const Register = ({ initialMode = "login" }) => {
                     <motion.button
                       type='button'
                       className={styles.socialButton}
+                      onClick={handleGoogleSignIn}
                       whileHover={{ y: -2, boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)" }}
                       whileTap={{ y: 0, boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)" }}>
                       <div className={styles.socialButtonInner}>
                         <FaGoogle />
-                        Google
+                        Sign In With Google
                       </div>
                     </motion.button>
                     <motion.button
@@ -483,7 +489,7 @@ const Register = ({ initialMode = "login" }) => {
                       whileTap={{ y: 0, boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)" }}>
                       <div className={styles.socialButtonInner}>
                         <FaApple />
-                        Apple
+                        Sign In With Apple
                       </div>
                     </motion.button>
                   </div>
@@ -491,7 +497,6 @@ const Register = ({ initialMode = "login" }) => {
               </form>
             </motion.div>
             </div>
-          
           </motion.div>
       </AnimatePresence>
     </main>

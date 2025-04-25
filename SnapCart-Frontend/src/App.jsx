@@ -9,6 +9,7 @@ import Cart from "./Pages/Cart";
 import Wishlist from "./Pages/Wishlist";
 import Profile from "./Pages/Profile";
 import Registration from "./Components/Registration";
+import OAuthSuccess from "./Components/OAuthSuccess";
 import Register from "./Pages/Register";
 import { ToastContainer, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -51,6 +52,7 @@ const App = () => {
           <Route path='/' element={<Registration />} />
           <Route path='/login' element={<Register initialMode='login' />} />
           <Route path='/signup' element={<Register initialMode='signup' />} />
+          <Route path='/oauth-success' element={<OAuthSuccess />} />
           <Route path='/home' element={<Home />} />
           <Route path='/products' element={<Products />} />
           <Route path='/about' element={<About />} />
@@ -60,7 +62,7 @@ const App = () => {
           <Route path='/profile' element={<Profile />} />
         </Routes>
         <ToastContainer
-          position='top-right'
+          position='top-center'
           autoClose={3000}
           hideProgressBar={false}
           newestOnTop={true}
