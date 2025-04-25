@@ -1,12 +1,13 @@
 /* eslint-disable react/prop-types */
 import { useContext, useState, useEffect } from "react";
 import UserContext from "../context/User/UserContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { User, Package, Heart, CreditCard, Settings, LogOut, X } from "lucide-react";
 
 const UserProfile = ({ isOpen, onClose }) => {
   const { isLoggedIn, logout, user } = useContext(UserContext);
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -18,6 +19,13 @@ const UserProfile = ({ isOpen, onClose }) => {
     { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
   ];
 
+  const [activeTab, setActiveTab] = useState(location.pathname);
+
+   // Update active tab when location changes
+   useEffect(() => {
+    setActiveTab(location.pathname);
+  }, [location.pathname]);
+ 
   // Control visibility for smooth transitions
   useEffect(() => {
     if (isOpen) {
@@ -54,6 +62,7 @@ const UserProfile = ({ isOpen, onClose }) => {
   };
 
   const handleTabClick = (path) => {
+    setActiveTab(path);
     setIsVisible(false);
     setTimeout(() => {
       onClose();
@@ -151,7 +160,9 @@ const UserProfile = ({ isOpen, onClose }) => {
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.path)}
-              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md transition-all duration-200 transform hover:translate-x-1"
+              className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md transition-all duration-300 transform hover:translate-x-1 ${
+                activeTab === tab.path ? "bg-gray-100 dark:bg-gray-700" : ""
+              }`}
               style={{ transitionDelay: `${index * 50}ms` }}
             >
               <tab.icon size={18} />

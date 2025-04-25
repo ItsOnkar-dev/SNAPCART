@@ -79,7 +79,8 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
         }`,
       logoName: "cursor-pointer font-extrabold text-2xl tracking-wide uppercase",
       listStyles: `transition-all hover:duration-300 ease-in-out hover:skew-x-3 hover:skew-y-1 cursor-pointer tracking-wide`,
-      activeStyles: "text-gradient1 dark:text-gradient dark:brightness-125 font-semibold tracking-wide underline underline-offset-8",
+      activeStyles: "brightness-125 font-semibold tracking-wide underline underline-offset-8 decoration-2 transition-all duration-300",
+
     }),
     [isSidebarOpen]
   );
@@ -204,8 +205,8 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 </NavLink>
               </IconWithTooltip>
 
-              <div onClick={toggleDarkMode} className='hidden sm:block cursor-pointer transition-transform duration-500 ease-in-out'>
-                <span className={`transition-transform duration-700 ease-in-out ${isDark ? "rotate-90" : "rotate-0"}`}>
+              <div onClick={toggleDarkMode} className='hidden sm:block cursor-pointer transition-transform duration-500 ease-in-out bg-gray-200 dark:bg-slate-700 rounded-full p-1.5'>
+                <span className={`rounded-full bg-gray-300 transition-transform duration-700 ease-in-out ${isDark ? "rotate-90" : "rotate-0"}`}>
                   {isDark ? <MdLightMode className='text-xl text-cyan-300 hover:text-cyan-200' /> : <MdNightlight className='text-xl text-black/60 hover:text-black ' />}
                 </span>
               </div>
@@ -214,7 +215,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 <div
                   ref={profileIconRef}
                   className={`${location.pathname === "/profile"
-                    ? "hidden md:flex gap-2 items-center text-cyan-500 dark:text-cyan-400 font-bold"
+                    ? "hidden md:flex gap-2 items-center text-cyan-500 dark:text-cyan-300 font-bold cursor-pointer"
                     : "hidden md:flex items-center gap-2 cursor-pointer text-black/80 dark:text-white/80"
                     }`}> 
                   <AiOutlineUser />
