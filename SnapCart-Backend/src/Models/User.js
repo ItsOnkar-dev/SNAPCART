@@ -7,17 +7,38 @@ const userSchema = new mongoose.Schema({
     unique: true,
     index: true,
   },
-  password: {
+  name: {
     type: String,
-    required: true,
+    // Store the full display name here
   },
   email: {
     type: String,
-    required: true,
+    required: function() {
+      // Only required if password is set (local account)
+      return this.password ? true : false;
+    }
+  },
+  password: {
+    type: String,
+    required: function() {
+      // Only required if no googleId (local account)
+      return this.googleId ? false : true;
+    }
+  },
+  googleId: {
+    type: String
   },
   role: {
     type: String,
     enum: ['Seller', 'Buyer', 'Admin'],
+    default: 'Buyer',
+  }, 
+  avatar: {
+    type: String
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
   },
 }, { timestamps: true, versionKey: false });
 

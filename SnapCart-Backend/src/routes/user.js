@@ -5,6 +5,7 @@ import rateLimit from "express-rate-limit";
 import UserRepo from "../Repositories/UserRepo.js";
 import catchAsync from "../Core/catchAsync.js";
 import { AuthenticationError, BadRequestError } from "../Core/ApiError.js";
+import passport from "../Core/passport-setup.js"
 import jwt from "jsonwebtoken";
 import isLoggedIn from "../Middlewares/Auth.js";
 import dotenv from "dotenv";
@@ -18,7 +19,7 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "JWTKJDGFSDFHDGSVFSDUFSDBFS
 // Rate limiting middleware
 const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 5, // 5 login attempts per window per IP
+  max: 15, // 5 login attempts per window per IP
   message: "Too many login attempts, please try again later",
 });
 
@@ -107,6 +108,37 @@ router.post(
       user: userWithoutPassword,
       token: jwtToken,
     });
+  })
+);
+
+// Google OAuth Routes
+// Initiate Google OAuth login
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+// Handle Google callback
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { session: false, failureRedirect: "/login" }),
+  catchAsync(async (req, res) => {
+    try {
+      // Generate JWT token for OAuth user
+      const jwtToken = jwt.sign({ userId: req.user._id }, JWT_SECRET_KEY, { expiresIn: "24h" });
+
+      // Get user data without sensitive info
+      const { password, ...userWithoutPassword } = req.user;
+      
+      // Create a URL-safe JSON string of user data
+      const userData = encodeURIComponent(JSON.stringify(userWithoutPassword));
+      
+      // Redirect to frontend success page with token and user data
+      res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/oauth-success?token=${jwtToken}&userData=${userData}`);
+    } catch (error) {
+      console.error("OAuth callback error:", error);
+      res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=authentication_failed`);
+    }
   })
 );
 
