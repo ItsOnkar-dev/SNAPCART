@@ -20,7 +20,7 @@ const UserContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.get("http://localhost:8000/auth/profile", {
+      const response = await axios.get("http://localhost:8000/user/profile", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -86,7 +86,7 @@ const UserContextProvider = ({ children }) => {
 
     try {
       const response = await axios.put(
-        "http://localhost:8000/auth/update-password",
+        "http://localhost:8000/user/update-password",
         { currentPassword, newPassword },
         {
           headers: {
@@ -133,7 +133,7 @@ const UserContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.delete("http://localhost:8000/auth/delete-account", {
+      const response = await axios.delete("http://localhost:8000/user/delete-account", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -159,7 +159,7 @@ const UserContextProvider = ({ children }) => {
 
     try {
       // Set up for file download
-      const response = await axios.get("http://localhost:8000/auth/download-data", {
+      const response = await axios.get("http://localhost:8000/user/download-data", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

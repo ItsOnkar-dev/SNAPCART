@@ -12,13 +12,13 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, navItems }) => {
       {/* Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-80 dark:bg-opacity-40 z-40 transition-opacity xl:hidden" 
+          className="fixed inset-0 bg-black bg-opacity-60 z-40 transition-opacity lg:hidden" 
           onClick={toggleSidebar} 
         />
       )}
       
       {/* Sidebar */}
-      <div className={`fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-700 ease-in-out xl:hidden dark:bg-[rgb(15,23,42)] flex flex-col ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <div className={`fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-500 ease-in-out xl:hidden dark:bg-[rgb(15,23,42)] flex flex-col ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer">

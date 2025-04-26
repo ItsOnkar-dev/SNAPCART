@@ -102,8 +102,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
   const styles = useMemo(
     () => ({
-      navbar: `fixed w-full p-4 md:px-10 z-30 transition-colors duration-300 bg-[rgb(255,255,255)] dark:bg-[rgb(10,18,49)] border-b border-gray-200 dark:border-slate-800 ${isSidebarOpen ? "backdrop-blur-xl inset-0" : "backdrop-blur-xl"
-        }`,
+      navbar: `fixed top-0 w-full p-4 md:px-10 z-30 transition-colors duration-300 bg-[rgb(255,255,255)] dark:bg-[rgb(10,18,49)] border-b border-gray-200 dark:border-slate-800`,
       authNavbar:
         "fixed w-full p-4 md:px-10 xl:px-32 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 backdrop-blur-xl",
       itemsList: "flex items-center gap-3 md:gap-1 cursor-pointer text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white",
@@ -202,7 +201,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
           <div className='hidden lg:block'>
             <ul className='flex items-center gap-8'>
               {navItems.slice(0, 6).map((item) => (
-                <li key={item.id} className={`${styles.listStyles} ${(item.id === 4 || item.id === 5) ? "block md:hidden" : ""}`}>
+                <li key={item.id} className={`${styles.listStyles} ${(item.id === 5 || item.id === 6) ? "block md:hidden" : ""}`}>
                   <NavLink
                     to={item.path}
                     className={({ isActive }) => `${isActive ? styles.activeStyles : styles.itemsList}`}>
