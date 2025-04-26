@@ -1,6 +1,6 @@
 import app from './app.js'
 import AppDataSource from './database/data-source.js'
-import Logger from './Core/Logger.js'
+import Logger from './Config/Logger.js'
 import dotenv from 'dotenv';
 
 dotenv.config();

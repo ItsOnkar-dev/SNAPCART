@@ -1,11 +1,11 @@
 import express from 'express'
 import productRoutes from './Routes/products.js'
 import userRoutes from './Routes/user.js'
+import authRoutes from './Routes/auth.js'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import session from 'express-session';
-import passport from './Core/passport-setup.js';
-import jwt from 'jsonwebtoken'; 
+import passport from './Config/passport-setup.js';
 
 const app = express();
 
@@ -14,8 +14,6 @@ dotenv.config(); // Load environment variables from .env file
 app.use(cors()) // Enable CORS for all requests
 app.use(express.json()); // Parse incoming JSON requests
 app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
-app.use('/api', productRoutes) // Add product routes
-app.use('/auth', userRoutes)  // Add user routes
 
 // Session setup
 app.use(session({
@@ -31,6 +29,10 @@ app.use(session({
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use('/api', productRoutes) // Add product routes
+app.use('/user', userRoutes)  // Add user routes
+app.use('/auth', authRoutes) // Add auth routes
 
 // Global Express Error Handler
 app.use((err, req, res, next) => {

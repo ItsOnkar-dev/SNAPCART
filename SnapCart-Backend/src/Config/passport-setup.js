@@ -33,10 +33,13 @@ passport.use(
       try {
         // First, check if user exists by googleId
         let user = await User.findOne({ googleId: profile.id });
-        
+        console.log("Existing user by googleId:", user);
+
         if (!user) {
           // If not found by googleId, check by email
+          console.log("Creating new user from Google profile:", profile.id);
           const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
+          console.log("Email from Google profile:", email);
           
           if (email) {
             user = await User.findOne({ email });
@@ -72,6 +75,7 @@ passport.use(
             });
             
             user = await newUser.save();
+            console.log("New user successfully saved:", user);
           }
         } else {
           // Update the name if the user already exists

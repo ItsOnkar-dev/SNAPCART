@@ -1,10 +1,15 @@
 import mongoose from 'mongoose'
-import Logger from '../Core/Logger.js'
+import Logger from '../Config/Logger.js'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+const DB_URL = process.env.DB_URL
 
 class AppDataSource{
   static async connect(){
     try { 
-      await mongoose.connect('mongodb://127.0.0.1:27017/snapcart_db') 
+      await mongoose.connect(DB_URL || 'mongodb://localhost:27017/SnapCart_DB') 
       Logger.info("Successfully connected to database")
     } catch (error) {
       console.log(error, "error while connected to database")
