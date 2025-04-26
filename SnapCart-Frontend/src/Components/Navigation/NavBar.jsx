@@ -1,15 +1,15 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useContext, useMemo, useCallback, useRef } from "react";
-import Logo from "../assets/Logo.png";
-import SearchBar from "./SearchBar";
-import { MdFavoriteBorder, MdOutlineShoppingBasket, MdMenu, MdClose, MdNightlight, MdLightMode } from "react-icons/md";
-import { ChevronDown, HelpCircle, Globe, Twitter, Instagram, Facebook, Github, LogOut } from "lucide-react";
-import { AiOutlineUser } from "react-icons/ai";
-import IconWithTooltip from "./IconWithTooltip";
+import Logo from "../../assets/logo.png";
+import SearchBar from "../SearchBar";
+import { MdOutlineShoppingBasket, MdMenu } from "react-icons/md";
+import { ChevronDown, HelpCircle, Globe, Twitter, Instagram, Facebook, Github, LogOut, House, UserRoundPen, Info, LayoutList, Heart, UserRound, Sun, Moon } from "lucide-react";
+import IconWithTooltip from "../IconWithTooltip";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import CartContext from "../context/Cart/CartContext";
-import UserContext from "../context/User/UserContext";
-import UserProfile from "../Components/UserProfile";
+import CartContext from "../../context/Cart/CartContext";
+import UserContext from "../../context/User/UserContext";
+import UserProfile from "../../Components/UserProfile";
+import Sidebar from "./Sidebar";
 
 const NavBar = ({ isDark, toggleDarkMode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -32,21 +32,55 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   useEffect(() => {
     if (user && user.user) {
       const userData = user.user._doc || user.user;
-      // Prioritize the actual name field, fall back to username
       setDisplayName(userData.name || userData.username || "User");
-      setUserAvatar(userData.avatar || '');
+      // Check all possible locations for avatar image
+      const avatarImage = userData.avatar || (userData.googleId && userData.googleId.picture) || userData.picture || userData.profilePicture || '';
+      setUserAvatar(avatarImage);
     } else {
       setDisplayName("User");
       setUserAvatar('');
     }
   }, [user]);
 
-  const navItems = [
-    { id: 1, title: "Home" },
-    { id: 2, title: "Products" },
-    { id: 3, title: "About" },
-    { id: 4, title: "Contact" },
-  ];
+  const handleThemeToggle = useCallback((e) => {
+    if (e) e.preventDefault(); // Prevent default navigation
+    toggleDarkMode();
+    if (isSidebarOpen) {
+      toggleSidebar();
+    }
+  }, [toggleDarkMode, isSidebarOpen]);
+
+  const handleLogOut = useCallback(() => {
+    logout();
+    navigate("/");
+    if (isSidebarOpen) {
+      toggleSidebar();
+    }
+  }, [logout, navigate, isSidebarOpen]);
+
+  const toggleSidebar = useCallback(() => {
+    setIsSidebarOpen((prev) => {
+      document.body.style.overflow = !prev ? "hidden" : "auto";
+      return !prev;
+    });
+  }, []);
+
+  const navItems = useMemo(() => [
+    { id: 1, icon: <House size={20} />, title: "Home", path: "/home" },
+    { id: 2, icon: <LayoutList size={20} />, title: "Products", path: "/products" },
+    { id: 3, icon: <Info size={20} />, title: "About", path: "/about" },
+    { id: 4, icon: <UserRoundPen size={20} />, title: "Contact", path: "/contact" },
+    { id: 5, icon: <Heart size={20} />, title: "Favorites", path: "/favorites" },
+    { id: 6, icon: <UserRound size={20} />, title: "Profile", path: "/profile" },
+    { 
+      id: 7, 
+      icon: isDark ? <Sun size={20} className="text-cyan-300" /> : <Moon size={20} />, 
+      title: isDark ? "Light Mode" : "Dark Mode",  
+      onClick: handleThemeToggle,
+      className: "md:hidden"
+    },
+    { id: 8, icon: <LogOut size={20} />, title: "Log Out", onClick: handleLogOut, className: "md:hidden" },
+  ], [isDark, handleThemeToggle, handleLogOut]);
 
   const handleProfileHover = () => {
     clearTimeout(hoverTimeoutRef.current);
@@ -66,33 +100,16 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
     };
   }, []);
 
-  const toggleSidebar = useCallback(() => {
-    setIsSidebarOpen((prev) => {
-      document.body.style.overflow = !prev ? "hidden" : "auto";
-      return !prev;
-    });
-  }, []);
-
-  const toggleTheme = () => {
-    toggleDarkMode(), toggleSidebar();
-  };
-
-  const handleLogOut = () => {
-    logout();
-    navigate("/");
-  };
-
   const styles = useMemo(
     () => ({
-      navbar: `fixed w-full p-4 md:px-10 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 ${isSidebarOpen ? "backdrop-blur-xl inset-0" : "backdrop-blur-xl"
+      navbar: `fixed w-full p-4 md:px-10 z-30 transition-colors duration-300 bg-[rgb(255,255,255)] dark:bg-[rgb(10,18,49)] border-b border-gray-200 dark:border-slate-800 ${isSidebarOpen ? "backdrop-blur-xl inset-0" : "backdrop-blur-xl"
         }`,
       authNavbar:
         "fixed w-full p-4 md:px-10 xl:px-32 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 backdrop-blur-xl",
-      sidebar: `fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-700 ease-in-out xl:hidden dark:bg-[rgb(15,23,42)] ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`,
+      itemsList: "flex items-center gap-3 md:gap-1 cursor-pointer text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white",
       logoName: "cursor-pointer font-extrabold text-2xl tracking-wide uppercase",
-      listStyles: `transition-all hover:duration-300 ease-in-out hover:skew-x-3 hover:skew-y-1 cursor-pointer tracking-wide`,
-      activeStyles: "brightness-125 font-semibold tracking-wide underline underline-offset-8 decoration-2 transition-all duration-300",
+      listStyles: `flex items-center gap-3 transition-all hover:duration-300 ease-in-out hover:skew-x-3 hover:skew-y-1 cursor-pointer tracking-wide`,
+      activeStyles: "flex items-center gap-3 md:gap-1 brightness-125 font-semibold tracking-wide duration-300",
     }),
     [isSidebarOpen]
   );
@@ -152,8 +169,8 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             </div>
 
             <IconWithTooltip tooltip={isDark ? "Light Mode" : "Dark Mode"}>
-              <div className={styles.iconButton} onClick={toggleDarkMode}>
-                {isDark ? <MdLightMode className='w-5 h-5 text-yellow-400' /> : <MdNightlight className='w-5 h-5 text-gray-600' />}
+              <div className={styles.iconButton} onClick={handleThemeToggle}>
+                {isDark ? <Sun size={20} className='w-5 h-5 text-yellow-400' /> : <Moon size={20} className=' text-gray-600' />}
               </div>
             </IconWithTooltip>
           </div>
@@ -183,12 +200,13 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
           {/* Desktop Navigation */}
           <div className='hidden lg:block'>
-            <ul className='flex items-center gap-10'>
-              {navItems.map((item) => (
-                <li key={item.id} className={styles.listStyles}>
+            <ul className='flex items-center gap-8'>
+              {navItems.slice(0, 6).map((item) => (
+                <li key={item.id} className={`${styles.listStyles} ${(item.id === 4 || item.id === 5) ? "block md:hidden" : ""}`}>
                   <NavLink
-                    to={item.title === "Home" ? "/home" : `/${item.title.toLowerCase()}`}
-                    className={({ isActive }) => `${isActive ? styles.activeStyles : "text-slate-600 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white"}`}>
+                    to={item.path}
+                    className={({ isActive }) => `${isActive ? styles.activeStyles : styles.itemsList}`}>
+                    {item.icon}
                     {item.title}
                   </NavLink>
                 </li>
@@ -205,7 +223,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             <div className='flex items-center gap-4 md:gap-6 text-xl lg:text-2xl'>
               <IconWithTooltip tooltip='Favorites'>
                 <NavLink to='/wishlist' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "hidden md:block text-black/60 dark:text-white/80")}>
-                  <MdFavoriteBorder />
+                <Heart size={20} />
                 </NavLink>
               </IconWithTooltip>
               <IconWithTooltip tooltip='Cart'>
@@ -217,9 +235,9 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 </NavLink>
               </IconWithTooltip>
 
-              <div onClick={toggleDarkMode} className='hidden sm:block cursor-pointer transition-transform duration-500 ease-in-out bg-gray-200 dark:bg-slate-700 rounded-full p-1.5'>
+              <div onClick={handleThemeToggle} className='hidden sm:block cursor-pointer transition-transform duration-500 ease-in-out bg-gray-200 dark:bg-slate-700 rounded-full p-1.5'>
                 <span className={`rounded-full bg-gray-300 transition-transform duration-700 ease-in-out ${isDark ? "rotate-90" : "rotate-0"}`}>
-                  {isDark ? <MdLightMode className='text-xl text-cyan-300 hover:text-cyan-200' /> : <MdNightlight className='text-xl text-black/60 hover:text-black ' />}
+                  {isDark ? <Sun size={20} className='text-cyan-300 hover:text-cyan-400' /> : <Moon size={20} className=' text-black/60 hover:text-black ' />}
                 </span>
               </div>
 
@@ -248,85 +266,15 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             </div>
           </div>
         </div>
-
-        {isSidebarOpen && <div className='fixed inset-0 bg-black bg-opacity-80 dark:bg-opacity-40 z-40 transition-opacity xl:hidden' onClick={toggleSidebar} />}
       </nav>
 
-      {/* Mobile Sidebar */}
-      <div className={styles.sidebar}>
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-2 cursor-pointer'>
-            <img src={Logo} alt='Logo' className='w-6' />
-            <div
-              className={`${styles.logoName}`}
-              onClick={() => {
-                navigate("/home");
-                toggleSidebar();
-              }}>
-              <span className='text-gradient1 dark:text-gradient'>Snap</span>
-              <span className='text-gray-600 hover:text-black dark:text-white'>Cart</span>
-            </div>
-          </div>
-          <button onClick={toggleSidebar}>
-            <MdClose className='text-2xl hover:scale-105' />
-          </button>
-        </div>
-        <ul className='space-y-7 py-10'>
-          {navItems.map((item) => (
-            <li key={item.id} className={styles.listStyles} onClick={toggleSidebar}>
-              <NavLink
-                to={item.title === "Home" ? "/home" : `/${item.title.toLowerCase()}`}
-                className={({ isActive }) => `${isActive ? styles.activeStyles : "text-slate-600 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white"}`}>
-                {item.title}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-
-        <div className='block md:hidden py-8 md:py-10 border-t border-gray-200 dark:border-slate-700'>
-          <div className='space-y-7'>
-            <div
-              className='flex items-center gap-3 cursor-pointer text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-              onClick={() => {
-                navigate("/wishlist");
-                toggleSidebar();
-              }}>
-              <MdFavoriteBorder className='text-xl' />
-              <span>Favorites</span>
-            </div>
-            <div
-              className='flex items-center gap-3 cursor-pointer text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-              onClick={() => {
-                navigate("/profile");
-                toggleSidebar();
-              }}>
-              <AiOutlineUser className='text-xl' />
-              <span>Profile</span>
-            </div>
-            <div className='flex items-center gap-3 cursor-pointer text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white' onClick={toggleTheme}>
-              {isDark ? (
-                <>
-                  <MdLightMode className='text-xl text-cyan-300' />
-                  <span>Light Mode</span>
-                </>
-              ) : (
-                <>
-                  <MdNightlight className='text-xl' />
-                  <span>Dark Mode</span>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className='py-8 md:py-10 border-t border-gray-200 dark:border-slate-700'>
-          <button
-            onClick={handleLogOut}
-            className='w-full flex items-center gap-3 text-sm px-4 py-3 text-white bg-red-500 hover:bg-red-700 rounded-md transition-all duration-300 transform hover:translate-y-1'>
-            <LogOut size={18} />
-            <span>Log Out</span>
-          </button>
-        </div>
-      </div>
+      {/* Sidebar Component */}
+      <Sidebar 
+        isSidebarOpen={isSidebarOpen}
+        toggleSidebar={toggleSidebar}
+        navItems={navItems}
+        isDark={isDark}
+      />
     </>
   );
 };

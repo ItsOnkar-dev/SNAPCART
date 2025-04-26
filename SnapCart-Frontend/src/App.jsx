@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Route, Routes } from "react-router-dom";
-import NavBar from "./Components/NavBar";
+import NavBar from "./Components/Navigation/NavBar";
 import Home from "./Pages/Home";
 import Products from "./Pages/Products";
 import About from "./Pages/About";
