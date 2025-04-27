@@ -179,10 +179,10 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
         
 
           {/* Action Icons */}
-          <div className='flex items-center gap-4 md:gap-6 text-xl lg:text-2xl'>
+          <div className='flex items-center gap-4 sm:gap-6 text-xl lg:text-2xl'>
             {/* Search Bar */}
             <SearchBar />
-            
+
             {/* Become a Seller */}
             <div className='hidden sm:block'>
               <NavLink
@@ -225,7 +225,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                     }}
                   />
                 ) : (
-                  <div className='w-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold'>{displayName.charAt(0).toUpperCase() || "?"}</div>
+                  <div className='w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold'>{displayName.charAt(0).toUpperCase() || "?"}</div>
                 )}
                 <h3 className='text-sm'>{displayName}</h3>
                 <span className={`transition-transform duration-500 ease-in-out ${isProfileModalOpen ? "rotate-180 opacity-100" : "opacity-80"}`}>
