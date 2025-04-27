@@ -11,25 +11,34 @@ const UserProfile = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
 
+  const handleLogOut = () => {
+    setIsVisible(false);
+    setTimeout(() => {
+      logout();
+      onClose();
+      navigate("/");
+    }, 300); 
+  };
+
   const tabs = [
-    { id: "profile", label: "My Profile", icon: User, path: "/profile" },
-    { id: "orders", label: "Orders", icon: Package, path: "/orders" },
-    { id: "wishlist", label: "Wishlist", icon: Heart, path: "/wishlist" },
-    { id: "payment", label: "Payment", icon: CreditCard, path: "/payment" },
-    { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
+    { id: 1, label: "My Profile", icon: User, path: "/profile" },
+    { id: 2, label: "Orders", icon: Package, path: "/orders" },
+    { id: 3, label: "Wishlist", icon: Heart, path: "/wishlist" },
+    { id: 4, label: "Payment", icon: CreditCard, path: "/payment" },
+    { id: 5, label: "Settings", icon: Settings, path: "/settings" },
+    { id: 6, label: "Log Out", icon: LogOut, onClick: handleLogOut, path: null },
   ];
 
   const [activeTab, setActiveTab] = useState(location.pathname);
 
-   // Update active tab when location changes
-   useEffect(() => {
+  // Update active tab when location changes
+  useEffect(() => {
     setActiveTab(location.pathname);
   }, [location.pathname]);
  
   // Control visibility for smooth transitions
   useEffect(() => {
     if (isOpen) {
-      // Small delay to ensure CSS transition works properly
       setTimeout(() => setIsVisible(true), 10);
     } else {
       setIsVisible(false);
@@ -46,27 +55,26 @@ const UserProfile = ({ isOpen, onClose }) => {
   }, [user, isLoggedIn]);
 
   const handleLogin = () => {
-    handleClose()
+    handleClose();
     setTimeout(() => {
       navigate("/login");
     }, 300);
   }
 
-  const handleLogOut = () => {
+  const handleTabClick = (tab) => {
+    setActiveTab(tab.path);
+    
+    // If this is the logout tab, call its onClick handler
+    if (tab.onClick) {
+      tab.onClick();
+      return;
+    }
+    
+    // Otherwise navigate to the path
     setIsVisible(false);
     setTimeout(() => {
-      logout();
       onClose();
-      navigate("/");
-    }, 300); // Match transition duration
-  };
-
-  const handleTabClick = (path) => {
-    setActiveTab(path);
-    setIsVisible(false);
-    setTimeout(() => {
-      onClose();
-      navigate(path);
+      navigate(tab.path);
     }, 300); // Match transition duration
   };
 
@@ -89,11 +97,10 @@ const UserProfile = ({ isOpen, onClose }) => {
     );
   }
 
-  // Animation classes based on visibility state
   const modalClasses = `
-    fixed z-50 right-0
+    fixed z-50 right-0 
     transition-all duration-500 ease-in-out
-    ${isVisible ? 'opacity-100 transform translate-y-6' : 'opacity-0 transform -translate-y-6 pointer-events-none'}
+    ${isVisible ? 'opacity-100 transform translate-y-4' : 'opacity-0 transform -translate-y-6 pointer-events-none'}
   `;
 
   // If user is not logged in, show login prompt
@@ -121,7 +128,7 @@ const UserProfile = ({ isOpen, onClose }) => {
 
   return (
     <div className={modalClasses}>
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-md w-full p-10 transform transition-transform duration-300 ease-in-out">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-md w-full px-6 py-10 transform transition-transform duration-300 ease-in-out">
         {/* Modal Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-800 dark:text-white">Your Profile</h2>
@@ -137,7 +144,17 @@ const UserProfile = ({ isOpen, onClose }) => {
         <div className="flex items-center mb-6">
           <div className="w-16 h-16 bg-gray-300 rounded-full overflow-hidden mr-4">
             {userData.avatar ? (
-              <img src={userData.avatar} alt="Profile" className="w-full h-full object-cover" />
+              <img 
+                src={userData.avatar} 
+                alt="Profile" 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  console.log("Avatar failed to load:", userData.avatar);
+                  e.target.onerror = null;
+                  e.target.style.display = 'none';
+                  e.target.parentNode.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold">${userData.username?.charAt(0).toUpperCase() || "?"}</div>`;
+                }}
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold">
                 {userData.username?.charAt(0).toUpperCase() || "?"}
@@ -155,33 +172,18 @@ const UserProfile = ({ isOpen, onClose }) => {
         <div className="border-b-2 border-gray-200 dark:border-gray-700 "></div>
 
         {/* Navigation Tabs */}
-        <div className="space-y-2 py-4">
-          {tabs.map((tab, index) => (
+        <div className="space-y-2 pt-4">
+          {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => handleTabClick(tab.path)}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md transition-all duration-300 transform hover:translate-x-1 ${
-                activeTab === tab.path ? "bg-gray-100 dark:bg-gray-700" : ""
-              }`}
-              style={{ transitionDelay: `${index * 50}ms` }}
-            >
+              onClick={() => handleTabClick(tab)}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md transition-all duration-500 transform hover:translate-x-1 ${
+                tab.path && activeTab === tab.path ? "bg-gray-100 dark:bg-gray-700" : ""
+              }`}>
               <tab.icon size={18} />
               <span>{tab.label}</span>
             </button>
           ))}
-        </div>
-
-        <div className="border-t-2 border-gray-200 dark:border-gray-700 "></div>
-
-        {/* Logout Button */}
-        <div className="pt-6">
-          <button
-            onClick={handleLogOut}
-            className="w-full flex items-center gap-3 text-sm px-4 py-3 text-white bg-red-500 hover:bg-red-700 rounded-md transition-all duration-300 transform hover:translate-y-1"
-          >
-            <LogOut size={18} />
-            <span>Log Out</span>
-          </button>
         </div>
       </div>
     </div>

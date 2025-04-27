@@ -32,10 +32,12 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   useEffect(() => {
     if (user && user.user) {
       const userData = user.user._doc || user.user;
+      console.log("User data:", userData);
       setDisplayName(userData.name || userData.username || "User");
       // Check all possible locations for avatar image
       const avatarImage = userData.avatar || (userData.googleId && userData.googleId.picture) || userData.picture || userData.profilePicture || '';
       setUserAvatar(avatarImage);
+      console.log("Avatar set to:", avatarImage);
     } else {
       setDisplayName("User");
       setUserAvatar('');
@@ -248,10 +250,17 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                     : "hidden md:flex items-center gap-2 cursor-pointer text-black/80 dark:text-white/80"
                     }`}>
                   {userAvatar ? (
-                    <img src={userAvatar} alt="User" className="w-8 object-cover rounded-full"/>
+                    <img src={userAvatar} alt="User" className="w-8 object-cover rounded-full" 
+                    onError={(e) => {
+                      console.log("Avatar failed to load:", userAvatar);
+                      e.target.onerror = null;
+                      e.target.style.display = 'none';
+                      e.target.parentNode.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold">${displayName?.charAt(0).toUpperCase() || "?"}</div>`;
+                    }}
+                    />
                   ) : (
                     <div className="w-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold">
-                      {displayName.charAt(0).toUpperCase()}
+                      {displayName.charAt(0).toUpperCase() || "?"}
                     </div>
                   )}
                   <h3 className='text-sm'>{displayName}</h3>
