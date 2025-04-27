@@ -3,7 +3,7 @@ import { useState, useEffect, useContext, useMemo, useCallback, useRef } from "r
 import Logo from "../../assets/logo.png";
 import SearchBar from "../SearchBar";
 import { MdOutlineShoppingBasket, MdMenu } from "react-icons/md";
-import { ChevronDown, HelpCircle, Globe, Twitter, Instagram, Facebook, Github, Sun, Moon } from "lucide-react";
+import { ChevronDown, HelpCircle, Globe, Twitter, Instagram, Facebook, Github, Sun, Moon, BadgeIndianRupee } from "lucide-react";
 import IconWithTooltip from "../IconWithTooltip";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import CartContext from "../../context/Cart/CartContext";
@@ -17,8 +17,8 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const profileIconRef = useRef(null);
   const profileModalRef = useRef(null);
   const hoverTimeoutRef = useRef(null);
-  const [displayName, setDisplayName] = useState('User');
-  const [userAvatar, setUserAvatar] = useState('');
+  const [displayName, setDisplayName] = useState("User");
+  const [userAvatar, setUserAvatar] = useState("");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,22 +35,25 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       console.log("User data:", userData);
       setDisplayName(userData.name || userData.username || "User");
       // Check all possible locations for avatar image
-      const avatarImage = userData.avatar || (userData.googleId && userData.googleId.picture) || userData.picture || userData.profilePicture || '';
+      const avatarImage = userData.avatar || (userData.googleId && userData.googleId.picture) || userData.picture || userData.profilePicture || "";
       setUserAvatar(avatarImage);
       console.log("Avatar set to:", avatarImage);
     } else {
       setDisplayName("User");
-      setUserAvatar('');
+      setUserAvatar("");
     }
   }, [user]);
 
-  const handleThemeToggle = useCallback((e) => {
-    if (e) e.preventDefault();
-    toggleDarkMode();
-    if (isSidebarOpen) {
-      toggleSidebar();
-    }
-  }, [toggleDarkMode, isSidebarOpen]);
+  const handleThemeToggle = useCallback(
+    (e) => {
+      if (e) e.preventDefault();
+      toggleDarkMode();
+      if (isSidebarOpen) {
+        toggleSidebar();
+      }
+    },
+    [toggleDarkMode, isSidebarOpen]
+  );
 
   const toggleSidebar = useCallback(() => {
     setIsSidebarOpen((prev) => {
@@ -173,63 +176,71 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
               <span className='text-gray-600 hover:text-black dark:text-white'>Cart</span>
             </div>
           </div>
+        
 
-          {/* Search and Icons */}
-          <div className='flex items-center gap-4 md:gap-6'>
+          {/* Action Icons */}
+          <div className='flex items-center gap-4 md:gap-6 text-xl lg:text-2xl'>
             {/* Search Bar */}
             <SearchBar />
+            
+            {/* Become a Seller */}
+            <div className='hidden sm:block'>
+              <NavLink
+                to='/seller/dashboard'
+                className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-center gap-2")}>
+                <div className='flex items-center gap-2'>
+                  <BadgeIndianRupee />
+                  <span className='text-sm'>Become a Seller</span>
+                </div>
+              </NavLink>
+            </div>
+            <NavLink to='/cart' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-end gap-2")}>
+              <div className='relative'>
+                <span className='absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full px-1.5 py-0.5'>{cartContext.cartLength}</span>
+                <MdOutlineShoppingBasket />
+              </div>
+              <span className='text-sm'>Cart</span>
+            </NavLink>
 
-            {/* Action Icons */}
-            <div className='flex items-center gap-4 md:gap-6 text-xl lg:text-2xl'>
-                <NavLink to='/cart' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-center gap-2")}>
-                  <div className='relative'>
-                    <span className='absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full px-1.5 py-0.5'>{cartContext.cartLength}</span>
-                    <MdOutlineShoppingBasket />
-                  </div>
-                  <span className="text-sm mt-1.5">Cart</span>
-                </NavLink>
-
-              <div ref={profileModalRef} onMouseEnter={handleProfileHover} onMouseLeave={handleProfileLeave}>
-                <div
-                  ref={profileIconRef}
-                  className={`${location.pathname === "/profile"
+            <div ref={profileModalRef} onMouseEnter={handleProfileHover} onMouseLeave={handleProfileLeave}>
+              <div
+                ref={profileIconRef}
+                className={`${
+                  location.pathname === "/profile"
                     ? "hidden md:flex gap-2 items-center text-cyan-500 dark:text-cyan-300 font-bold cursor-pointer"
-                    : "hidden sm:flex items-center gap-2 cursor-pointer text-black/80 dark:text-white/80"
-                    }`}>
-                  {userAvatar ? (
-                    <img src={userAvatar} alt="User" className="w-8 object-cover rounded-full" 
+                    : "hidden sm:flex items-center gap-2 cursor-pointer text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white"
+                }`}>
+                {userAvatar ? (
+                  <img
+                    src={userAvatar}
+                    alt='User'
+                    className='w-8 object-cover rounded-full'
                     onError={(e) => {
                       console.log("Avatar failed to load:", userAvatar);
                       e.target.onerror = null;
-                      e.target.style.display = 'none';
-                      e.target.parentNode.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold">${displayName?.charAt(0).toUpperCase() || "?"}</div>`;
+                      e.target.style.display = "none";
+                      e.target.parentNode.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold">${
+                        displayName?.charAt(0).toUpperCase() || "?"
+                      }</div>`;
                     }}
-                    />
-                  ) : (
-                    <div className="w-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold">
-                      {displayName.charAt(0).toUpperCase() || "?"}
-                    </div>
-                  )}
-                  <h3 className='text-sm'>{displayName}</h3>
-                  <span className={`transition-transform duration-500 ease-in-out ${isProfileModalOpen ? "rotate-180 opacity-100" : "opacity-80"}`}>
-                    <ChevronDown size={18} />
-                  </span>
-                </div>
-
-                {isProfileModalOpen && <UserProfile isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} isDark={isDark} handleThemeToggle={handleThemeToggle} />}
+                  />
+                ) : (
+                  <div className='w-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold'>{displayName.charAt(0).toUpperCase() || "?"}</div>
+                )}
+                <h3 className='text-sm'>{displayName}</h3>
+                <span className={`transition-transform duration-500 ease-in-out ${isProfileModalOpen ? "rotate-180 opacity-100" : "opacity-80"}`}>
+                  <ChevronDown size={18} />
+                </span>
               </div>
+
+              {isProfileModalOpen && <UserProfile isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} isDark={isDark} handleThemeToggle={handleThemeToggle} />}
             </div>
           </div>
         </div>
       </nav>
 
       {/* Sidebar Component */}
-      <Sidebar 
-        isSidebarOpen={isSidebarOpen}
-        toggleSidebar={toggleSidebar}
-        handleThemeToggle={handleThemeToggle}
-        isDark={isDark}
-      />
+      <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} handleThemeToggle={handleThemeToggle} isDark={isDark} />
     </>
   );
 };
