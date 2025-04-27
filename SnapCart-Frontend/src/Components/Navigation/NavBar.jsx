@@ -3,7 +3,7 @@ import { useState, useEffect, useContext, useMemo, useCallback, useRef } from "r
 import Logo from "../../assets/logo.png";
 import SearchBar from "../SearchBar";
 import { MdOutlineShoppingBasket, MdMenu } from "react-icons/md";
-import { ChevronDown, HelpCircle, Globe, Twitter, Instagram, Facebook, Github, LogOut, House, UserRoundPen, Info, LayoutList, Heart, UserRound, Sun, Moon } from "lucide-react";
+import { ChevronDown, HelpCircle, Globe, Twitter, Instagram, Facebook, Github, Sun, Moon } from "lucide-react";
 import IconWithTooltip from "../IconWithTooltip";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import CartContext from "../../context/Cart/CartContext";
@@ -23,7 +23,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const cartContext = useContext(CartContext);
-  const { user, logout } = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   // Check if we're on the authentication page
   const isAuthPage = location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup";
@@ -45,20 +45,12 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   }, [user]);
 
   const handleThemeToggle = useCallback((e) => {
-    if (e) e.preventDefault(); // Prevent default navigation
+    if (e) e.preventDefault();
     toggleDarkMode();
     if (isSidebarOpen) {
       toggleSidebar();
     }
   }, [toggleDarkMode, isSidebarOpen]);
-
-  const handleLogOut = useCallback(() => {
-    logout();
-    navigate("/");
-    if (isSidebarOpen) {
-      toggleSidebar();
-    }
-  }, [logout, navigate, isSidebarOpen]);
 
   const toggleSidebar = useCallback(() => {
     setIsSidebarOpen((prev) => {
@@ -66,23 +58,6 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       return !prev;
     });
   }, []);
-
-  const navItems = useMemo(() => [
-    { id: 1, icon: <House size={20} />, title: "Home", path: "/home" },
-    { id: 2, icon: <LayoutList size={20} />, title: "Products", path: "/products" },
-    { id: 3, icon: <Info size={20} />, title: "About", path: "/about" },
-    { id: 4, icon: <UserRoundPen size={20} />, title: "Contact", path: "/contact" },
-    { id: 5, icon: <Heart size={20} />, title: "Favorites", path: "/favorites" },
-    { id: 6, icon: <UserRound size={20} />, title: "Profile", path: "/profile" },
-    { 
-      id: 7, 
-      icon: isDark ? <Sun size={20} className="text-cyan-300" /> : <Moon size={20} />, 
-      title: isDark ? "Light Mode" : "Dark Mode",  
-      onClick: handleThemeToggle,
-      className: "md:hidden"
-    },
-    { id: 8, icon: <LogOut size={20} />, title: "Log Out", onClick: handleLogOut, className: "md:hidden" },
-  ], [isDark, handleThemeToggle, handleLogOut]);
 
   const handleProfileHover = () => {
     clearTimeout(hoverTimeoutRef.current);
@@ -186,7 +161,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       <nav className={styles.navbar}>
         <div className='flex items-center justify-between'>
           {/* Mobile Menu Button */}
-          <button className='lg:hidden' onClick={toggleSidebar}>
+          <button className='sm:hidden' onClick={toggleSidebar}>
             <MdMenu className='text-2xl' />
           </button>
 
@@ -199,55 +174,27 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className='hidden lg:block'>
-            <ul className='flex items-center gap-8'>
-              {navItems.slice(0, 6).map((item) => (
-                <li key={item.id} className={`${styles.listStyles} ${(item.id === 5 || item.id === 6) ? "block md:hidden" : ""}`}>
-                  <NavLink
-                    to={item.path}
-                    className={({ isActive }) => `${isActive ? styles.activeStyles : styles.itemsList}`}>
-                    {item.icon}
-                    {item.title}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </div>
-
           {/* Search and Icons */}
-          <div className='flex items-center md:gap-6 '>
+          <div className='flex items-center gap-4 md:gap-6'>
             {/* Search Bar */}
             <SearchBar />
 
             {/* Action Icons */}
             <div className='flex items-center gap-4 md:gap-6 text-xl lg:text-2xl'>
-              <IconWithTooltip tooltip='Favorites'>
-                <NavLink to='/wishlist' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "hidden md:block text-black/60 dark:text-white/80")}>
-                <Heart size={20} />
-                </NavLink>
-              </IconWithTooltip>
-              <IconWithTooltip tooltip='Cart'>
-                <NavLink to='/cart' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "text-black/60 dark:text-white/80")}>
+                <NavLink to='/cart' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-center gap-2")}>
                   <div className='relative'>
                     <span className='absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full px-1.5 py-0.5'>{cartContext.cartLength}</span>
                     <MdOutlineShoppingBasket />
                   </div>
+                  <span className="text-sm mt-1.5">Cart</span>
                 </NavLink>
-              </IconWithTooltip>
-
-              <div onClick={handleThemeToggle} className='hidden sm:block cursor-pointer transition-transform duration-500 ease-in-out bg-gray-200 dark:bg-slate-700 rounded-full p-1.5'>
-                <span className={`rounded-full bg-gray-300 transition-transform duration-700 ease-in-out ${isDark ? "rotate-90" : "rotate-0"}`}>
-                  {isDark ? <Sun size={20} className='text-cyan-300 hover:text-cyan-400' /> : <Moon size={20} className=' text-black/60 hover:text-black ' />}
-                </span>
-              </div>
 
               <div ref={profileModalRef} onMouseEnter={handleProfileHover} onMouseLeave={handleProfileLeave}>
                 <div
                   ref={profileIconRef}
                   className={`${location.pathname === "/profile"
                     ? "hidden md:flex gap-2 items-center text-cyan-500 dark:text-cyan-300 font-bold cursor-pointer"
-                    : "hidden md:flex items-center gap-2 cursor-pointer text-black/80 dark:text-white/80"
+                    : "hidden sm:flex items-center gap-2 cursor-pointer text-black/80 dark:text-white/80"
                     }`}>
                   {userAvatar ? (
                     <img src={userAvatar} alt="User" className="w-8 object-cover rounded-full" 
@@ -269,7 +216,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                   </span>
                 </div>
 
-                {isProfileModalOpen && <UserProfile isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />}
+                {isProfileModalOpen && <UserProfile isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} isDark={isDark} handleThemeToggle={handleThemeToggle} />}
               </div>
             </div>
           </div>
@@ -280,7 +227,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       <Sidebar 
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
-        navItems={navItems}
+        handleThemeToggle={handleThemeToggle}
         isDark={isDark}
       />
     </>

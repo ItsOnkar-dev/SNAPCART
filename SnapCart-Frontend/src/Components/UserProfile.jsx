@@ -2,9 +2,9 @@
 import { useContext, useState, useEffect } from "react";
 import UserContext from "../context/User/UserContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { User, Package, Heart, CreditCard, Settings, LogOut, X } from "lucide-react";
+import { User, Package, Heart, CreditCard, Settings, LogOut, X, Sun, Moon } from "lucide-react";
 
-const UserProfile = ({ isOpen, onClose }) => {
+const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
   const { isLoggedIn, logout, user } = useContext(UserContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,7 +26,14 @@ const UserProfile = ({ isOpen, onClose }) => {
     { id: 3, label: "Wishlist", icon: Heart, path: "/wishlist" },
     { id: 4, label: "Payment", icon: CreditCard, path: "/payment" },
     { id: 5, label: "Settings", icon: Settings, path: "/settings" },
-    { id: 6, label: "Log Out", icon: LogOut, onClick: handleLogOut, path: null },
+    { 
+      id: 6, 
+      label: isDark ? "Light Mode" : "Dark Mode", 
+      icon: isDark ? Sun : Moon,  
+      onClick: handleThemeToggle,
+      path: null,
+    },
+    { id: 7, label: "Log Out", icon: LogOut, onClick: handleLogOut, path: null },
   ];
 
   const [activeTab, setActiveTab] = useState(location.pathname);

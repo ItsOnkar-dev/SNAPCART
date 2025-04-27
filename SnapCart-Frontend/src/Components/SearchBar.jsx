@@ -23,7 +23,7 @@ const SearchBar = () => {
     () => ({
       inputStyles: (expand) =>
         `block border border-slate-300 dark:border-slate-600 text-sm py-1.5 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${
-          expand ? "w-[27vw]" : "w-[22vw]"
+          expand ? "w-[45vw]" : "w-[40vw]"
         }`,
       mobileInputStyles: (expand) =>
         `block w-full border border-slate-300 dark:border-slate-600 text-sm py-2 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${
@@ -36,7 +36,7 @@ const SearchBar = () => {
   return (
     <>
       {/* Desktop Search Bar */}
-      <div className="hidden xl:flex items-center relative">
+      <div className="hidden lg:flex items-center relative">
         <input
           type="text"
           placeholder="What are you looking for?"
@@ -48,7 +48,7 @@ const SearchBar = () => {
       </div>
 
       {/* Mobile Search Icon */}
-      <button className="xl:hidden" onClick={toggleMobileSearch}>
+      <button className="lg:hidden" onClick={toggleMobileSearch}>
         <GoSearch className="text-xl text-slate-500 dark:text-slate-300 dark:hover:text-white hover:text-black" />
       </button>
 
