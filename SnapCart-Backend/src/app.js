@@ -2,6 +2,8 @@ import express from 'express'
 import productRoutes from './Routes/products.js'
 import userRoutes from './Routes/user.js'
 import authRoutes from './Routes/auth.js'
+import sellersRoutes from './Routes/seller.js'
+import adminRoutes from './Routes/admin.js'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import session from 'express-session';
@@ -33,6 +35,8 @@ app.use(passport.session());
 app.use('/api', productRoutes) // Add product routes
 app.use('/user', userRoutes)  // Add user routes
 app.use('/auth', authRoutes) // Add auth routes
+app.use(sellersRoutes);
+app.use(adminRoutes);
 
 // Global Express Error Handler
 app.use((err, req, res, next) => {
