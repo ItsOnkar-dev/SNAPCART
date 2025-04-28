@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useContext, useMemo, useCallback, useRef } from "react";
-import Logo from "../../assets/logo.png";
+import SnapCartLogo from "../../assets/SnapCart.png";
+import SnapCartLogo1 from "../../assets/SnapCart1.png";
 import SearchBar from "../SearchBar";
 import { MdOutlineShoppingBasket, MdMenu } from "react-icons/md";
 import { ChevronDown, HelpCircle, Globe, Twitter, Instagram, Facebook, Github, Sun, Moon, BadgeIndianRupee } from "lucide-react";
@@ -86,7 +87,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       authNavbar:
         "fixed w-full p-4 md:px-10 xl:px-32 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 backdrop-blur-xl",
       itemsList: "flex items-center gap-3 md:gap-1 cursor-pointer text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white",
-      logoName: "cursor-pointer font-extrabold text-2xl tracking-wide uppercase",
+      logoName: "cursor-pointer text-2xl text-black dark:text-white font-extrabold tracking-wider",
       listStyles: `flex items-center gap-3 transition-all hover:duration-300 ease-in-out hover:skew-x-3 hover:skew-y-1 cursor-pointer tracking-wide`,
       activeStyles: "flex items-center gap-3 md:gap-1 brightness-125 font-semibold tracking-wide duration-300",
     }),
@@ -100,10 +101,9 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
         <div className='flex items-center justify-between'>
           {/* Logo */}
           <div className='flex items-center gap-2'>
-            <img src={Logo} alt='Logo' className='w-6' />
+            {isDark ? <img src={SnapCartLogo} alt='Logo' className='w-8 h-8 rounded-full' /> : <img src={SnapCartLogo1} alt='Logo' className='w-8 h-8 rounded-full' />}
             <div className={styles.logoName} onClick={() => navigate("/")}>
-              <span className='text-gradient1 dark:text-gradient'>Snap</span>
-              <span className='text-gray-800 dark:text-white'>Cart</span>
+              <span>SnapCart</span>
             </div>
           </div>
 
@@ -170,13 +170,11 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
           {/* Logo */}
           <div className='flex items-center gap-2 cursor-pointer transition-all duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3'>
-            <img src={Logo} alt='Logo' className='w-6' />
+            {isDark ? <img src={SnapCartLogo} alt='Logo' className='w-8 h-8 rounded-full' /> : <img src={SnapCartLogo1} alt='Logo' className='w-8 h-8 rounded-full' />}
             <div className={`${styles.logoName}`} onClick={() => navigate("/home")}>
-              <span className='text-gradient1 dark:text-gradient'>Snap</span>
-              <span className='text-gray-600 hover:text-black dark:text-white'>Cart</span>
+              <span>SnapCart</span>
             </div>
           </div>
-        
 
           {/* Action Icons */}
           <div className='flex items-center gap-4 sm:gap-6 text-xl lg:text-2xl'>
@@ -186,7 +184,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             {/* Become a Seller */}
             <div className='hidden sm:block'>
               <NavLink
-                to='/seller/dashboard'
+                to='/become-seller'
                 className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-center gap-2")}>
                 <div className='flex items-center gap-2'>
                   <BadgeIndianRupee />
@@ -195,11 +193,13 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
               </NavLink>
             </div>
             <NavLink to='/cart' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-end gap-2")}>
-              <div className='relative'>
-                <span className='absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full px-1.5 py-0.5'>{cartContext.cartLength}</span>
-                <MdOutlineShoppingBasket />
+              <div className='flex items-center gap-2'>
+                <div className='relative'>
+                  <span className='absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full px-1.5 py-0.5'>{cartContext.cartLength}</span>
+                  <MdOutlineShoppingBasket />
+                </div>
+                <span className='text-sm'>Cart</span>
               </div>
-              <span className='text-sm'>Cart</span>
             </NavLink>
 
             <div ref={profileModalRef} onMouseEnter={handleProfileHover} onMouseLeave={handleProfileLeave}>
@@ -207,7 +207,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 ref={profileIconRef}
                 className={`${
                   location.pathname === "/profile"
-                    ? "hidden md:flex gap-2 items-center text-cyan-500 dark:text-cyan-300 font-bold cursor-pointer"
+                    ? "hidden md:flex gap-2 items-center text-pink-600 placeholder:font-bold cursor-pointer"
                     : "hidden sm:flex items-center gap-2 cursor-pointer text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white"
                 }`}>
                 {userAvatar ? (

@@ -13,6 +13,7 @@ import OAuthSuccess from "./Components/OAuthSuccess";
 import Register from "./Pages/Register";
 import { ToastContainer, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import BecomeSeller from "./Pages/BecomeSeller";
 
 const App = () => {
 
@@ -60,6 +61,7 @@ const App = () => {
           <Route path='/cart' element={<Cart />} />
           <Route path='/wishlist' element={<Wishlist />} />
           <Route path='/profile' element={<Profile />} />
+          <Route path='/become-seller' element={<BecomeSeller/>} />
         </Routes>
         <ToastContainer
           position='top-center'

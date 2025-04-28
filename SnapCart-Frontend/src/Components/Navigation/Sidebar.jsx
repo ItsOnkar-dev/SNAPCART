@@ -4,7 +4,8 @@ import { MdClose } from "react-icons/md";
 import { LogOut, House, UserRoundPen, Info, LayoutList, Heart, UserRound, Sun, Moon } from "lucide-react";
 import UserContext from "../../context/User/UserContext";
 import { NavLink, useNavigate } from "react-router-dom";
-import Logo from "../../assets/logo.png";
+import SnapCartLogo from "../../assets/SnapCart.png";
+import SnapCartLogo1 from "../../assets/SnapCart1.png";
 import SidebarFooter from "./SidebarFooter";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, isDark, handleThemeToggle }) => {
@@ -19,66 +20,60 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, isDark, handleThemeToggle }) =>
     }
   }, [logout, navigate, isSidebarOpen]);
 
-  const navItems = useMemo(() => [
-    { id: 1, icon: <House size={20} />, title: "Home", path: "/home" },
-    { id: 2, icon: <LayoutList size={20} />, title: "Products", path: "/products" },
-    { id: 3, icon: <Info size={20} />, title: "About", path: "/about" },
-    { id: 4, icon: <UserRoundPen size={20} />, title: "Contact", path: "/contact" },
-    { id: 5, icon: <Heart size={20} />, title: "Favorites", path: "/favorites" },
-    { id: 6, icon: <UserRound size={20} />, title: "Profile", path: "/profile" },
-    { 
-      id: 7, 
-      icon: isDark ? <Sun size={20} className="text-cyan-300" /> : <Moon size={20} />, 
-      title: isDark ? "Light Mode" : "Dark Mode",  
-      onClick: handleThemeToggle,
-      className: "md:hidden"
-    },
-    { id: 8, icon: <LogOut size={20} />, title: "Log Out", onClick: handleLogOut, className: "md:hidden" },
-  ], [isDark, handleThemeToggle, handleLogOut]);
+  const navItems = useMemo(
+    () => [
+      { id: 1, icon: <House size={20} />, title: "Home", path: "/home" },
+      { id: 2, icon: <LayoutList size={20} />, title: "Products", path: "/products" },
+      { id: 3, icon: <Info size={20} />, title: "About", path: "/about" },
+      { id: 4, icon: <UserRoundPen size={20} />, title: "Contact", path: "/contact" },
+      { id: 5, icon: <Heart size={20} />, title: "Favorites", path: "/favorites" },
+      { id: 6, icon: <UserRound size={20} />, title: "Profile", path: "/profile" },
+      {
+        id: 7,
+        icon: isDark ? <Sun size={20} className='text-cyan-300' /> : <Moon size={20} />,
+        title: isDark ? "Light Mode" : "Dark Mode",
+        onClick: handleThemeToggle,
+        className: "md:hidden",
+      },
+      { id: 8, icon: <LogOut size={20} />, title: "Log Out", onClick: handleLogOut, className: "md:hidden" },
+    ],
+    [isDark, handleThemeToggle, handleLogOut]
+  );
 
   return (
     <>
       {/* Overlay */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-60 z-40 transition-opacity lg:hidden" 
-          onClick={toggleSidebar} 
-        />
-      )}
-      
+      {isSidebarOpen && <div className='fixed inset-0 bg-black bg-opacity-60 z-40 transition-opacity lg:hidden' onClick={toggleSidebar} />}
+
       {/* Sidebar */}
-      <div className={`fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-500 ease-in-out xl:hidden dark:bg-[rgb(15,23,42)] flex flex-col ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <div
+        className={`fixed top-0 left-0 h-full w-72 bg-white px-6 py-4 z-50 transform transition-transform duration-500 ease-in-out xl:hidden dark:bg-[rgb(15,23,42)] flex flex-col ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}>
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer">
-            <img src={Logo} alt="Logo" className="w-6" />
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-2 cursor-pointer'>
+            {isDark ? <img src={SnapCartLogo} alt='Logo' className='w-8 h-8 rounded-full' /> : <img src={SnapCartLogo1} alt='Logo' className='w-8 h-8 rounded-full' />}
             <div
-              className="cursor-pointer font-extrabold text-2xl tracking-wide uppercase"
+              className='cursor-pointer font-extrabold text-2xl tracking-wider'
               onClick={() => {
                 navigate("/home");
                 toggleSidebar();
               }}>
-              <span className="text-gradient1 dark:text-gradient">Snap</span>
-              <span className="text-gray-600 hover:text-black dark:text-white">Cart</span>
+             <span>SnapCart</span>
             </div>
           </div>
           <button onClick={toggleSidebar}>
-            <MdClose className="text-2xl hover:scale-105" />
+            <MdClose className='text-2xl hover:scale-105' />
           </button>
         </div>
-        
+
         {/* Navigation Items */}
-        <ul className="space-y-7 py-10 flex-grow">
+        <ul className='space-y-7 py-10 flex-grow'>
           {navItems.map((item) => (
-            <li 
-              key={item.id} 
-              className="flex items-center gap-3 transition-all hover:duration-300 ease-in-out hover:skew-x-3 hover:skew-y-1 cursor-pointer tracking-wide"
-            >
+            <li key={item.id} className='flex items-center gap-3 transition-all hover:duration-300 ease-in-out hover:skew-x-3 hover:skew-y-1 cursor-pointer tracking-wide'>
               {item.onClick ? (
-                <div 
-                  className="flex items-center gap-3 md:gap-1 cursor-pointer text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-                  onClick={item.onClick}
-                >
+                <div className='flex items-center gap-3 md:gap-1 cursor-pointer text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white' onClick={item.onClick}>
                   {item.icon}
                   {item.title}
                 </div>
@@ -86,8 +81,9 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, isDark, handleThemeToggle }) =>
                 <NavLink
                   to={item.path}
                   onClick={toggleSidebar}
-                  className={({ isActive }) => `flex items-center gap-3 md:gap-1 ${isActive ? "brightness-125 font-semibold tracking-wide" : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"}`}
-                >
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 md:gap-1 ${isActive ? "brightness-125 font-semibold tracking-wide" : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"}`
+                  }>
                   {item.icon}
                   {item.title}
                 </NavLink>
