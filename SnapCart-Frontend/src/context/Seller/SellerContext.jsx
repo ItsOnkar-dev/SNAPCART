@@ -4,6 +4,10 @@ import { createContext } from "react";
 const SellerContext = createContext({
   seller: null,
   setSeller: () => {},
+  approvedSellers: null,
+  setApprovedSellers: () => {},
+  unapprovedSellers: null,
+  setUnapprovedSellers: () => {},
   errors: {},
   setErrors: () => {},
 });

@@ -87,7 +87,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       authNavbar:
         "fixed w-full p-4 md:px-10 xl:px-32 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 backdrop-blur-xl",
       itemsList: "flex items-center gap-3 md:gap-1 cursor-pointer text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white",
-      logoName: "cursor-pointer text-2xl text-black dark:text-white font-extrabold tracking-wider",
+      logoName: "cursor-pointer text-3xl text-black dark:text-white font-extrabold tracking-wider",
       listStyles: `flex items-center gap-3 transition-all hover:duration-300 ease-in-out hover:skew-x-3 hover:skew-y-1 cursor-pointer tracking-wide`,
       activeStyles: "flex items-center gap-3 md:gap-1 brightness-125 font-semibold tracking-wide duration-300",
     }),
@@ -177,7 +177,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
           </div>
 
           {/* Action Icons */}
-          <div className='flex items-center gap-4 sm:gap-6 text-xl lg:text-2xl'>
+          <div className='flex items-center gap-4 sm:gap-6'>
             {/* Search Bar */}
             <SearchBar />
 
@@ -185,20 +185,20 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             <div className='hidden sm:block'>
               <NavLink
                 to='/become-seller'
-                className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-center gap-2")}>
+                className={({ isActive }) => (isActive ? "text-pink-600" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-center gap-2")}>
                 <div className='flex items-center gap-2'>
                   <BadgeIndianRupee />
-                  <span className='text-sm'>Become a Seller</span>
+                  <span className=''>Become a Seller</span>
                 </div>
               </NavLink>
             </div>
-            <NavLink to='/cart' className={({ isActive }) => (isActive ? "text-pink-600 font-bold" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-end gap-2")}>
+            <NavLink to='/cart' className={({ isActive }) => (isActive ? "text-pink-600" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-end gap-2")}>
               <div className='flex items-center gap-2'>
                 <div className='relative'>
                   <span className='absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full px-1.5 py-0.5'>{cartContext.cartLength}</span>
-                  <MdOutlineShoppingBasket />
+                  <MdOutlineShoppingBasket className="text-xl md:text-2xl"/>
                 </div>
-                <span className='text-sm'>Cart</span>
+                <span className=''>Cart</span>
               </div>
             </NavLink>
 
@@ -227,7 +227,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 ) : (
                   <div className='w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold'>{displayName.charAt(0).toUpperCase() || "?"}</div>
                 )}
-                <h3 className='text-sm'>{displayName}</h3>
+                <h3 className=''>{displayName}</h3>
                 <span className={`transition-transform duration-500 ease-in-out ${isProfileModalOpen ? "rotate-180 opacity-100" : "opacity-80"}`}>
                   <ChevronDown size={18} />
                 </span>
