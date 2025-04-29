@@ -17,7 +17,6 @@ import BecomeSeller from "./Pages/BecomeSeller";
 import SellerContextProvider from "./context/Seller/SellerContextProvider";
 import AdminDashboard from "./Pages/AdminDashboard";
 import ProductManagement from "./Components/ProductList/ProductManagement";
-import ProtectedRoute from "./Components/ProtectedRoute";
 
 // Get initial theme from localStorage or system preference
 const getInitialTheme = () => {
@@ -51,61 +50,47 @@ const App = () => {
   }, []);
 
   return (
-      <SellerContextProvider>
-        <div className='min-h-screen bg-white text-gray-900 dark:bg-slate-900 dark:text-white transition-colors duration-300'>
-          <NavBar isDark={isDark} toggleDarkMode={toggleDarkMode} />
-          <main>
-            <Routes>
-              <Route path='/' element={<Registration />} />
-              <Route path='/login' element={<Register initialMode='login' />} />
-              <Route path='/signup' element={<Register initialMode='signup' />} />
-              <Route path='/oauth-success' element={<OAuthSuccess />} />
-              <Route path='/home' element={<Home />} />
-              <Route path='/products' element={<Products />} />
-              <Route path='/about' element={<About />} />
-              <Route path='/contact' element={<Contact />} />
-              <Route path='/cart' element={<Cart />} />
-              <Route path='/wishlist' element={<Wishlist />} />
-              <Route path='/profile' element={<Profile />} />
-              <Route path='/become-seller' element={<BecomeSeller />} />
-              <Route
-                path='/admin'
-                element={
-                  <ProtectedRoute allowedRoles={["seller"]}>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path='/seller/product-management'
-                element={
-                  <ProtectedRoute allowedRoles={["seller"]}>
-                    <ProductManagement />
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
-            <ToastContainer
-              position='top-center'
-              autoClose={3000}
-              hideProgressBar={false}
-              newestOnTop={true}
-              closeOnClick={true}
-              closeButton={true}
-              draggable
-              pauseOnFocusLoss
-              pauseOnHover={false}
-              theme='light'
-              transition={Slide}
-              toastClassName={() =>
-                "relative min-h-16 flex items-center justify-between p-6 rounded-lg shadow-xl dark:bg-slate-900 dark:text-white bg-white text-slate-800 text-sm overflow-hidden cursor-pointer border border-gray-300 dark:border-gray-500"
-              }
-              bodyClassName={() => "flex-1"}
-              progressClassName={() => "Toastify__progress-bar Toastify__progress-bar--animated Toastify__progress-bar--default h-1 bg-gradient-to-r from-indigo-600 via-cyan-400 to-purple-600"}
-            />
-          </main>
-        </div>
-      </SellerContextProvider>
+    <SellerContextProvider>
+      <div className='min-h-screen bg-white text-gray-900 dark:bg-slate-900 dark:text-white transition-colors duration-300'>
+        <NavBar isDark={isDark} toggleDarkMode={toggleDarkMode} />
+        <main>
+          <Routes>
+            <Route path='/' element={<Registration />} />
+            <Route path='/login' element={<Register initialMode='login' />} />
+            <Route path='/signup' element={<Register initialMode='signup' />} />
+            <Route path='/oauth-success' element={<OAuthSuccess />} />
+            <Route path='/home' element={<Home />} />
+            <Route path='/products' element={<Products />} />
+            <Route path='/about' element={<About />} />
+            <Route path='/contact' element={<Contact />} />
+            <Route path='/cart' element={<Cart />} />
+            <Route path='/wishlist' element={<Wishlist />} />
+            <Route path='/profile' element={<Profile />} />
+            <Route path='/become-seller' element={<BecomeSeller />} />
+            <Route path='/admin' element={<AdminDashboard />} />
+            <Route path='/seller/product-management' element={<ProductManagement />} />
+          </Routes>
+          <ToastContainer
+            position='top-center'
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={true}
+            closeOnClick={true}
+            closeButton={true}
+            draggable
+            pauseOnFocusLoss
+            pauseOnHover={false}
+            theme='light'
+            transition={Slide}
+            toastClassName={() =>
+              "relative min-h-16 flex items-center justify-between p-6 rounded-lg shadow-xl dark:bg-slate-900 dark:text-white bg-white text-slate-800 text-sm overflow-hidden cursor-pointer border border-gray-300 dark:border-gray-500"
+            }
+            bodyClassName={() => "flex-1"}
+            progressClassName={() => "Toastify__progress-bar Toastify__progress-bar--animated Toastify__progress-bar--default h-1 bg-gradient-to-r from-indigo-600 via-cyan-400 to-purple-600"}
+          />
+        </main>
+      </div>
+    </SellerContextProvider>
   );
 };
 

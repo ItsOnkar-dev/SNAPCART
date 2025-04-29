@@ -6,23 +6,25 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const SellerContextProvider = ({ children }) => {
+  const [sellers, setSellers] = useState([]);
   const [seller, setSeller] = useState(null);
   const [isSellerLoading, setIsSellerLoading] = useState(true);
-  const [unapprovedSellers, setUnapprovedSellers] = useState([]);
-  const [approvedSellers, setApprovedSellers] = useState([]);
   const [errors, setErrors] = useState({});
 
-  // Fetch seller data on mount
+  // Base API URL - make it configurable
+  const API_BASE_URL = "http://localhost:8000";
+
+  // Fetch all sellers on mount
   useEffect(() => {
-    const fetchSellerData = async () => {
+    const fetchSellers = async () => {
       setIsSellerLoading(true);
       try {
-        const response = await axios.get("http://localhost:8000/sellers");
-        console.log("Fetched Seller Data Successfully", response.data.data);
-        setSeller(response.data.data);
+        const response = await axios.get(`${API_BASE_URL}/sellers`);
+        console.log("Fetched Sellers Successfully", response.data.data);
+        setSellers(response.data.data);
       } catch (error) {
-        console.error("An error occurred:", error);
-        // Only set error if it's not a "not found" error (which is expected for non-sellers)
+        console.error("An error occurred fetching sellers:", error);
+        // Only set error if it's not a "not found" error
         if (error.response && error.response.status !== 404) {
           const errorMsg = error.response?.data?.message || `Server error: ${error.response?.status}`;
           setErrors({ submit: errorMsg });
@@ -33,53 +35,70 @@ const SellerContextProvider = ({ children }) => {
       }
     };
 
-    fetchSellerData();
+    fetchSellers();
   }, []);
 
-  // Admin functionality: Fetch unapproved sellers
-  useEffect(() => {
-    const fetchUnapprovedSellers = async () => {
-      // Only fetch if the current user is a seller (potential admin)
-      if (!seller) return;
-      
-      try {
-        const response = await axios.get("http://localhost:8000/admin/sellers");
-        console.log("Fetched unapproved sellers data:", response.data.data);
-        setUnapprovedSellers(response.data.data);
-      } catch (error) {
-        console.error("An error occurred:", error);
-        if (error.response) {
-          setErrors({ submit: error.response.data.message || `Server error: ${error.response.status}` });
-        } else if (error.request) {
-          setErrors({ submit: "No response from server. Please check your connection and try again." });
-        } else {
-          setErrors({ submit: "An error occurred while fetching seller data. Please try again." });
-        }
-      }
-    };
-    
-    fetchUnapprovedSellers();
-  }, [seller]);
+  // Try to fetch current seller if user is logged in
+  // useEffect(() => {
+  //   const fetchCurrentSeller = async () => {
+  //     setIsSellerLoading(true);
+  //     try {
+  //       // Note: This endpoint requires authentication
+  //       const response = await axios.get(`${API_BASE_URL}/sellers/current`);
+  //       console.log("Fetched Current Seller Successfully", response.data.data);
+  //       setSeller(response.data.data);
+  //     } catch (error) {
+  //       console.log("User is not a seller yet or not logged in");
+  //       // Not setting error because this is normal for non-sellers
+  //     } finally {
+  //       setIsSellerLoading(false);
+  //     }
+  //   };
+
+  //   // Uncomment this when authentication is fully implemented
+  //   // fetchCurrentSeller();
+  // }, []);
 
   // Create new seller
   const createSeller = async (sellerData) => {
     try {
-      const response = await axios.post("http://localhost:8000/sellers", sellerData);
+      // Add validation
+      if (!sellerData.name || !sellerData.email || !sellerData.storeName || !sellerData.storeDescription) {
+        throw new Error("Missing required fields: name, email, storeName, and storeDescription are required");
+      }
+
+      console.log("Creating seller with data:", sellerData);
+      const response = await axios.post(`${API_BASE_URL}/sellers`, sellerData);
+      console.log("Seller created successfully:", response.data);
       setSeller(response.data.data);
       toast.success("Seller account created successfully!");
       return response.data.data;
     } catch (error) {
       console.error("An error occurred:", error);
-      const errorMsg = error.response?.data?.message || "Failed to create seller account";
+      let errorMsg;
+      
+      if (error.response?.data?.message) {
+        errorMsg = error.response.data.message;
+      } else if (error.message) {
+        errorMsg = error.message;
+      } else {
+        errorMsg = "Failed to create seller account";
+      }
+      
       toast.error(errorMsg);
+      setErrors({ submit: errorMsg });
       throw error;
     }
   };
 
   // Update seller information
-  const updateSeller = async (sellerData) => {
+  const updateSeller = async (sellerId, sellerData) => {
     try {
-      const response = await axios.patch(`http://localhost:8000/sellers/${seller._id}`, sellerData);
+      if (!sellerId) {
+        throw new Error("Seller ID is required to update seller information");
+      }
+      
+      const response = await axios.patch(`${API_BASE_URL}/sellers/${sellerId}`, sellerData);
       setSeller(response.data.data);
       toast.success("Seller information updated successfully!");
       return response.data.data;
@@ -87,36 +106,19 @@ const SellerContextProvider = ({ children }) => {
       console.error("An error occurred:", error);
       const errorMsg = error.response?.data?.message || "Failed to update seller information";
       toast.error(errorMsg);
-      throw error;
-    }
-  };
-
-  // Admin: Approve a seller
-  const handleApproveSeller = async (sellerId) => {
-    try {
-      const response = await axios.post(`http://localhost:8000/admin/sellers/${sellerId}/approve`);
-      console.log("Seller approved successfully", response.data.data);
-      setUnapprovedSellers((prev) => prev.filter((seller) => seller._id !== sellerId));
-      setApprovedSellers((prev) => [...prev, response.data.data]);
-      toast.success("Seller approved successfully!");
-      return response.data.data;
-    } catch (error) {
-      console.error("An error occurred:", error);
-      toast.error("Failed to approve seller");
+      setErrors({ submit: errorMsg });
       throw error;
     }
   };
 
   return (
     <SellerContext.Provider value={{ 
+      sellers,
       seller, 
       setSeller, 
       isSellerLoading,
       errors, 
-      setErrors, 
-      handleApproveSeller, 
-      unapprovedSellers, 
-      approvedSellers,
+      setErrors,
       createSeller,
       updateSeller
     }}>
