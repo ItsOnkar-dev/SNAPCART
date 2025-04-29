@@ -7,26 +7,55 @@ import { isLoggedIn } from '../Middlewares/Auth.js';
 
 const router = express.Router(); 
 
-// Get the seller of the current user
+// Get all the sellers
 router.get('/sellers', catchAsync(async (req, res) => {
-  Logger.info("Fetching the seller data of the current user");
-  const seller = await Seller.findOne({});
+  Logger.info("Fetching all sellers");
+  const sellers = await Seller.find({});
   
-  if (!seller) {
-    throw new NotFoundError('Seller not found');
+  if (!sellers || sellers.length === 0) {
+    throw new NotFoundError('No sellers found');
   }
   
   res.status(200).json({
     status: 'success', 
-    message: 'Fetched seller successfully',
-    data: seller
-  });
+    message: 'Fetched all sellers successfully',
+    data: sellers,
+  });   
+}));
+
+// Get the seller of the current user
+router.get('/sellers/current', isLoggedIn, catchAsync(async (req, res) => {
+  Logger.info("Fetching the seller data of the current user");
+  
+  // Make sure req.user exists and has an _id
+  if (!req.user || !req.user._id) {
+    throw new AuthenticationError('User is not authenticated');
+  }
+  
+  const seller = await Seller.findOne({ userId: req.user._id });
+  
+  if (!seller) {
+    throw new NotFoundError('User is not a seller');
+  }
+  
+  res.status(200).json({
+    status: 'success', 
+    message: 'Fetched seller data successfully',
+    data: seller,
+  });   
 }));
 
 // Create a new seller
 router.post('/sellers', catchAsync(async (req, res) => {
   Logger.info("Create the seller request received", { body: req.body });
+  
+  // Extract data from request body
   const { name, email, storeName, storeDescription } = req.body;
+  
+  // Validate required fields
+  if (!name || !email || !storeName || !storeDescription) {
+    throw new BadRequestError('Missing required fields: name, email, storeName, and storeDescription are required');
+  }
   
   // Check if email or store name already exists
   const existingEmail = await Seller.findOne({ email });
@@ -40,15 +69,20 @@ router.post('/sellers', catchAsync(async (req, res) => {
   }
   
   // Create the new seller
+  // If user auth is implemented, uncomment the userId line:
+  // const userId = req.user ? req.user._id : null;
+  
   const newSeller = await Seller.create({
     name,
     email,
     storeName,
     storeDescription,
-    // userId: req.user._id // Uncomment when user authentication is implemented
+    // userId // Uncomment when user authentication is implemented
   });
   
-  if (!newSeller) throw new InternalServerError('Failed to create seller');
+  if (!newSeller) {
+    throw new InternalServerError('Failed to create seller');
+  }
   
   res.status(201).json({
     status: 'success',
@@ -83,60 +117,6 @@ router.patch('/sellers/:id', isLoggedIn, catchAsync(async (req, res) => {
     message: 'Updated the seller successfully',
     data: seller
   });
-}));
-
-// Fetch all unapproved sellers (admin only)
-router.get('/admin/sellers', isLoggedIn, catchAsync(async (req, res) => {
-  try {
-    Logger.info("Fetching all unapproved sellers");
-    
-    // Check if user is admin (implement proper role-based auth)
-    // if (!req.user || req.user.role !== 'admin') {
-    //   throw new AuthenticationError('Not authorized');
-    // }
-    
-    const unapprovedSellers = await Seller.find({ approved: false });
-    
-    res.status(200).json({
-      status: 'success',
-      data: unapprovedSellers
-    });
-  } catch (error) {
-    Logger.error("Error fetching unapproved sellers", { error });
-    // Let the global error handler handle this
-    throw error;
-  }
-}));
-
-// Approve a seller (admin only)
-router.post('/admin/sellers/:id/approve', isLoggedIn, catchAsync(async (req, res) => {
-  try {
-    Logger.info("Approving a seller", { sellerId: req.params.id });
-    const { id } = req.params;
-    
-    // Check if user is admin (implement proper role-based auth)
-    // if (!req.user || req.user.role !== 'admin') {
-    //   throw new AuthenticationError('Not authorized');
-    // }
-    
-    const seller = await Seller.findByIdAndUpdate(
-      id, 
-      { approved: true },
-      { new: true }
-    );
-    
-    if (!seller) throw new NotFoundError('Seller not found');
-    
-    res.status(200).json({
-      status: 'success',
-      message: 'Seller approved successfully',
-      data: seller
-    });
-  } catch (error) {
-    Logger.error("Error approving seller", { error, sellerId: req.params.id });
-    // Let the global error handler handle this
-    throw error;
-  }
 }));
 
 export default router;
