@@ -13,6 +13,13 @@ export class InternalServerError extends Error{
   }
 }
 
+export class NotFoundError extends Error{
+  constructor(message = 'Not Found') {
+      super(message); 
+      this.status = 404;
+  }
+}
+
 export class AuthenticationError extends Error{
   constructor(message = 'Authentication Error') {
       super(message); 

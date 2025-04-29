@@ -4,7 +4,7 @@ import rateLimit from "express-rate-limit";
 import UserRepo from "../Repositories/UserRepo.js";
 import catchAsync from "../Core/catchAsync.js";
 import { AuthenticationError, BadRequestError } from "../Core/ApiError.js";
-import isLoggedIn from "../Middlewares/Auth.js";
+import {isLoggedIn} from "../Middlewares/Auth.js";
 
 const router = express.Router();
 
