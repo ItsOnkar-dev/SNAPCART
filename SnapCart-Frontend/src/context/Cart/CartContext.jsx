@@ -1,10 +1,14 @@
-import { createContext } from 'react'
+import { createContext } from 'react';
 
 const CartContext = createContext({
   cart: [],
   cartLength: 0,
-  addToCart: () => {
-  }
-})
+  wishlist: [], // Changed from wishList to wishlist
+  wishlistLength: 0,
+  addToCart: () => {},
+  removeFromCart: () => {},
+  addToWishlist: () => {},
+  removeFromWishlist: () => {},
+});
 
-export default CartContext
+export default CartContext;

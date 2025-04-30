@@ -13,6 +13,10 @@ const ProductCard = ({ product }) => {
     cartContext.addToCart({ title, image, description, category, qty: 1 })
   }
 
+  const handleAddToWishlist = () => {
+    cartContext.addToWishlist({ title, image, description, category })
+  }
+
   const truncateDesc = (text, maxLength) => {
     if (text.length > maxLength) {
       return text.substring(0, maxLength) + "...";
@@ -39,7 +43,7 @@ const ProductCard = ({ product }) => {
         <div className="mx-auto flex items-center justify-between w-full">
           {/* <button className="bg-black text-white px-3 py-1 rounded-md">Add to Cart</button> */}
           <button className="bg-slate-600 hover:bg-black dark:text-black dark:bg-white text-white px-3 py-1 rounded-md" onClick={handleAddToCart}>Add to Cart</button>
-          <button className="bg-blue-400 hover:bg-blue-500 text-white px-3 py-1 rounded-md">Wishlist</button>
+          <button className="bg-blue-400 hover:bg-blue-500 text-white px-3 py-1 rounded-md" onClick={handleAddToWishlist}>Wishlist</button>
         </div>
       </div>
     </>

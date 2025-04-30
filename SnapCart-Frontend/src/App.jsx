@@ -6,7 +6,7 @@ import Products from "./Pages/Products";
 import About from "./Pages/About";
 import Contact from "./Pages/Contact";
 import Cart from "./Pages/Cart";
-import Wishlist from "./Pages/Wishlist";
+import WishList from './Pages/WishList'
 import Profile from "./Pages/Profile";
 import Registration from "./Components/Registration";
 import OAuthSuccess from "./Components/OAuthSuccess";
@@ -55,16 +55,16 @@ const App = () => {
         <NavBar isDark={isDark} toggleDarkMode={toggleDarkMode} />
         <main>
           <Routes>
-            <Route path='/' element={<Registration />} />
+          <Route path='/' element={<Home />} />
+            <Route path='/registration' element={<Registration />} />
             <Route path='/login' element={<Register initialMode='login' />} />
             <Route path='/signup' element={<Register initialMode='signup' />} />
             <Route path='/oauth-success' element={<OAuthSuccess />} />
-            <Route path='/home' element={<Home />} />
             <Route path='/products' element={<Products />} />
             <Route path='/about' element={<About />} />
             <Route path='/contact' element={<Contact />} />
             <Route path='/cart' element={<Cart />} />
-            <Route path='/wishlist' element={<Wishlist />} />
+            <Route path='/wishlist' element={<WishList/>} />
             <Route path='/profile' element={<Profile />} />
             <Route path='/become-seller' element={<BecomeSeller />} />
             <Route path='/admin' element={<AdminDashboard />} />
@@ -85,8 +85,6 @@ const App = () => {
             toastClassName={() =>
               "relative min-h-16 flex items-center justify-between p-6 rounded-lg shadow-xl dark:bg-slate-900 dark:text-white bg-white text-slate-800 text-sm overflow-hidden cursor-pointer border border-gray-300 dark:border-gray-500"
             }
-            bodyClassName={() => "flex-1"}
-            progressClassName={() => "Toastify__progress-bar Toastify__progress-bar--animated Toastify__progress-bar--default h-1 bg-gradient-to-r from-indigo-600 via-cyan-400 to-purple-600"}
           />
         </main>
       </div>

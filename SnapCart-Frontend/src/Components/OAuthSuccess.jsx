@@ -30,7 +30,7 @@ const OAuthSuccess = () => {
         
         if (success) {
           // Redirect to the home page or dashboard on success
-          navigate('/home');
+          navigate('/');
         } else {
           navigate('/login', { state: { error: 'Failed to process authentication' } });
         }

@@ -172,7 +172,7 @@ const Register = ({ initialMode = "login" }) => {
 
       // Navigate after successful API response
       if (isLogin) {
-        navigate("/home");
+        navigate("/");
       } else {
         setIsLogin(true);
         toast.success(response.data.msg)
