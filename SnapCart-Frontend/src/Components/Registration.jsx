@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
-import { ShoppingBag, Truck, Shield, Award, Check, Gift, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ShoppingBag, Truck, Shield, Award, TrendingUp, Check, Gift } from "lucide-react";
+import Register from "../Pages/Register";
 import SnapCartLogo from "../assets/SnapCart.png";
 import SnapCartLogo1 from "../assets/SnapCart1.png";
 
@@ -29,6 +29,10 @@ const containerVariants = {
 const Registration = () => {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isDark, setIsDark] = useState(true);
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
 
   const features = [
     {
@@ -56,6 +60,20 @@ const Registration = () => {
   // Products currently trending
   const trendingItems = ["Smart Watches", "Premium Headphones", "Eco Friendly Products", "Home Decor"];
 
+  const openLoginModal = () => {
+    setIsLogin(true);
+    setIsModalOpen(true);
+  };
+
+  const openSignupModal = () => {
+    setIsLogin(false);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveFeature((prev) => (prev + 1) % features.length);
@@ -64,7 +82,7 @@ const Registration = () => {
   }, [features.length]);
 
   return (
-    <main className='min-h-screen flex items-center justify-center p-4 sm:px-10 bg-gradient-to-br from-white to-purple-100 dark:from-slate-950 dark:to-blue-950 overflow-hidden backdrop-blur-3xl'>
+    <main className='min-h-screen flex items-center justify-center p-4 sm:px-10 overflow-hidden backdrop-blur-3xl'>
       <AnimatePresence mode='wait'>
         <motion.div
           key='registration'
@@ -187,25 +205,25 @@ const Registration = () => {
 
               {/* Action buttons with enhanced styling */}
               <div className='space-y-4'>
-                <NavLink
-                  to='/login'
-                  className='flex items-center justify-center rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 px-6 py-3 text-white  shadow-lg shadow-purple-200 dark:shadow-purple-900/30 w-full transform transition-all duration-300 hover:-translate-y-1'>
+                <button
+                  onClick={openLoginModal}
+                  className='flex items-center justify-center rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 px-6 py-3 text-white shadow-lg shadow-purple-200 dark:shadow-purple-900/30 w-full transform transition-all duration-300 hover:-translate-y-1'>
                   <span className='mr-2'>Login to Your Account</span>
                   <div className='w-5 h-5 rounded-full bg-white/20 flex items-center justify-center'>
                     <Check className='w-3 h-3 text-white' />
                   </div>
-                </NavLink>
+                </button>
 
                 <div className='relative flex items-center justify-center my-4'>
                   <div className='border-t border-gray-200 dark:border-gray-700 absolute w-full'></div>
                   <span className='bg-white dark:bg-slate-800 px-4 text-sm text-gray-500 dark:text-gray-400 relative'>or</span>
                 </div>
 
-                <NavLink
-                  to='/signup'
-                  className='flex items-center justify-center rounded-xl bg-white dark:bg-gray-900 px-6 py-3 text-gray-800 dark:text-white  border-2 border-purple-200 dark:border-purple-800 shadow-lg hover:shadow-purple-100 dark:hover:shadow-purple-900/20 w-full transform transition-all duration-300 hover:-translate-y-1'>
+                <button
+                  onClick={openSignupModal}
+                  className='flex items-center justify-center rounded-xl bg-white dark:bg-gray-900 px-6 py-3 text-gray-800 dark:text-white border-2 border-purple-200 dark:border-purple-800 shadow-lg hover:shadow-purple-100 dark:hover:shadow-purple-900/20 w-full transform transition-all duration-300 hover:-translate-y-1'>
                   Create New Account
-                </NavLink>
+                </button>
               </div>
 
               {/* Additional info with enhanced styling */}
@@ -223,6 +241,14 @@ const Registration = () => {
           </div>
         </motion.div>
       </AnimatePresence>
+
+      {/* Authentication Modal */}
+      <Register 
+        isModalOpen={isModalOpen}
+        isLogin={isLogin}
+        closeModal={closeModal}
+        toggleForm={() => setIsLogin(!isLogin)}
+      />
     </main>
   );
 };

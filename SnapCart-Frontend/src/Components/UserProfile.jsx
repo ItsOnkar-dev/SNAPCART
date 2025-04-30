@@ -62,19 +62,16 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
 
   const handleTabClick = (tab) => {
     setActiveTab(tab.path);
-
-    // If this is a tab with a custom onClick handler
+    
     if (tab.onClick) {
       tab.onClick();
       return;
     }
-
-    // Otherwise navigate to the path
     setIsVisible(false);
     setTimeout(() => {
       onClose();
       navigate(tab.path);
-    }, 300); // Match transition duration
+    }, 300); 
   };
 
   // Handle closing with animation
@@ -82,7 +79,7 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
     setIsVisible(false);
     setTimeout(() => {
       onClose();
-    }, 300); // Match transition duration
+    }, 300); 
   };
 
   // Logout confirmation handlers

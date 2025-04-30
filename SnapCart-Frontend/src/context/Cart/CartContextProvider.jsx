@@ -2,6 +2,7 @@
 import { useState } from "react";
 import CartContext from "./CartContext";
 import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const CartContextProvider = ({ children }) => {
   const [cart, setCart] = useState([]);

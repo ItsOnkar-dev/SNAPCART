@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useContext, useMemo, useCallback } from "react";
 import { MdClose } from "react-icons/md";
-import { LogOut, House, UserRoundPen, Info, LayoutList, Heart, UserRound, Sun, Moon } from "lucide-react";
+import { LogOut, House, UserRoundPen, Info, LayoutList, Heart, BadgeIndianRupee, UserRound, Sun, Moon } from "lucide-react";
 import UserContext from "../../context/User/UserContext";
 import { NavLink, useNavigate } from "react-router-dom";
 import SnapCartLogo from "../../assets/SnapCart.png";
@@ -10,7 +10,14 @@ import SidebarFooter from "./SidebarFooter";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, isDark, handleThemeToggle }) => {
   const navigate = useNavigate();
-  const { logout } = useContext(UserContext);
+  const { isLoggedIn, logout } = useContext(UserContext);
+
+  const handleLogin = useCallback(() => {
+    if (isSidebarOpen) {
+      toggleSidebar();
+    }
+    navigate("/registration")
+  }, [isSidebarOpen, toggleSidebar, navigate])
 
   const handleLogOut = useCallback(() => {
     logout();
@@ -18,27 +25,44 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, isDark, handleThemeToggle }) =>
     if (isSidebarOpen) {
       toggleSidebar();
     }
-  }, [logout, navigate, isSidebarOpen]);
+  }, [logout, navigate, isSidebarOpen, toggleSidebar]);
 
-  const navItems = useMemo(
-    () => [
-      { id: 1, icon: <House size={20} />, title: "Home", path: "/home" },
-      { id: 2, icon: <LayoutList size={20} />, title: "Products", path: "/products" },
+  const navItems = useMemo(() => {
+    const items = [
+      { id: 1, icon: <House size={20} />, title: "Home", path: "/" },
+      isLoggedIn && { id: 2, icon: <LayoutList size={20} />, title: "Products", path: "/products" },
       { id: 3, icon: <Info size={20} />, title: "About", path: "/about" },
       { id: 4, icon: <UserRoundPen size={20} />, title: "Contact", path: "/contact" },
       { id: 5, icon: <Heart size={20} />, title: "Favorites", path: "/favorites" },
-      { id: 6, icon: <UserRound size={20} />, title: "Profile", path: "/profile" },
-      {
+      isLoggedIn && { id: 6, icon: <UserRound size={20} />, title: "Profile", path: "/profile" },
+      isLoggedIn && {
         id: 7,
+        icon: <BadgeIndianRupee size={20} />,
+        title: "Become a Seller",
+        path: "/become-seller",
+
+      },
+      {
+        id: 8,
         icon: isDark ? <Sun size={20} className='text-cyan-300' /> : <Moon size={20} />,
         title: isDark ? "Light Mode" : "Dark Mode",
         onClick: handleThemeToggle,
         className: "md:hidden",
       },
-      { id: 8, icon: <LogOut size={20} />, title: "Log Out", onClick: handleLogOut, className: "md:hidden" },
-    ],
-    [isDark, handleThemeToggle, handleLogOut]
-  );
+      {
+        id: 9,
+        icon: <LogOut size={20} />,
+        title: isLoggedIn ? "Log Out" : "Login/Register",
+        onClick: isLoggedIn ? handleLogOut : handleLogin,
+        className: "md:hidden",
+        path: isLoggedIn ? null : "/registration",
+      },
+    ];
+  
+    // Filter out falsy values like 'false' from isLoggedIn && {...}
+    return items.filter(Boolean);
+  }, [isDark, handleThemeToggle, handleLogOut, isLoggedIn, handleLogin]);
+  
 
   return (
     <>
