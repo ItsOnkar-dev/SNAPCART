@@ -20,13 +20,13 @@ const SellerContextProvider = ({ children }) => {
       setIsSellerLoading(true);
       try {
         const response = await axios.get(`${API_BASE_URL}/sellers`);
-        console.log("Fetched Sellers Successfully", response.data.data);
-        setSellers(response.data.data);
+        console.log("Fetched Sellers Successfully", response.data);
+        setSellers(response.data);
       } catch (error) {
         console.error("An error occurred fetching sellers:", error);
         // Only set error if it's not a "not found" error
         if (error.response && error.response.status !== 404) {
-          const errorMsg = error.response?.data?.message || `Server error: ${error.response?.status}`;
+          const errorMsg = error.response?.message || `Server error: ${error.response?.status}`;
           setErrors({ submit: errorMsg });
           toast.error(errorMsg);
         }
@@ -39,24 +39,24 @@ const SellerContextProvider = ({ children }) => {
   }, []);
 
   // Try to fetch current seller if user is logged in
-  useEffect(() => {
-    const fetchCurrentSeller = async () => {
-      setIsSellerLoading(true);
-      try {
-        // Note: This endpoint requires authentication
-        const response = await axios.get(`${API_BASE_URL}/sellers/current`);
-        console.log("Fetched Current Seller Successfully", response.data.data);
-        setSeller(response.data.data);
-      } catch (error) {
-        console.log("User is not a seller yet or not logged in", error);
-        // Not setting error because this is normal for non-sellers
-      } finally {
-        setIsSellerLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchCurrentSeller = async () => {
+  //     setIsSellerLoading(true);
+  //     try {
+  //       // Note: This endpoint requires authentication
+  //       const response = await axios.get(`${API_BASE_URL}/sellers/current`);
+  //       console.log("Fetched Current Seller Successfully", response.data.data);
+  //       setSeller(response.data.data);
+  //     } catch (error) {
+  //       console.log("User is not a seller yet or not logged in", error);
+  //       // Not setting error because this is normal for non-sellers
+  //     } finally {
+  //       setIsSellerLoading(false);
+  //     }
+  //   };
 
-    fetchCurrentSeller();
-  }, []);
+  //   fetchCurrentSeller();
+  // }, []);
 
   // Create new seller
   const createSeller = async (sellerData) => {

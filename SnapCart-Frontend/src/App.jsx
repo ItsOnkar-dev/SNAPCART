@@ -10,7 +10,6 @@ import WishList from "./Pages/WishList";
 import Profile from "./Pages/Profile";
 import Registration from "./Components/Registration";
 import OAuthSuccess from "./Components/OAuthSuccess";
-import Register from "./Pages/Register";
 import { ToastContainer, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BecomeSeller from "./Pages/BecomeSeller";
@@ -63,8 +62,6 @@ const App = () => {
           <Routes>
             <Route path='/' element={<Home />} />
             <Route path='/registration' element={<Registration />} />
-            <Route path='/login' element={<Register initialMode='login' />} />
-            <Route path='/signup' element={<Register initialMode='signup' />} />
             <Route path='/oauth-success' element={<OAuthSuccess />} />
             <Route path='/products' element={<Products />} />
             <Route path='/about' element={<About />} />

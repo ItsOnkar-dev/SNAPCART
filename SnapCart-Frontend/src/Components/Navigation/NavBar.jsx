@@ -23,7 +23,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const cartContext = useContext(CartContext);
-  const { user } = useContext(UserContext);
+  const { user, isLoggedIn} = useContext(UserContext);
 
   // Update displayName whenever user data changes
   useEffect(() => {
@@ -31,10 +31,9 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       const userData = user.user._doc || user.user;
       console.log("User data:", userData);
       setDisplayName(userData.name || userData.username || "User");
-      // Check all possible locations for avatar image
-      const avatarImage = userData.avatar || (userData.googleId && userData.googleId.picture) || userData.picture || userData.profilePicture || "";
-      setUserAvatar(avatarImage);
+      const avatarImage = userData.avatar || "";
       console.log("Avatar set to:", avatarImage);
+      setUserAvatar(avatarImage);
     } else {
       setDisplayName("User");
       setUserAvatar("");
@@ -114,7 +113,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             <SearchBar />
 
             {/* Become a Seller */}
-            <div className='hidden sm:block'>
+            <div className={`${isLoggedIn ? "sm-block" : "hidden"} hidden sm:block`}>
               <NavLink
                 to='/become-seller'
                 className={({ isActive }) => (isActive ? "text-pink-600" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-center gap-2")}>
@@ -174,7 +173,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                   ) : (
                     <div className='w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold'>{displayName.charAt(0).toUpperCase() || "?"}</div>
                   )}
-                  <h3 className=''>{displayName}</h3>
+                  <h3 className='hidden md:block'>{displayName}</h3>
                   <span className={`transition-transform duration-500 ease-in-out ${isProfileModalOpen ? "rotate-180 opacity-100" : "opacity-80"}`}>
                     <ChevronDown size={18} />
                   </span>

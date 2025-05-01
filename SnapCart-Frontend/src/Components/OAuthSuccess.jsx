@@ -17,7 +17,7 @@ const OAuthSuccess = () => {
       
       if (!token || !userDataStr) {
         console.error('Missing token or user data in URL');
-        navigate('/login', { state: { error: 'Authentication failed' } });
+        navigate('/registration', { state: { error: 'Authentication failed' } });
         return;
       }
       
@@ -32,11 +32,11 @@ const OAuthSuccess = () => {
           // Redirect to the home page or dashboard on success
           navigate('/');
         } else {
-          navigate('/login', { state: { error: 'Failed to process authentication' } });
+          navigate('/registration', { state: { error: 'Failed to process authentication' } });
         }
       } catch (error) {
         console.error('Error processing OAuth redirect:', error);
-        navigate('/login', { state: { error: 'Invalid authentication data' } });
+        navigate('/registration', { state: { error: 'Invalid authentication data' } });
       }
     };
     
