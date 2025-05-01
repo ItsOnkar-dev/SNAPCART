@@ -24,26 +24,26 @@ router.get('/sellers', catchAsync(async (req, res) => {
 }));
 
 // Get the seller of the current user
-router.get('/sellers/current', isLoggedIn, catchAsync(async (req, res) => {
-  Logger.info("Fetching the seller data of the current user");
+// router.get('/sellers/current', isLoggedIn, catchAsync(async (req, res) => {
+//   Logger.info("Fetching the seller data of the current user");
   
-  // Make sure req.user exists and has an _id
-  if (!req.user || !req.user._id) {
-    throw new AuthenticationError('User is not authenticated');
-  }
+//   // Make sure req.user exists and has an _id
+//   if (!req.user || !req.user._id) {
+//     throw new AuthenticationError('User is not authenticated');
+//   }
   
-  const seller = await Seller.findOne({ userId: req.user._id });
+//   const seller = await Seller.findOne({ userId: req.user._id });
   
-  if (!seller) {
-    throw new NotFoundError('User is not a seller');
-  }
+//   if (!seller) {
+//     throw new NotFoundError('User is not a seller');
+//   }
   
-  res.status(200).json({
-    status: 'success', 
-    message: 'Fetched seller data successfully',
-    data: seller,
-  });   
-}));
+//   res.status(200).json({
+//     status: 'success', 
+//     message: 'Fetched seller data successfully',
+//     data: seller,
+//   });   
+// }));
 
 // Create a new seller
 router.post('/sellers', catchAsync(async (req, res) => {

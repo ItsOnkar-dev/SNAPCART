@@ -6,20 +6,6 @@ import bcrypt from 'bcrypt';
 
 dotenv.config();
 
-// Passport configuration
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (error) {
-    done(error, null);
-  }
-});
-
 // Configure Google Strategy
 passport.use(
   new GoogleStrategy(
@@ -27,10 +13,13 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: `${process.env.API_URL || 'http://localhost:8000'}/auth/google/callback`,
-      userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo'
+      userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo',
+      profileFields: ['id', 'displayName', 'photos', 'email']
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
+
+        // console.log("Google profile received:", profile);
         // First, check if user exists by googleId
         let user = await User.findOne({ googleId: profile.id });
         console.log("Existing user by googleId:", user);
@@ -93,5 +82,19 @@ passport.use(
     }
   )
 );
+
+// Passport configuration
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
+});
 
 export default passport;

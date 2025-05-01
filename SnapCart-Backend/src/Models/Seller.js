@@ -19,10 +19,10 @@ const sellerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  approved: {
-    type: Boolean,
-    default: false, // Initially, sellers are not approved
-  },
+  // approved: {
+  //   type: Boolean,
+  //   default: false, // Initially, sellers are not approved
+  // },
 });
 
 const Seller = mongoose.model('Seller', sellerSchema);

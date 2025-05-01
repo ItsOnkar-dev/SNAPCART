@@ -63,7 +63,7 @@ router.post(
 
 // User Login
 router.post(
-  "/login",
+  "/registration",
   loginLimiter,
   catchAsync(async (req, res) => {
     // Input validation
@@ -115,7 +115,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { 
     session: false,  // Change this to true if you want to use sessions
-    failureRedirect: "/login" 
+    failureRedirect: "/registration" 
   }),
   catchAsync(async (req, res) => {
     try {
@@ -140,7 +140,7 @@ router.get(
       res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/oauth-success?token=${jwtToken}&userData=${userData}`);
     } catch (error) {
       console.error("OAuth callback error:", error);
-      res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=authentication_failed`);
+      res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/registration?error=authentication_failed`);
     }
   })
 );
