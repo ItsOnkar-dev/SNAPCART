@@ -6,6 +6,8 @@ import UserContext from "../../context/User/UserContext";
 import { NavLink, useNavigate } from "react-router-dom";
 import SnapCartLogo from "../../assets/SnapCart.png";
 import SnapCartLogo1 from "../../assets/SnapCart1.png";
+import SnapCartLogo2 from "../../assets/SnapCartLog01.png";
+import SnapCartLogo3 from "../../assets/SnapCartLogo2.png";
 import SidebarFooter from "./SidebarFooter";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, isDark, handleThemeToggle }) => {
@@ -84,7 +86,8 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, isDark, handleThemeToggle }) =>
                 navigate("/home");
                 toggleSidebar();
               }}>
-             <span>SnapCart</span>
+             {/* <span>SnapCart</span> */}
+              {isDark ? <img src={SnapCartLogo2} alt='Logo' className='w-32 sm:w-40' /> : <img src={SnapCartLogo3} alt='Logo' className='w-32 sm:w-40' />}
             </div>
           </div>
           <button onClick={toggleSidebar}>

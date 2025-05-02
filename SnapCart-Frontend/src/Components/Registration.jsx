@@ -5,6 +5,8 @@ import { ShoppingBag, Truck, Shield, Award, TrendingUp, Check, Gift } from "luci
 import Register from "../Pages/Register";
 import SnapCartLogo from "../assets/SnapCart.png";
 import SnapCartLogo1 from "../assets/SnapCart1.png";
+import SnapCartLogo2 from "../assets/SnapCartLog01.png";
+import SnapCartLogo3 from "../assets/SnapCartLogo2.png";
 
 // Framer Motion variants
 const containerVariants = {
@@ -29,7 +31,7 @@ const containerVariants = {
 const Registration = () => {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isDark, setIsDark] = useState(true);
-  
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
@@ -177,9 +179,10 @@ const Registration = () => {
               {/* Logo and heading section */}
               <div className='flex flex-col items-center gap-4 sm:gap-6 mb-6 sm:mb-8 relative'>
                 <div className='flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600/10 to-blue-500/10 px-10 py-2 rounded-full'>
-                  {isDark ? <img src={SnapCartLogo} alt='Logo' className='w-8 h-8 rounded-full' /> : <img src={SnapCartLogo1} alt='Logo' className='w-8 h-8 rounded-full' />}
+                  <img src={isDark ? SnapCartLogo : SnapCartLogo1} alt='Logo' className='w-8 h-8 rounded-full' />
                   <h1 className='cursor-pointer font-extrabold text-2xl tracking-wider transition-all duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3'>
                     <span>SnapCart</span>
+                    {/* <img src={isDark ? SnapCartLogo2 : SnapCartLogo3} alt='Logo' className='w-32 sm:w-40' /> */}
                   </h1>
                 </div>
 
@@ -243,12 +246,7 @@ const Registration = () => {
       </AnimatePresence>
 
       {/* Authentication Modal */}
-      <Register 
-        isModalOpen={isModalOpen}
-        isLogin={isLogin}
-        closeModal={closeModal}
-        toggleForm={() => setIsLogin(!isLogin)}
-      />
+      <Register isModalOpen={isModalOpen} isLogin={isLogin} closeModal={closeModal} toggleForm={() => setIsLogin(!isLogin)} />
     </main>
   );
 };

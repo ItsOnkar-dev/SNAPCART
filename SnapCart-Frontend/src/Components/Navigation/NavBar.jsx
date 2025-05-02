@@ -2,6 +2,8 @@
 import { useState, useEffect, useContext, useMemo, useCallback, useRef } from "react";
 import SnapCartLogo from "../../assets/SnapCart.png";
 import SnapCartLogo1 from "../../assets/SnapCart1.png";
+import SnapCartLogo2 from "../../assets/SnapCartLog01.png";
+import SnapCartLogo3 from "../../assets/SnapCartLogo2.png";
 import SearchBar from "../SearchBar";
 import { MdOutlineShoppingBasket, MdMenu } from "react-icons/md";
 import { ChevronDown, BadgeIndianRupee, Heart, UserRound, Sun, Moon } from "lucide-react";
@@ -78,7 +80,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
   const styles = useMemo(
     () => ({
-      navbar: `fixed top-0 w-full p-4 md:px-10 z-30 transition-colors duration-300 bg-[rgb(255,255,255)] dark:bg-[rgb(10,18,49)] border-b border-gray-200 dark:border-slate-800`,
+      navbar: `fixed top-0 w-full p-4 md:px-10 z-30 transition-colors duration-300 bg-[rgb(255,255,255)] dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800`,
       authNavbar:
         "fixed w-full p-4 md:px-10 xl:px-32 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 backdrop-blur-xl",
       itemsList: "flex items-center gap-3 md:gap-1 cursor-pointer text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white",
@@ -101,9 +103,10 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
           {/* Logo */}
           <div className='flex items-center gap-2 cursor-pointer transition-all duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3'>
-            {isDark ? <img src={SnapCartLogo} alt='Logo' className='w-8 h-8 rounded-full' /> : <img src={SnapCartLogo1} alt='Logo' className='w-8 h-8 rounded-full' />}
+             <img src={isDark ? SnapCartLogo : SnapCartLogo1} alt='Logo' className='w-8 h-8 rounded-full' />
             <div className={`${styles.logoName}`} onClick={() => navigate("/")}>
-              <span>SnapCart</span>
+              {/* <span>SnapCart</span> */}
+              <img src={isDark ? SnapCartLogo2 : SnapCartLogo3} alt='Logo' className='w-32 sm:w-40' />
             </div>
           </div>
 
