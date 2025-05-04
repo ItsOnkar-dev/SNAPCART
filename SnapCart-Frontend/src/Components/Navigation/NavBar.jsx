@@ -32,7 +32,10 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
     if (user && user.user) {
       const userData = user.user._doc || user.user;
       console.log("User data:", userData);
-      setDisplayName(userData.name || userData.username || "User");
+      
+      const name = userData.name || userData.username || "User";
+      setDisplayName(name);
+      
       const avatarImage = userData.avatar || "";
       console.log("Avatar set to:", avatarImage);
       setUserAvatar(avatarImage);
@@ -90,6 +93,17 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
     }),
     []
   );
+
+  // Safely get the first character of the display name
+  const getInitial = () => {
+    if (displayName && typeof displayName === 'string' && displayName.length > 0) {
+      return displayName.charAt(0).toUpperCase();
+    }
+    return '?';
+  };
+
+  // Check if avatar URL is valid
+  const hasValidAvatar = userAvatar && userAvatar.trim() !== '';
 
   return (
     <>
@@ -159,22 +173,21 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                       ? "hidden md:flex gap-2 items-center text-pink-600 placeholder:font-bold cursor-pointer"
                       : "hidden sm:flex items-center gap-2 cursor-pointer text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white"
                   }`}>
-                  {userAvatar ? (
+                  {hasValidAvatar ? (
                     <img
                       src={userAvatar}
                       alt='User'
                       className='w-8 h-8 object-cover rounded-full'
                       onError={(e) => {
-                        console.log("Avatar failed to load:", userAvatar);
-                        e.target.onerror = null;
-                        e.target.style.display = "none";
-                        e.target.parentNode.innerHTML = `<div class="w-8 h-8 flex items-center justify-center bg-cyan-500 text-white text-xl font-bold">${
-                          displayName?.charAt(0).toUpperCase() || "?"
-                        }</div>`;
+                        console.error("Avatar image failed to load");
+                        e.target.style.display = 'none';
+                        setUserAvatar(''); // Reset avatar on error
                       }}
                     />
                   ) : (
-                    <div className='w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold'>{displayName.charAt(0).toUpperCase() || "?"}</div>
+                    <div className='w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold'>
+                      {getInitial()}
+                    </div>
                   )}
                   <h3 className='hidden md:block'>{displayName}</h3>
                   <span className={`transition-transform duration-500 ease-in-out ${isProfileModalOpen ? "rotate-180 opacity-100" : "opacity-80"}`}>
