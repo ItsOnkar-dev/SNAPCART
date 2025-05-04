@@ -3,9 +3,10 @@ import { useContext, useState, useEffect } from "react";
 import UserContext from "../context/User/UserContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { User, Package, Heart, CreditCard, Settings, LogOut, X, Sun, Moon } from "lucide-react";
+import LogOutModal from "./LogOutModal";
 
 const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
-  const { isLoggedIn, logout, user } = useContext(UserContext);
+  const { isLoggedIn, user } = useContext(UserContext);
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
@@ -82,22 +83,19 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
     }, 300); 
   };
 
-  // Logout confirmation handlers
-  const handleConfirmLogout = () => {
+  // Handle logout modal close
+  const handleLogoutModalClose = () => {
     setShowLogoutConfirmation(false);
-    setTimeout(() => {
-      logout();
-      onClose();
-      navigate("/");
-    }, 300);
-  };
-
-  const handleCancelLogout = () => {
-    setShowLogoutConfirmation(false);
-    // Make the profile modal visible again if it was open
+    // Make profile modal visible again
     if (isOpen) {
       setTimeout(() => setIsVisible(true), 10);
     }
+  };
+
+  // Handle successful logout completion
+  const handleLogoutComplete = () => {
+    // No need to set showLogoutConfirmation to false as the component will unmount
+    onClose();
   };
 
   // If still loading, show loading indicator
@@ -135,7 +133,7 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
 
   if (!isOpen) return null;
 
-  const userData = user && user.user && user.user._doc ? user.user._doc : {};
+  const userData = user && user.user && user.user._doc ? user.user._doc : user?.user || {};
 
   return (
     <>
@@ -163,12 +161,14 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
                     e.target.onerror = null;
                     e.target.style.display = "none";
                     e.target.parentNode.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold">${
-                      userData.username?.charAt(0).toUpperCase() || "?"
+                      userData.name?.charAt(0).toUpperCase() || userData.username?.charAt(0).toUpperCase() || "?"
                     }</div>`;
                   }}
                 />
               ) : (
-                <div className='w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold'>{userData.username?.charAt(0).toUpperCase() || "?"}</div>
+                <div className='w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold'>
+                  {userData.name?.charAt(0).toUpperCase() || userData.username?.charAt(0).toUpperCase() || "?"}
+                </div>
               )}
             </div>
             <div>
@@ -198,40 +198,11 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
 
       {/* Logout Confirmation Dialog */}
       {showLogoutConfirmation && (
-        <div>
-          <div className='fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50'>
-            <div className='bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-lg w-full px-10 py-8 transform transition-all duration-300 ease-in-out text-center relative'>
-              {/* Modal Header */}
-              <h2 className='text-2xl mb-4 font-bold text-gray-800 dark:text-white '>Confirm Logout</h2>
-
-              <button
-                onClick={handleCancelLogout}
-                className='text-white dark:text-slate-800 dark:hover:text-black transition-colors duration-200 bg-slate-700 dark:bg-white rounded-full p-1 absolute -top-2 -right-2 '>
-                <X size={20} />
-              </button>
-
-              {/* Modal Content */}
-              <div className='flex items-center justify-center mb-6'>
-                <div className='flex items-center gap-4'>
-                  <LogOut size={20} />
-                  <p className='text-gray-700 dark:text-gray-300'>Are you sure you want to logout?</p>
-                </div>
-              </div>
-
-              {/* Buttons */}
-              <div className='flex justify-between gap-4'>
-                <button onClick={handleConfirmLogout} className='w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200'>
-                  CONFIRM
-                </button>
-                <button
-                  onClick={handleCancelLogout}
-                  className='w-full bg-white hover:bg-gray-100 text-gray-700 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 font-medium py-2 px-4 rounded border border-gray-300 dark:border-gray-600 transition-colors duration-200'>
-                  CANCEL
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <LogOutModal 
+          isOpen={showLogoutConfirmation} 
+          onClose={handleLogoutModalClose}
+          onLogoutComplete={handleLogoutComplete}
+        />
       )}
     </>
   );

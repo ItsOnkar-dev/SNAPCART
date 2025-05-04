@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useContext, useMemo, useCallback } from "react";
+import { useContext, useMemo, useCallback, useState } from "react";
 import { MdClose } from "react-icons/md";
 import { LogOut, House, UserRoundPen, Info, LayoutList, Heart, BadgeIndianRupee, UserRound, Sun, Moon } from "lucide-react";
 import UserContext from "../../context/User/UserContext";
@@ -9,10 +9,12 @@ import SnapCartLogo1 from "../../assets/SnapCart1.png";
 import SnapCartLogo2 from "../../assets/SnapCartLog01.png";
 import SnapCartLogo3 from "../../assets/SnapCartLogo2.png";
 import SidebarFooter from "./SidebarFooter";
+import LogOutModal from "../LogOutModal";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, isDark, handleThemeToggle }) => {
   const navigate = useNavigate();
-  const { isLoggedIn, logout } = useContext(UserContext);
+  const { isLoggedIn } = useContext(UserContext);
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
   const handleLogin = useCallback(() => {
     if (isSidebarOpen) {
@@ -22,12 +24,19 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, isDark, handleThemeToggle }) =>
   }, [isSidebarOpen, toggleSidebar, navigate])
 
   const handleLogOut = useCallback(() => {
-    logout();
+    setShowLogoutConfirmation(true);
+  }, []);
+
+  const handleLogoutModalClose = useCallback(() => {
+    setShowLogoutConfirmation(false);
+  }, []);
+
+  const handleLogoutComplete = useCallback(() => {
     navigate("/");
     if (isSidebarOpen) {
       toggleSidebar();
     }
-  }, [logout, navigate, isSidebarOpen, toggleSidebar]);
+  }, [navigate, isSidebarOpen, toggleSidebar]);
 
   const navItems = useMemo(() => {
     const items = [
@@ -122,6 +131,15 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, isDark, handleThemeToggle }) =>
         {/* Footer */}
         <SidebarFooter />
       </div>
+
+       {/* Logout Confirmation Dialog */}
+       {showLogoutConfirmation && (
+        <LogOutModal 
+          isOpen={showLogoutConfirmation} 
+          onClose={handleLogoutModalClose}
+          onLogoutComplete={handleLogoutComplete}
+        />
+      )}
     </>
   );
 };

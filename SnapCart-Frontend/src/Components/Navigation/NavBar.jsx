@@ -197,7 +197,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 {isProfileModalOpen && <UserProfile isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} isDark={isDark} handleThemeToggle={handleThemeToggle} />}
               </div>
             ) : (
-              <NavLink to='/registration' className='hidden sm:flex items-center gap-2 text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white'>
+              <NavLink to='/registration' className='hidden sm:flex items-center gap-1 text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white'>
                 <UserRound />
                 <span className=''>Register</span>
               </NavLink>
