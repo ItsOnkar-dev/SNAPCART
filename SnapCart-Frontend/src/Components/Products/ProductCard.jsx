@@ -5,7 +5,7 @@ import CartContext from "../../context/Cart/CartContext";
 
 const ProductCard = ({ product }) => {
 
-  const { title, image, description, category } = product
+  const { title, image, description, category, price } = product
 
   const cartContext = useContext(CartContext)
 
@@ -33,12 +33,19 @@ const ProductCard = ({ product }) => {
 
   return (
     <>
-      <div className="flex flex-col items-start justify-center gap-6  bg-transparent w-full h-auto px-4 py-6 shadow-md cursor-pointer rounded-md border border-gray-200 dark:border-gray-700">
-        <img src={image} alt={title} className="block m-auto w-56 h-44 object-contain cursor-pointer transition-all duration-300 ease-in-out hover:scale-110" />
+      <div className="flex flex-col items-start justify-center gap-6  bg-transparent w-full h-auto px-4 py-6 shadow-md cursor-pointer rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="w-full h-48 overflow-hidden rounded-lg">
+          <img 
+            src={image} 
+            alt={title} 
+            className="block w-full h-full object-cover cursor-pointer transition-all duration-500 ease-in-out hover:scale-150" 
+          />
+        </div>
         <div className="flex flex-col gap-1 text-sm text-gray-500 dark:text-gray-400">
-          <h2><span className="text-black dark:text-white">Title:</span> {truncateTitle(title, 40)}</h2>
-          <p><span className="text-black dark:text-white">Description: </span>{truncateDesc(description, 80)}</p>
-          <p ><span className="text-black dark:text-white">Category:</span> {category}</p>
+          <span className="text-black dark:text-white text-lg">{truncateTitle(title, 40)}</span>
+          <span className="text-black dark:text-white/70">{truncateDesc(description, 80)}</span>
+          <span className="text-black dark:text-white/70">{category}</span> 
+          <span className="text-black dark:text-white/70">Rs. {price}</span>
         </div>
         <div className="mx-auto flex items-center justify-between w-full">
           {/* <button className="bg-black text-white px-3 py-1 rounded-md">Add to Cart</button> */}
