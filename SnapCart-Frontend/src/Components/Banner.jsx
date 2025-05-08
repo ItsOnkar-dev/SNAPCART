@@ -1,33 +1,55 @@
 
 import { Carousel } from "react-responsive-carousel"
 import "react-responsive-carousel/lib/styles/carousel.min.css"
+import Joggers from "../assets/joggers.webp"
+import SummerShirts from "../assets/Summer-Shirts.webp"
+import Shoes from "../assets/Shoes.webp"
+import Perfume from "../assets/Perfume.webp"
+import SummerSkirts from "../assets/girl_summer.webp"
+import socks from "../assets/socks.webp"
+import Backpack from "../assets/Backpack.webp"
 
-const ImageCarousel = () => {
+const Banner = () => {
   const images = [
     {
-      src: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-      alt: "Smart watch on a wooden surface",
+      id: 1,
+      src: Joggers,
+      alt: "Colorful joggers on a white background",
     },
     {
-      src: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-      alt: "Wireless headphones on a colorful background",
+      id: 2,
+      src: SummerShirts,
+      alt: "Summer shirts",
     },
     {
-      src: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-      alt: "Red sneakers on a red background",
+      id: 3,
+      src: Shoes,
+      alt: "Sneakers",
     },
     {
-      src: "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-      alt: "Perfume bottle on a pink background",
+      id: 4,
+      src: Perfume,
+      alt: "Perfumes",
     },
     {
-      src: "https://images.unsplash.com/photo-1491637639811-60e2756cc1c7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-      alt: "Sunglasses on a blue background",
+      id: 5,
+      src: SummerSkirts,
+      alt: "Summer skirts",
+    },
+    {
+      id: 6,
+      src: socks,
+      alt: "Socks",
+    },
+    {
+      id: 7,
+      src: Backpack,
+      alt: "Backpacks",
     },
   ]
 
   return (
-    <div className="block w-full mx-auto relative cursor-pointer">
+    <div className="block w-full mx-auto md:px-4 relative cursor-pointer">
       <Carousel
         showArrows={true}
         showStatus={false}
@@ -82,9 +104,9 @@ const ImageCarousel = () => {
           )
         }
       >
-        {images.map((image, index) => (
-          <div key={index} className="h-[300px] lg:h-[350px] xl:h-[400px]">
-            <img src={image.src || "/placeholder.svg"} alt={image.alt} className="object-cover w-full h-full" />
+        {images.map((image) => (
+          <div key={image.id} className="h-[50vh] sm:h-[70vh]">
+            <img src={image.src} alt={image.alt} className="object-cover w-full h-full" />
           </div>
         ))}
       </Carousel>
@@ -92,5 +114,5 @@ const ImageCarousel = () => {
   )
 }
 
-export default ImageCarousel
+export default Banner
 

@@ -43,7 +43,7 @@ const SearchBar = () => {
       <div className="hidden lg:flex items-center relative">
         <input
           type="text"
-          placeholder="Search products..."
+          placeholder="What are you looking for?"
           className={styles.inputStyles(expandInput)}
           onFocus={handleSearchFocus}
           onBlur={handleSearchBlur}

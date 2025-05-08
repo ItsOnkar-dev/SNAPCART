@@ -130,7 +130,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             <SearchBar />
 
             {/* Become a Seller */}
-            <div className={`${isLoggedIn ? "sm-block" : "hidden"} hidden sm:block`}>
+            <div className={`${isLoggedIn ? "max-sm:hidden sm-block" : "hidden"}`}>
               <NavLink
                 to='/become-seller'
                 className={({ isActive }) => (isActive ? "text-pink-600" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-center gap-2")}>

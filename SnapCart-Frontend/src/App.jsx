@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Route, Routes } from "react-router-dom";
 import NavBar from "./Components/Navigation/NavBar";
 import Home from "./Pages/Home";
-import Products from "./Pages/Products";
 import About from "./Pages/About";
 import Contact from "./Pages/Contact";
 import Cart from "./Pages/Cart";
@@ -15,7 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 import BecomeSeller from "./Pages/BecomeSeller";
 import SellerContextProvider from "./context/Seller/SellerContextProvider";
 import AdminDashboard from "./Pages/AdminDashboard";
-import ProductManagement from "./Components/ProductList/ProductManagement";
+import ProductManagement from "./Components/Products/ProductManagement";
 
 // Get initial theme from localStorage or system preference
 const getInitialTheme = () => {
@@ -63,7 +62,6 @@ const App = () => {
             <Route path='/' element={<Home />} />
             <Route path='/registration' element={<Registration />} />
             <Route path='/oauth-success' element={<OAuthSuccess />} />
-            <Route path='/products' element={<Products />} />
             <Route path='/about' element={<About />} />
             <Route path='/contact' element={<Contact />} />
             <Route path='/cart' element={<Cart />} />

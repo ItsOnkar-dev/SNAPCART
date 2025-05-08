@@ -24,12 +24,12 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #3fb7f4;
+  background-color: #a3caf2;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: lightcyan;
+  background: none;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
