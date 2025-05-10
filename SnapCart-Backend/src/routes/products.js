@@ -20,6 +20,10 @@ router.post('/products', catchAsync(async(req, res) => {
   Logger.info("Create the product request received", { body: req.body })
   const { title, description, image, price } = req.body;
 
+  if(!title || description || !image || !price) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
   const newProduct = await Product.create(
     { 
       title, 
