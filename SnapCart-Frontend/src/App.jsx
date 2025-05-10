@@ -15,6 +15,7 @@ import BecomeSeller from "./Pages/BecomeSeller";
 import SellerContextProvider from "./context/Seller/SellerContextProvider";
 import AdminDashboard from "./Pages/AdminDashboard";
 import ProductManagement from "./Components/Products/ProductManagement";
+import ProductDetails from "./Pages/ProductDetails";
 
 // Get initial theme from localStorage or system preference
 const getInitialTheme = () => {
@@ -64,6 +65,7 @@ const App = () => {
             <Route path='/oauth-success' element={<OAuthSuccess />} />
             <Route path='/about' element={<About />} />
             <Route path='/contact' element={<Contact />} />
+            <Route path='/products/:productId' element={<ProductDetails />}/>
             <Route path='/cart' element={<Cart />} />
             <Route path='/wishlist' element={<WishList />} />
             <Route path='/profile' element={<Profile />} />
