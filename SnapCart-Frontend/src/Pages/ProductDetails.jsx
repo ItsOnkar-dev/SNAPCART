@@ -1,22 +1,25 @@
 import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import CartContext from "../context/Cart/CartContext";
+import { useProductContext } from "../context/Product/ProductContext";
 import { Star, ChevronRight, ShoppingCart, Heart, Share2, Truck, ShieldCheck, ArrowLeft, Plus, Minus } from "lucide-react";
 
 const ProductDetails = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isInWishlist, setIsInWishlist] = useState(false);
-  const [relatedProducts, setRelatedProducts] = useState([]);
   const [activeTab, setActiveTab] = useState("description");
   
+  const { getProductById, loading, error, getRelatedProducts } = useProductContext();
   const cartContext = useContext(CartContext);
+  
+  // Get the product from context
+  const product = getProductById(productId);
+  
+  // Get related products
+  const relatedProducts = getRelatedProducts(productId, 4);
 
   // Check if product is in wishlist
   useEffect(() => {
@@ -27,32 +30,6 @@ const ProductDetails = () => {
       setIsInWishlist(!!itemInWishlist);
     }
   }, [cartContext.wishlist, product]);
-
-  // Fetch product details
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`http://localhost:8000/api/products/${productId}`);
-        setProduct(res.data);
-        
-        // Fetch related products (same category or random)
-        const relatedRes = await axios.get("http://localhost:8000/api/products");
-        // Filter out current product and limit to 4 items
-        const filteredRelated = relatedRes.data.data
-          .filter(item => item._id !== productId)
-          .slice(0, 4);
-        setRelatedProducts(filteredRelated);
-        
-        setLoading(false);
-      } catch (err) {
-        setError("Failed to load product. Please try again.", err);
-        setLoading(false);
-      }
-    };
-
-    fetchProduct();
-  }, [productId]);
 
   const handleAddToCart = () => {
     if (product) {

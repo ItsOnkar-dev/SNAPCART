@@ -12,7 +12,6 @@ import OAuthSuccess from "./Components/OAuthSuccess";
 import { ToastContainer, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BecomeSeller from "./Pages/BecomeSeller";
-import SellerContextProvider from "./context/Seller/SellerContextProvider";
 import AdminDashboard from "./Pages/AdminDashboard";
 import ProductManagement from "./Components/Products/ProductManagement";
 import ProductDetails from "./Pages/ProductDetails";
@@ -55,44 +54,42 @@ const App = () => {
   const progressClassName = () => "Toastify__progress-bar Toastify__progress-bar--animated Toastify__progress-bar--default h-1 bg-gradient-to-r from-purple-500 via-cyan-500 to-blue-500";
 
   return (
-    <SellerContextProvider>
-      <div className='min-h-screen bg-white text-gray-900 dark:bg-slate-900 dark:text-white transition-colors duration-300'>
-        <NavBar isDark={isDark} toggleDarkMode={toggleDarkMode} />
-        <main>
-          <Routes>
-            <Route path='/' element={<Home />} />
-            <Route path='/registration' element={<Registration />} />
-            <Route path='/oauth-success' element={<OAuthSuccess />} />
-            <Route path='/about' element={<About />} />
-            <Route path='/contact' element={<Contact />} />
-            <Route path='/products/:productId' element={<ProductDetails />}/>
-            <Route path='/cart' element={<Cart />} />
-            <Route path='/wishlist' element={<WishList />} />
-            <Route path='/profile' element={<Profile />} />
-            <Route path='/become-seller' element={<BecomeSeller />} />
-            <Route path='/admin' element={<AdminDashboard />} />
-            <Route path='/seller/product-management' element={<ProductManagement />} />
-          </Routes>
-          <ToastContainer
-            position='top-center'
-            autoClose={2000}
-            hideProgressBar={false}
-            newestOnTop={true}
-            closeOnClick
-            closeButton
-            draggable
-            pauseOnFocusLoss
-            pauseOnHover={false}
-            theme={window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"}
-            transition={Zoom}
-            toastClassName={toastClassName}
-            bodyClassName={bodyClassName}
-            progressClassName={progressClassName}
-            limit={3}
-          />
-        </main>
-      </div>
-    </SellerContextProvider>
+    <div className='min-h-screen bg-white text-gray-900 dark:bg-slate-900 dark:text-white transition-colors duration-300'>
+      <NavBar isDark={isDark} toggleDarkMode={toggleDarkMode} />
+      <main>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/registration' element={<Registration />} />
+          <Route path='/oauth-success' element={<OAuthSuccess />} />
+          <Route path='/about' element={<About />} />
+          <Route path='/contact' element={<Contact />} />
+          <Route path='/products/:productId' element={<ProductDetails />} />
+          <Route path='/cart' element={<Cart />} />
+          <Route path='/wishlist' element={<WishList />} />
+          <Route path='/profile' element={<Profile />} />
+          <Route path='/become-seller' element={<BecomeSeller />} />
+          <Route path='/admin' element={<AdminDashboard />} />
+          <Route path='/seller/product-management' element={<ProductManagement />} />
+        </Routes>
+        <ToastContainer
+          position='top-center'
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={true}
+          closeOnClick
+          closeButton
+          draggable
+          pauseOnFocusLoss
+          pauseOnHover={false}
+          theme={window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"}
+          transition={Zoom}
+          toastClassName={toastClassName}
+          bodyClassName={bodyClassName}
+          progressClassName={progressClassName}
+          limit={3}
+        />
+      </main>
+    </div>
   );
 };
 
