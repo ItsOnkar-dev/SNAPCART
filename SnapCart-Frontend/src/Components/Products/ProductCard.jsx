@@ -22,13 +22,11 @@ const ProductCard = ({ product }) => {
   }, [cartContext.wishlist, title]);
   
   const handleAddToCart = (e) => {
-    e.preventDefault();
     e.stopPropagation();
     cartContext.addToCart({ ...product, qty: 1 });
   };
   
   const handleToggleWishlist = (e) => {
-    e.preventDefault();
     e.stopPropagation();
     if (isInWishlist) {
       cartContext.removeFromWishlist(title);
@@ -38,11 +36,15 @@ const ProductCard = ({ product }) => {
       setIsInWishlist(true);
     }
   };
-
-   const handleCardClick = () => {
+  
+  const handleCardClick = () => {
+    // Navigate to product details page
     navigate(`/products/${_id}`);
-    // Scroll to the top of the page
+    
+    setTimeout(() => {
+      // Scroll to the top of the page
     window.scrollTo(0, 0);
+    }, 500)
   };
   
   const truncateDesc = (text, maxLength) => {
@@ -62,13 +64,13 @@ const ProductCard = ({ product }) => {
   return (
     <div 
       onClick={handleCardClick}
-      className="group flex flex-col items-start justify-center gap-6  bg-transparent w-full h-auto px-4 py-6 shadow-md cursor-pointer rounded-lg border border-gray-200 dark:border-gray-700"
+      className="group border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden hover:shadow-md px-4 py-6 transition-shadow duration-300 cursor-pointer"
     >
-      <div className="relative w-full h-48 overflow-hidden rounded-lg">
+      <div className="relative h-52 overflow-hidden bg-gray-100 rounded-lg">
         <img 
           src={image} 
           alt={title} 
-          className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500" 
+          className="w-full h-full object-cover cursor-pointer group-hover:scale-125 transition-transform duration-500" 
         />
         <button
           onClick={handleToggleWishlist}
@@ -81,17 +83,17 @@ const ProductCard = ({ product }) => {
         </button>
       </div>
       
-      <div className="p-2 text-sm text-gray-500 dark:text-gray-400">
+      <div className="pt-5">
         <h3 className="text-gray-900 dark:text-white font-medium mb-1 truncate">
           {truncateTitle(title, 40)}
         </h3>
         
-        <p className="text-gray-900 dark:text-white/70 text-sm mb-2 line-clamp-2">
+        <p className="text-gray-600 dark:text-white/70 text-sm mb-2 line-clamp-2">
           {truncateDesc(description, 80)}
         </p>
         
         <div className="flex items-center justify-between mt-5">
-          <span className="text-gray-900 dark:text-white/70 font-bold">₹{price}</span>
+          <span className="text-gray-900 dark:text-white font-bold">₹ {price}</span>
           
           <button 
             onClick={handleAddToCart}
@@ -107,3 +109,4 @@ const ProductCard = ({ product }) => {
 };
 
 export default ProductCard;
+    

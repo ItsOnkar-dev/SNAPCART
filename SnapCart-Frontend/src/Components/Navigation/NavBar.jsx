@@ -170,7 +170,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                   ref={profileIconRef}
                   className={`${
                     location.pathname === "/profile"
-                      ? "hidden md:flex gap-2 items-center text-pink-600 placeholder:font-bold cursor-pointer"
+                      ? "hidden sm:flex gap-2 items-center text-pink-600 placeholder:font-bold cursor-pointer"
                       : "hidden sm:flex items-center gap-2 cursor-pointer text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white"
                   }`}>
                   {hasValidAvatar ? (
