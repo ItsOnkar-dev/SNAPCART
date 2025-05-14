@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useRef } from "react";
 import SellerContext from "../../context/Seller/SellerContext";
 import { useProductContext } from "../../context/Product/ProductContext";
 import { toast } from "react-toastify";
@@ -14,6 +14,9 @@ const ProductManagement = () => {
 
   const [editMode, setEditMode] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  
+  // Create a ref for the form
+  const productFormRef = useRef(null);
 
   const { seller } = useContext(SellerContext);
   const { products, loading, addProduct, updateProduct, deleteProduct } = useProductContext();
@@ -36,6 +39,11 @@ const ProductManagement = () => {
     }
   };
 
+  const scrollToForm = () => {
+    // Using the ref to scroll instead of querySelector
+    productFormRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const handleEditClick = (product) => {
     setEditMode(true);
     setSelectedProduct(product);
@@ -46,8 +54,8 @@ const ProductManagement = () => {
       price: product.price,
     });
 
-    // Scroll to form
-    document.querySelector(".product-form").scrollIntoView({ behavior: "smooth" });
+    // Scroll to form using our new function
+    scrollToForm();
   };
 
   const handleUpdateProduct = async (e) => {
@@ -96,8 +104,8 @@ const ProductManagement = () => {
           <p className='text-gray-600 max-w-2xl mx-auto'>Create, update, and manage your product inventory with ease. Add detailed descriptions and attractive images to showcase your offerings.</p>
         </div>
 
-        {/* Create/Edit Product Form */}
-        <div className='product-form bg-white rounded-xl shadow-xl p-6 mb-12 transition-all duration-300 transform'>
+        {/* Create/Edit Product Form - Now with ref */}
+        <div ref={productFormRef} className='bg-white rounded-xl shadow-xl p-6 mb-12 transition-all duration-300 transform'>
           <h2 className='text-2xl font-bold mb-6 pb-2 border-b border-gray-200 flex items-center'>
             {editMode ? (
               <>
@@ -203,12 +211,10 @@ const ProductManagement = () => {
                 } text-white font-bold py-3 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 flex items-center`}>
                 {editMode ? (
                   <>
-                    <button className="flex" onClick={() => handleUpdateProduct()}>
-                      <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 mr-2' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4' />
-                      </svg>
-                      Update Product
-                    </button>
+                    <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 mr-2' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4' />
+                    </svg>
+                    Update Product
                   </>
                 ) : (
                   <>
@@ -239,11 +245,11 @@ const ProductManagement = () => {
         <div className='mb-8'>
           <h2 className='text-3xl font-bold mb-8 text-center'>
             Your Products
-            <span className='ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-blue-100 bg-blue-600 rounded-full'>
+            <span className='ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-blue-100 bg-blue-500 rounded-full'>
               {Array.isArray(products) ? products.length : 0}
             </span>
           </h2>
-
+ 
           {loading ? (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
               {[1, 2, 3].map((item) => (
@@ -327,8 +333,8 @@ const ProductManagement = () => {
               <h3 className='text-2xl font-bold text-gray-700 mb-2'>No Products Found</h3>
               <p className='text-gray-500 mb-6 max-w-md'>You haven&apos;t created any products yet. Get started by creating your first product above!</p>
               <button
-                onClick={() => document.querySelector(".product-form").scrollIntoView({ behavior: "smooth" })}
-                className='bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center'>
+                onClick={scrollToForm}
+                className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-200 flex items-center'>
                 <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 mr-2' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 6v6m0 0v6m0-6h6m-6 0H6' />
                 </svg>
