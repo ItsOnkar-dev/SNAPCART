@@ -8,8 +8,8 @@ import "react-toastify/dist/ReactToastify.css";
 
 const BecomeSeller = () => {
   const navigate = useNavigate();
-  const { seller, isSellerLoading, createSeller, errors: contextErrors } = useSellerContext();
-  const { user } = useUserContext();
+  const { seller, isSellerLoading, createSeller,  hasCheckedSellerStatus, errors: contextErrors } = useSellerContext();
+  const { user, isLoggedIn } = useUserContext();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -20,17 +20,26 @@ const BecomeSeller = () => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasExistingSellerAccount, setHasExistingSellerAccount] = useState(false);
+
+   // Check authentication status first
+  useEffect(() => {
+    if (hasCheckedSellerStatus && !isLoggedIn) {
+      toast.error("You must be logged in to become a seller");
+      navigate("/become-seller");
+    }
+  }, [isLoggedIn, hasCheckedSellerStatus, navigate]);
 
   // If seller data exists, redirect to product management
   useEffect(() => {
-    if (!isSellerLoading && seller) {
+    if (!isSellerLoading && hasCheckedSellerStatus && seller) {
       toast.info("You are already a seller! Redirecting to product management...");
       // Add a small delay to allow the toast to be seen
       setTimeout(() => {
         navigate("/seller/product-management");
       }, 1500);
     }
-  }, [seller, navigate, isSellerLoading]);
+  }, [seller, navigate, isSellerLoading, hasCheckedSellerStatus]);
 
   // Pre-fill form with user data if available
   useEffect(() => {
@@ -40,6 +49,22 @@ const BecomeSeller = () => {
         name: user.name || "",
         email: user.email || "",
       }));
+      // Check if this email already has a seller account
+      const checkEmail = async () => {
+        if (user.email) {
+          try {
+            const response = await fetch(`http://localhost:8000/sellers/check-email?email=${user.email}`);
+            const data = await response.json();
+            if (data.data?.exists) {
+              setHasExistingSellerAccount(true);
+            }
+          } catch (error) {
+            console.error("Error checking email:", error);
+          }
+        }
+      };
+      
+      checkEmail();
     }
   }, [user]);
 
@@ -97,12 +122,18 @@ const BecomeSeller = () => {
     try {
       console.log("Submitting seller form with data:", formData);
       // Use the createSeller function from context
-      await createSeller(formData);
-      // Navigate to product management on success
-      navigate("/seller/product-management");
-      toast.success("Seller application submitted successfully! Redirecting to product management...");
+      const result = await createSeller(formData);
+      if (result.success) {
+        // Navigate to product management on success
+        toast.success("Seller account created successfully! Redirecting to product management...");
+        setTimeout(() => {
+          navigate("/seller/product-management");
+        }, 1500);
+      } else {
+        throw new Error(result.error || "Failed to create seller account");
+      }
     } catch (error) {
-      console.error("An error occurred:", error);
+     
       let errorMessage;
 
       if (error.response) {
@@ -169,7 +200,7 @@ const BecomeSeller = () => {
   ];
 
   // Show loading while checking seller status
-  if (isSellerLoading) {
+  if (isSellerLoading || !hasCheckedSellerStatus) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500'></div>
@@ -184,6 +215,39 @@ const BecomeSeller = () => {
     { value: "15M+", label: "Active buyers" },
     { value: "100%", label: "Secure transactions" },
   ];
+
+  // Show existing seller account message
+  if (hasExistingSellerAccount && !seller) {
+    return (
+      <div className='min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4'>
+        <div className='bg-white dark:bg-slate-800 border dark:border-gray-600 shadow-lg rounded-lg overflow-hidden max-w-md w-full'>
+          <div className='p-8 text-center'>
+            <div className='w-20 h-20 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-6'>
+              <svg xmlns='http://www.w3.org/2000/svg' className='h-10 w-10 text-yellow-500' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 9v2m0 4h.01M12 22c-5.523 0-10-4.477-10-10S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z' />
+              </svg>
+            </div>
+            <h2 className='text-2xl font-bold text-gray-800 dark:text-white mb-4'>Seller Account Exists</h2>
+            <p className='text-gray-600 dark:text-gray-300 mb-6'>
+              It looks like this email address already has a seller account. Please log in with your seller credentials to access your seller dashboard.
+            </p>
+            <div className='flex flex-col space-y-4'>
+              <button
+                onClick={() => navigate("/become-seller")}
+                className='w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-3 px-4 rounded-lg transition-colors'>
+                Log In as Seller
+              </button>
+              <button
+                onClick={() => navigate("/")}
+                className='w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-3 px-4 rounded-lg transition-colors'>
+                Return to Home
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Reusable form input component using refs to maintain focus
   const FormInput = ({ id, name, label, type = "text", placeholder, value, error, onChange }) => (

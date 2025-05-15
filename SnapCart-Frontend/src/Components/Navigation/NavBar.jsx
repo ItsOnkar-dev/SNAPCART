@@ -10,6 +10,7 @@ import { ChevronDown, BadgeIndianRupee, Heart, UserRound, Sun, Moon } from "luci
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import useCartContext from "../../context/Cart/useCartContext";
 import useUserContext from "../../context/User/useUserContext";
+import useSellerContext from "../../context/Seller/useSellerContext";
 import UserProfile from "../../Components/UserProfile";
 import Sidebar from "./Sidebar";
 import { toast } from "react-toastify";
@@ -28,6 +29,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const location = useLocation();
   const cartContext = useCartContext();
   const { user, isLoggedIn } = useUserContext();
+  const {seller} = useSellerContext()
 
   // Update displayName whenever user data changes
   useEffect(() => {
@@ -78,7 +80,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   };
 
   const handleIsLoggedIn = () => {
-    if (isLoggedIn && user) {
+    if (isLoggedIn && seller) {
       navigate("/seller/product-management");
       toast.success("You are already logged in as a seller! Redirecting to product management...");
     }

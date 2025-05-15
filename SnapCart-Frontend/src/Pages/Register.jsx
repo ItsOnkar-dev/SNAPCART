@@ -137,8 +137,13 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
 
       console.log(isLogin ? "Logging in with:" : "Signing up with:", userData);
 
-      await axios.post(`http://localhost:8000/auth/${isLogin ? "login" : "register"}`, userData);
-      closeModal()
+      const response = await axios.post(`http://localhost:8000/auth/${isLogin ? "login" : "register"}`, userData);
+      if (response.status === "success") {
+        toast.success(response.data?.message || "Logged In successful");
+      } else {
+        toast.success(response.data?.message || "Account Created Successfully")
+        closeModal()
+      }
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.response?.data?.errors?.[0]?.msg || error.response?.data || "An error occurred. Please try again.";
       toast.error(errorMessage);

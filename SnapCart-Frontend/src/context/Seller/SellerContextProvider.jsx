@@ -6,66 +6,53 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const SellerContextProvider = ({ children }) => {
-  const [sellers, setSellers] = useState([]);
   const [seller, setSeller] = useState(null);
   const [isSellerLoading, setIsSellerLoading] = useState(true);
   const [errors, setErrors] = useState({});
+  const [hasCheckedSellerStatus, setHasCheckedSellerStatus] = useState(false);
 
   // Base API URL - make it configurable
   const API_BASE_URL = "http://localhost:8000";
 
-  // Fetch all sellers on mount
+  // Try to fetch current seller if user is logged in
   useEffect(() => {
-    const fetchSellers = async () => {
-      setIsSellerLoading(true);
+    const fetchSellerData = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/sellers`);
-        if (response.data && Array.isArray(response.data.data)) {
-          setSellers(response.data.data);
-          console.log("[SellerContext] Sellers fetched:", response.data.data);
-        } else {
-          setSellers([]);
-          setErrors({ submit: response.data?.message || 'Unexpected response format' });
+        setIsSellerLoading(true);
+        const token = localStorage.getItem("token");
+        
+        if (!token) {
+          // No token means not logged in
+          setIsSellerLoading(false);
+          setHasCheckedSellerStatus(true);
+          return;
+        }
+        const response = await axios.get(`${API_BASE_URL}/sellers/current`);
+        console.log("Fetched Current Seller Successfully", response.data.data);
+        if (response.data.status === "success") {
+          setSeller(response.data.data);
         }
       } catch (error) {
         if (error.response && error.response.status !== 404) {
-          const errorMsg = error.response?.data?.message || `Server error: ${error.response?.status}`;
-          setErrors({ submit: errorMsg });
-          toast.error(errorMsg);
+          console.error("Error fetching seller data:", error);
+          setErrors({ fetch: "Failed to fetch seller information" });
         }
       } finally {
         setIsSellerLoading(false);
+        setHasCheckedSellerStatus(true);
       }
     };
 
-    fetchSellers();
+    fetchSellerData();
   }, []);
-
-  // Try to fetch current seller if user is logged in
-  // useEffect(() => {
-  //   const fetchCurrentSeller = async () => {
-  //     setIsSellerLoading(true);
-  //     try {
-  //       // Note: This endpoint requires authentication
-  //       const response = await axios.get(`${API_BASE_URL}/sellers/current`);
-  //       console.log("Fetched Current Seller Successfully", response.data.data);
-  //       setSeller(response.data.data);
-  //     } catch (error) {
-  //       console.log("User is not a seller yet or not logged in", error);
-  //       // Not setting error because this is normal for non-sellers
-  //     } finally {
-  //       setIsSellerLoading(false);
-  //     }
-  //   };
-
-  //   fetchCurrentSeller();
-  // }, []);
 
   // Create new seller
   const createSeller = async (sellerData) => {
+    setErrors(null);
     try {
-      if (!sellerData.name || !sellerData.email || !sellerData.storeName || !sellerData.storeDescription) {
-        throw new Error("Missing required fields: name, email, storeName, and storeDescription are required");
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("You must be logged in to become a seller");
       }
 
       const response = await axios.post(`${API_BASE_URL}/sellers`, sellerData);
@@ -88,6 +75,22 @@ const SellerContextProvider = ({ children }) => {
       setErrors({ submit: errorMsg });
       throw error;
     }
+  };
+
+  // Check if email has a seller account but not logged in as that seller
+  const checkSellerEmail = async (email) => {
+    try {
+      const response = await axios.get(`/api/sellers/check-email?email=${email}`);
+      return response.data.exists;
+    } catch (error) {
+      console.error("Error checking seller email:", error);
+      return false;
+    }
+  };
+  
+  // Helper to check if user is logged in as seller
+  const isLoggedInAsSeller = () => {
+    return seller !== null;
   };
 
   // Update seller information
@@ -118,16 +121,26 @@ const SellerContextProvider = ({ children }) => {
     }
   };
 
+  // Logout from seller account (but maintain user login)
+  const logoutSeller = () => {
+    setSeller(null);
+    // Note: This doesn't remove the token, as the user is still logged in
+    toast.info("Logged out from seller account");
+    return true;
+  };
+
+
   return (
     <SellerContext.Provider value={{ 
-      sellers,
       seller, 
-      setSeller, 
       isSellerLoading,
       errors, 
-      setErrors,
       createSeller,
-      updateSeller
+      checkSellerEmail,
+      hasCheckedSellerStatus,
+      isLoggedInAsSeller,
+      updateSeller,
+      logoutSeller
     }}>
       {children}
     </SellerContext.Provider>
