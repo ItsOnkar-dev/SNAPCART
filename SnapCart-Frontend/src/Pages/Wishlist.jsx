@@ -1,10 +1,10 @@
 import { useContext } from "react";
-import CartContext from "../context/Cart/CartContext";
+import useCartContext from "../context/Cart/useCartContext";
 import { Trash2, ShoppingBag, Bookmark } from "lucide-react";
 import { motion } from "framer-motion";
 
 const WishList = () => {
-  const { wishlist, removeFromWishlist, addToCart } = useContext(CartContext);
+  const { wishlist, removeFromWishlist, addToCart } = useCartContext();
 
   const moveToCart = (item) => {
     addToCart(item);

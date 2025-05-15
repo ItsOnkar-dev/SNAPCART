@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import CartContext from "../context/Cart/CartContext";
-import { useProductContext } from "../context/Product/ProductContext";
+import useCartContext from "../context/Cart/useCartContext";
+import useProductContext from "../context/Product/useProductContext";
 import { Star, ChevronRight, ShoppingCart, Heart, Truck, ShieldCheck, ArrowLeft, Plus, Minus, Facebook, Twitter, Instagram } from "lucide-react";
 
 const ProductDetails = () => {
@@ -13,7 +13,7 @@ const ProductDetails = () => {
   const [activeTab, setActiveTab] = useState("description");
 
   const { getProductById, loading, error, getRelatedProducts } = useProductContext();
-  const { addToCart, wishlist, addToWishlist, removeFromWishlist } = useContext(CartContext);
+  const { addToCart, wishlist, addToWishlist, removeFromWishlist } = useCartContext();
 
   // Get the product from context
   const product = getProductById(productId);

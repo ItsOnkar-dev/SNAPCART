@@ -3,7 +3,7 @@
 import CartContextProvider from "./context/Cart/CartContextProvider";
 import UserContextProvider from "./context/User/UserContextProvider";
 import SellerContextProvider from "./context/Seller/SellerContextProvider";
-import { ProductProvider } from "./context/Product/ProductContext";
+import ProductContextProvider from "./context/Product/ProductContextProvider";
 
 // Component that combines all context providers
 const AppProviders = ({ children }) => {
@@ -11,9 +11,9 @@ const AppProviders = ({ children }) => {
     <UserContextProvider>
       <CartContextProvider>
         <SellerContextProvider>
-          <ProductProvider>
+          <ProductContextProvider>
             {children}
-          </ProductProvider>
+          </ProductContextProvider>
         </SellerContextProvider>
       </CartContextProvider>
     </UserContextProvider>

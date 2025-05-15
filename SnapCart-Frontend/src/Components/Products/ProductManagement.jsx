@@ -1,6 +1,6 @@
-import { useState, useContext, useRef } from "react";
-import SellerContext from "../../context/Seller/SellerContext";
-import { useProductContext } from "../../context/Product/ProductContext";
+import { useState, useRef } from "react";
+// import useSellerContext from "../../context/Seller/useSellerContext";
+import useProductContext from "../../context/Product/useProductContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -18,8 +18,7 @@ const ProductManagement = () => {
   // Create a ref for the form
   const productFormRef = useRef(null);
 
-  const { seller } = useContext(SellerContext);
-  const { products, loading, addProduct, updateProduct, deleteProduct } = useProductContext();
+  const { sellerProducts, loading, addProduct, updateProduct, deleteProduct } = useProductContext();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -93,7 +92,6 @@ const ProductManagement = () => {
     setNewProduct({ title: "", description: "", image: "", price: "" });
   };
 
-  if (!seller) return <div className='min-h-screen flex items-center justify-center bg-gray-50 font-bold text-red-500 text-xl'>Please log in as a seller to manage products.</div>;
 
   return (
     <div className='bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen my-20'>
@@ -243,10 +241,10 @@ const ProductManagement = () => {
 
         {/* Product List Section */}
         <div className='mb-8'>
-          <h2 className='text-3xl font-bold mb-8 text-center'>
+          <h2 className='text-3xl font-bold mb-8 text-center text-black dark:text-white'>
             Your Products
             <span className='ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-blue-100 bg-blue-500 rounded-full'>
-              {Array.isArray(products) ? products.length : 0}
+              {Array.isArray(sellerProducts) ? sellerProducts.length : 0}
             </span>
           </h2>
  
@@ -268,10 +266,10 @@ const ProductManagement = () => {
                 </div>
               ))}
             </div>
-          ) : Array.isArray(products) && products.length > 0 ? (
+          ) : Array.isArray(sellerProducts) && sellerProducts.length > 0 ? (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
-              {products.map((product) => (
-                <div key={product._id} className='bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1'>
+              {sellerProducts.map((product) => (
+                <div key={product._id} className='bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1'>
                   <div className='relative h-56 bg-gray-200 overflow-hidden'>
                     <img
                       src={product.image || "/api/placeholder/300/200"}
@@ -330,8 +328,8 @@ const ProductManagement = () => {
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1} d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' />
                 </svg>
               </div>
-              <h3 className='text-2xl font-bold text-gray-700 mb-2'>No Products Found</h3>
-              <p className='text-gray-500 mb-6 max-w-md'>You haven&apos;t created any products yet. Get started by creating your first product above!</p>
+              <h3 className='text-2xl font-bold text-gray-700 dark:text-white mb-2'>No Products Found</h3>
+              <p className='text-gray-500 dark:text-gray-300 mb-6 max-w-md'>You haven&apos;t created any products yet. Get started by creating your first product above!</p>
               <button
                 onClick={scrollToForm}
                 className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-200 flex items-center'>

@@ -1,12 +1,12 @@
 /* eslint-disable react/prop-types */
-import { useContext, useState, useEffect } from "react";
-import UserContext from "../context/User/UserContext";
+import { useState, useEffect } from "react";
+import useUserContext from "../context/User/useUserContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { User, Package, Heart, CreditCard, Settings, LogOut, X, Sun, Moon } from "lucide-react";
 import LogOutModal from "./LogOutModal";
 
 const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
-  const { isLoggedIn, user } = useContext(UserContext);
+  const { isLoggedIn, user } = useUserContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);

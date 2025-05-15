@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect, useContext, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import SnapCartLogo from "../../assets/SnapCart.png";
 import SnapCartLogo1 from "../../assets/SnapCart1.png";
 import SnapCartLogo2 from "../../assets/SnapCartLog01.png";
@@ -8,10 +8,12 @@ import SearchBar from "../SearchBar";
 import { MdOutlineShoppingBasket, MdMenu } from "react-icons/md";
 import { ChevronDown, BadgeIndianRupee, Heart, UserRound, Sun, Moon } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import CartContext from "../../context/Cart/CartContext";
-import UserContext from "../../context/User/UserContext";
+import useCartContext from "../../context/Cart/useCartContext";
+import useUserContext from "../../context/User/useUserContext";
 import UserProfile from "../../Components/UserProfile";
 import Sidebar from "./Sidebar";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const NavBar = ({ isDark, toggleDarkMode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -24,8 +26,8 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const cartContext = useContext(CartContext);
-  const { user, isLoggedIn } = useContext(UserContext);
+  const cartContext = useCartContext();
+  const { user, isLoggedIn } = useUserContext();
 
   // Update displayName whenever user data changes
   useEffect(() => {
@@ -46,6 +48,13 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
     console.log("[NavBar] isLoggedIn:", isLoggedIn);
   }, [isLoggedIn]);
 
+  const toggleSidebar = useCallback(() => {
+    setIsSidebarOpen((prev) => {
+      document.body.style.overflow = !prev ? "hidden" : "auto";
+      return !prev;
+    });
+  }, []);
+
   const handleThemeToggle = useCallback(
     (e) => {
       if (e) e.preventDefault();
@@ -54,15 +63,8 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
         toggleSidebar();
       }
     },
-    [toggleDarkMode, isSidebarOpen]
+    [toggleDarkMode, isSidebarOpen, toggleSidebar]
   );
-
-  const toggleSidebar = useCallback(() => {
-    setIsSidebarOpen((prev) => {
-      document.body.style.overflow = !prev ? "hidden" : "auto";
-      return !prev;
-    });
-  }, []);
 
   const handleProfileHover = () => {
     clearTimeout(hoverTimeoutRef.current);
@@ -73,6 +75,13 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
     hoverTimeoutRef.current = setTimeout(() => {
       setIsProfileModalOpen(false);
     }, 200);
+  };
+
+  const handleIsLoggedIn = () => {
+    if (isLoggedIn && user) {
+      navigate("/seller/product-management");
+      toast.success("You are already logged in as a seller! Redirecting to product management...");
+    }
   };
 
   // Clear any pending timeouts when component unmounts
@@ -131,7 +140,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             <SearchBar />
 
             {/* Become a Seller */}
-            <div className={`${isLoggedIn ? "max-sm:hidden sm-block" : "hidden"}`}>
+            <div className={`${isLoggedIn ? "max-sm:hidden sm-block" : "hidden"}`} onClick={handleIsLoggedIn}>
               <NavLink
                 to='/become-seller'
                 className={({ isActive }) => (isActive ? "text-pink-600" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-center gap-2")}>

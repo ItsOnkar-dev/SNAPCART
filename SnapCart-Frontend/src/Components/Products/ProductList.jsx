@@ -1,6 +1,4 @@
-
-
-import { useProductContext } from "../../context/Product/ProductContext";
+import useProductContext from "../../context/Product/useProductContext";
 import ProductCard from "./ProductCard";
 
 const ProductList = () => {

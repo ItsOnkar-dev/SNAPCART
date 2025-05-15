@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types */
-import { useContext, useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { MdClose } from "react-icons/md";
 import { LogOut, House, UserRoundPen, Info, LayoutList, Heart, BadgeIndianRupee, UserRound, Sun, Moon } from "lucide-react";
-import UserContext from "../../context/User/UserContext";
+import useUserContext from "../../context/User/useUserContext";
 import { NavLink, useNavigate } from "react-router-dom";
 import SnapCartLogo from "../../assets/SnapCart.png";
 import SnapCartLogo1 from "../../assets/SnapCart1.png";
@@ -13,7 +13,7 @@ import LogOutModal from "../LogOutModal";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, isDark, handleThemeToggle }) => {
   const navigate = useNavigate();
-  const { isLoggedIn } = useContext(UserContext);
+  const { isLoggedIn } = useUserContext();
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
   const handleLogin = useCallback(() => {

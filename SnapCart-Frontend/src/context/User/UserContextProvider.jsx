@@ -50,7 +50,7 @@ const UserContextProvider = ({ children }) => {
   // Standard login
   const login = async (userCredentials) => {
     try {
-      const response = await axios.post("http://localhost:8000/auth/registration", userCredentials);
+      const response = await axios.post("http://localhost:8000/auth/login", userCredentials);
       window.localStorage.setItem("token", response.data?.data?.token || response.data?.token);
       toast.success(response.data?.message || "Login successful");
       setIsLoggedIn(true);

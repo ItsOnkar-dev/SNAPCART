@@ -1,13 +1,14 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
-import { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowLeft, Mail, Lock, User, Eye, EyeOff, Loader2, X } from "lucide-react";
 import { FaGoogle, FaApple, FaShoppingBag } from "react-icons/fa";
 import { FaSackDollar } from "react-icons/fa6";
 import axios from "axios";
 import { toast } from "react-toastify";
-import UserContext from "../context/User/UserContext";
+import useUserContext from "../context/User/useUserContext";
+import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 
 // Framer Motion variants
 const overlayVariants = {
@@ -68,7 +69,8 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
   const [name, setName] = useState("");
   const [role, setRole] = useState("Buyer");
   const modalRef = useRef(null);
-  const { login } = useContext(UserContext);
+  const { login } = useUserContext();
+  const navigate = useNavigate(); // Initialize navigate hook
 
   // Add effect to scroll the modal into view when it opens
   useEffect(() => {
@@ -118,13 +120,7 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
           role: role || "Buyer", // Default to buyer if no role is specified during login
         };
         // Use context login function
-        const success = await login(userData);
-        if (success) {
-          closeModal();
-          toast.success("Logged in successfully!");
-        }
-        setIsLoading(false);
-        return;
+        login(userData);
       } else {
         if (!role) {
           toast.error("Please select a role (Seller or Buyer)");
@@ -139,18 +135,10 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
         };
       }
 
-      const response = await axios.post(`http://localhost:8000/auth/register`, userData);
-      toast.success(response.data.message || "Account created successfully!");
-      // Auto-login after successful registration
-      const loginSuccess = await login({
-        username: name,
-        password: password,
-        role: role,
-      });
-      if (loginSuccess) {
-        toast.success("Logged in successfully!");
-        closeModal();
-      }
+      console.log(isLogin ? "Logging in with:" : "Signing up with:", userData);
+
+      await axios.post(`http://localhost:8000/auth/${isLogin ? "login" : "register"}`, userData);
+      closeModal()
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.response?.data?.errors?.[0]?.msg || error.response?.data || "An error occurred. Please try again.";
       toast.error(errorMessage);

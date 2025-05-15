@@ -1,10 +1,9 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useContext } from 'react';
-import UserContext from '../context/User/UserContext';
+import useUserContext from "../context/User/useUserContext";
 
 const OAuthSuccess = () => {
-  const { handleOAuthSuccess } = useContext(UserContext);
+  const { handleOAuthSuccess } = useUserContext();
   const navigate = useNavigate();
   const location = useLocation();
 

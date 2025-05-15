@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 import { useContext, useState } from "react";
-import CartContext from "../context/Cart/CartContext";
+import useCartContext from "../context/Cart/useCartContext";
 
 const Cart = () => {
 
-  const { cart, removeFromCart } = useContext(CartContext);
+  const { cart, removeFromCart } = useCartContext();
 
   return (
     <div className="px-10 py-40 block w-full lg:w-[55vw] mx-auto">

@@ -1,26 +1,15 @@
 /* eslint-disable react/prop-types */
-import { useState, useContext, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import SellerContext from "../context/Seller/SellerContext";
-import UserContext from "../context/User/UserContext";
+import useSellerContext from "../context/Seller/useSellerContext";
+import useUserContext from "../context/User/useUserContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const BecomeSeller = () => {
   const navigate = useNavigate();
-  const { seller, isSellerLoading, createSeller, errors: contextErrors } = useContext(SellerContext);
-  const { user } = useContext(UserContext);
-
-  // Create refs for each input field
-  const inputRefs = {
-    name: useRef(null),
-    email: useRef(null),
-    storeName: useRef(null),
-    storeDescription: useRef(null),
-  };
-
-  // Track the active input field
-  const [activeField, setActiveField] = useState(null);
+  const { seller, isSellerLoading, createSeller, errors: contextErrors } = useSellerContext();
+  const { user } = useUserContext();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -54,40 +43,8 @@ const BecomeSeller = () => {
     }
   }, [user]);
 
-  // Restore focus after render if we have an active field
-  useEffect(() => {
-    if (activeField && inputRefs[activeField] && inputRefs[activeField].current) {
-      const input = inputRefs[activeField].current;
-      const length = input.value.length;
-
-      // Set timeout to ensure this happens after React's updates
-      setTimeout(() => {
-        input.focus();
-
-        // For text inputs, place cursor at the end
-        if (input.type !== "checkbox") {
-          input.setSelectionRange(length, length);
-        }
-      }, 0);
-    }
-  }, [formData, errors, activeField]);
-
-  const handleFocus = (fieldName) => {
-    setActiveField(fieldName);
-  };
-
-  const handleBlur = () => {
-    // Only clear active field if we're not immediately focusing another of our inputs
-    setTimeout(() => {
-      setActiveField(null);
-    }, 100);
-  };
-
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
-
-    // Remember which field we're editing
-    setActiveField(name);
 
     // Update form data
     setFormData((prevFormData) => ({
@@ -229,21 +186,18 @@ const BecomeSeller = () => {
   ];
 
   // Reusable form input component using refs to maintain focus
-  const FormInput = ({ id, label, type = "text", placeholder, value, error }) => (
+  const FormInput = ({ id, name, label, type = "text", placeholder, value, error, onChange }) => (
     <div>
       <label htmlFor={id} className={styles.formLabel}>
         {label}
       </label>
       <input
-        ref={inputRefs[id]}
         type={type}
         id={id}
-        name={id}
+        name={name}
         placeholder={placeholder}
         value={value}
-        onChange={handleChange}
-        onFocus={() => handleFocus(id)}
-        onBlur={handleBlur}
+        onChange={onChange}
         className={`${styles.input} ${error ? "border-red-500 bg-red-50 dark:bg-red-900/20" : "border-gray-300"}`}
       />
       {error && <p className={styles.errorText}>{error}</p>}
@@ -273,7 +227,7 @@ const BecomeSeller = () => {
               Start selling your products and reach customers worldwide with your unique products. Expand your reach and grow your business by becoming a seller on SnapCart. We offer you a platform to
               connect with millions of customers eager to discover unique products like yours.
             </p>
-          </div>
+          </div> 
 
           <div className='p-6'>
             {/* Features - Simplified */}
@@ -302,23 +256,20 @@ const BecomeSeller = () => {
             <section className='bg-transparent rounded-lg p-6 border border-gray-300 dark:border-gray-600'>
               <h2 className='text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white/80'>Create Your Seller Account</h2>
               <form onSubmit={handleSubmit} className='space-y-4'>
-                <FormInput id='name' label='Your Name' placeholder='Enter your full name' value={formData.name} error={errors.name} />
-                <FormInput id='email' label='Email Address' type='email' placeholder='your@email.com' value={formData.email} error={errors.email} />
-                <FormInput id='storeName' label='Store Name' placeholder='Your store name' value={formData.storeName} error={errors.storeName} />
+                <FormInput id='name' name='name' label='Your Name' placeholder='Enter your full name' value={formData.name} error={errors.name} onChange={handleChange} />
+                <FormInput id='email' name='email' label='Email Address' type='email' placeholder='your@email.com' value={formData.email} error={errors.email} onChange={handleChange} />
+                <FormInput id='storeName' name='storeName' label='Store Name' placeholder='Your store name' value={formData.storeName} error={errors.storeName} onChange={handleChange} />
 
                 <div>
                   <label htmlFor='storeDescription' className={styles.formLabel}>
                     Store Description
                   </label>
                   <textarea
-                    ref={inputRefs.storeDescription}
                     id='storeDescription'
                     name='storeDescription'
                     placeholder='Tell us about your store and products...'
                     value={formData.storeDescription}
                     onChange={handleChange}
-                    onFocus={() => handleFocus("storeDescription")}
-                    onBlur={handleBlur}
                     rows='4'
                     className={`${styles.input} ${errors.storeDescription ? "border-red-500 bg-red-50 dark:bg-red-900/20" : "border-gray-300"}`}
                   />
@@ -333,8 +284,6 @@ const BecomeSeller = () => {
                       name='agreeToTerms'
                       checked={formData.agreeToTerms}
                       onChange={handleChange}
-                      onFocus={() => handleFocus("agreeToTerms")}
-                      onBlur={handleBlur}
                       className='w-4 h-4 text-indigo-500 dark:text-white/80 border-gray-300 rounded focus:ring-blue-500'
                     />
                   </div>

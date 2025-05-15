@@ -1,8 +1,7 @@
-import { useContext } from "react";
-import SellerContext from "../context/Seller/SellerContext";      
+import useSellerContext from "../context/Seller/useSellerContext";
 
 const AdminDashboard = () => {
-  const {seller, unapprovedSellers, handleApproveSeller } = useContext(SellerContext);
+  const {seller, unapprovedSellers, handleApproveSeller } = useSellerContext();
 
   if (!seller) return <div>Loading seller data...</div>;
   return (

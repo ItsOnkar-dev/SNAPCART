@@ -1,12 +1,12 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { LogOut, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import UserContext from "../context/User/UserContext";
+import useUserContext from "../context/User/useUserContext";
 
 const LogOutModal = ({ isOpen, onClose, onLogoutComplete }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const { logout } = useContext(UserContext);
+  const { logout } = useUserContext();
   const navigate = useNavigate();
 
   // Control visibility for smooth transitions

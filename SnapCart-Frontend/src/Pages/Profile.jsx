@@ -1,11 +1,11 @@
-import { useContext, useState, useEffect } from "react";
-import UserContext from "../context/User/UserContext";
+import { useState, useEffect } from "react";
+import useUserContext from "../context/User/useUserContext";
 import { useNavigate } from "react-router-dom";
 import { User, ShoppingBag, Package, Heart, CreditCard, Settings, LogOut, AlertCircle } from "lucide-react";
 import { toast } from "react-toastify";
 
 const Profile = () => {
-  const { isLoggedIn, logout, user, updatePassword, deletedAccount, downloadUserData } = useContext(UserContext);
+  const { isLoggedIn, logout, user, updatePassword, deletedAccount, downloadUserData } = useUserContext();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [showUsernameTooltip, setShowUsernameTooltip] = useState(false);
