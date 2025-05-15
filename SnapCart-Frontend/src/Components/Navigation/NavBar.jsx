@@ -25,25 +25,26 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const cartContext = useContext(CartContext);
-  const { user, isLoggedIn} = useContext(UserContext);
+  const { user, isLoggedIn } = useContext(UserContext);
 
   // Update displayName whenever user data changes
   useEffect(() => {
-    if (user && user.user) {
-      const userData = user.user._doc || user.user;
-      console.log("User data:", userData);
-      
-      const name = userData.name || userData.username || "User";
+    if (isLoggedIn && user) {
+      const name = user.name || user.username || "User";
       setDisplayName(name);
-      
-      const avatarImage = userData.avatar || "";
-      console.log("Avatar set to:", avatarImage);
+      const avatarImage = user.avatar || "";
       setUserAvatar(avatarImage);
+      console.log("[NavBar] User detected:", user);
     } else {
       setDisplayName("User");
       setUserAvatar("");
+      console.log("[NavBar] No user logged in.");
     }
-  }, [user]);
+  }, [user, isLoggedIn]);
+
+  useEffect(() => {
+    console.log("[NavBar] isLoggedIn:", isLoggedIn);
+  }, [isLoggedIn]);
 
   const handleThemeToggle = useCallback(
     (e) => {
@@ -96,14 +97,14 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
   // Safely get the first character of the display name
   const getInitial = () => {
-    if (displayName && typeof displayName === 'string' && displayName.length > 0) {
+    if (displayName && typeof displayName === "string" && displayName.length > 0) {
       return displayName.charAt(0).toUpperCase();
     }
-    return '?';
+    return "?";
   };
 
   // Check if avatar URL is valid
-  const hasValidAvatar = userAvatar && userAvatar.trim() !== '';
+  const hasValidAvatar = userAvatar && userAvatar.trim() !== "";
 
   return (
     <>
@@ -117,7 +118,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
           {/* Logo */}
           <div className='flex items-center gap-2 cursor-pointer transition-all duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3'>
-             <img src={isDark ? SnapCartLogo : SnapCartLogo1} alt='Logo' className='w-8 h-8 rounded-full' />
+            <img src={isDark ? SnapCartLogo : SnapCartLogo1} alt='Logo' className='w-8 h-8 rounded-full' />
             <div className={`${styles.logoName}`} onClick={() => navigate("/")}>
               {/* <span>SnapCart</span> */}
               <img src={isDark ? SnapCartLogo2 : SnapCartLogo3} alt='Logo' className='w-32 sm:w-40' />
@@ -157,14 +158,13 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 {/* <span className=''>Cart</span> */}
               </div>
             </NavLink>
-            {user && user.user ? null : (
-              <span className={`rounded-full transition-transform duration-700 ease-in-ou cursor-pointer ${isDark ? "rotate-90" : "rotate-0"}`} onClick={handleThemeToggle}>
-                {isDark ? <Sun size={22} className='text-cyan-300 hover:text-cyan-400' /> : <Moon size={22} className=' text-black/60 hover:text-black ' />}
-              </span>
-            )}
+
+            <span className={`rounded-full transition-transform duration-700 ease-in-ou cursor-pointer ${isDark ? "rotate-90" : "rotate-0"}`} onClick={handleThemeToggle}>
+              {isDark ? <Sun size={22} className='text-cyan-300 hover:text-cyan-400' /> : <Moon size={22} className=' text-black/60 hover:text-black ' />}
+            </span>
 
             {/* User Profile / Register Button */}
-            {user && user.user ? (
+            {isLoggedIn && user ? (
               <div ref={profileModalRef} onMouseEnter={handleProfileHover} onMouseLeave={handleProfileLeave}>
                 <div
                   ref={profileIconRef}
@@ -180,14 +180,12 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                       className='w-8 h-8 object-cover rounded-full'
                       onError={(e) => {
                         console.error("Avatar image failed to load");
-                        e.target.style.display = 'none';
-                        setUserAvatar(''); // Reset avatar on error
+                        e.target.style.display = "none";
+                        setUserAvatar(""); // Reset avatar on error
                       }}
                     />
                   ) : (
-                    <div className='w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold'>
-                      {getInitial()}
-                    </div>
+                    <div className='w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold'>{getInitial()}</div>
                   )}
                   <h3 className='hidden md:block'>{displayName}</h3>
                   <span className={`transition-transform duration-500 ease-in-out ${isProfileModalOpen ? "rotate-180 opacity-100" : "opacity-80"}`}>

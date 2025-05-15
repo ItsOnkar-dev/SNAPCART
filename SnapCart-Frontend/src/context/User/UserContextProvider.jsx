@@ -13,7 +13,6 @@ const UserContextProvider = ({ children }) => {
   const fetchUserProfile = async () => {
     const token = window.localStorage.getItem("token");
     if (!token) {
-      console.log("No token found in local storage, please login to get started");
       setIsLoggedIn(false);
       setIsLoading(false);
       return;
@@ -25,15 +24,15 @@ const UserContextProvider = ({ children }) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("User Profile:", response.data);
       setIsLoggedIn(true);
-      setUser(response.data);
+      const userObj = response.data?.data?.user || response.data?.data || response.data?.user || response.data;
+      setUser(userObj);
+      console.log("[UserContext] User profile fetched:", userObj);
     } catch (error) {
-      console.log("Error fetching profile:", error);
-      // If the token is invalid, remove it
       if (error.response && (error.response.status === 401 || error.response.status === 500)) {
         window.localStorage.removeItem("token");
         setIsLoggedIn(false);
+        console.warn("[UserContext] Token invalid or expired. isLoggedIn set to false.");
       }
     } finally {
       setIsLoading(false);
@@ -44,19 +43,23 @@ const UserContextProvider = ({ children }) => {
     fetchUserProfile();
   }, []);
 
+  useEffect(() => {
+    console.log("[UserContext] isLoggedIn:", isLoggedIn);
+  }, [isLoggedIn]);
+
   // Standard login
   const login = async (userCredentials) => {
     try {
-      const response = await axios.post("http://localhost:8000/auth/login", userCredentials);
-      console.log("Login successful:", response.data);
-      window.localStorage.setItem("token", response.data?.token);
-      toast.success(response.data?.msg || "Login successful");
+      const response = await axios.post("http://localhost:8000/auth/registration", userCredentials);
+      window.localStorage.setItem("token", response.data?.data?.token || response.data?.token);
+      toast.success(response.data?.message || "Login successful");
       setIsLoggedIn(true);
-      setUser(response.data); // Directly set the user from response data
+      const userObj = response.data?.data?.user || response.data?.data || response.data?.user || response.data;
+      setUser(userObj);
+      console.log("[UserContext] User logged in:", userObj);
       return true;
     } catch (error) {
-      console.error("Login error:", error);
-      toast.error(error.response?.data?.errMsg || "Login failed. Please try again.");
+      toast.error(error.response?.data?.message || "Login failed. Please try again.");
       return false;
     }
   };
@@ -67,12 +70,12 @@ const UserContextProvider = ({ children }) => {
       if(token && userData) {
         window.localStorage.setItem("token", token);
         setIsLoggedIn(true);
-        setUser(userData); // Set user data directly
+        setUser(userData);
+        console.log("[UserContext] OAuth login success. User:", userData);
         toast.success("Google Authentication Successful");
         return true;
       }
     } catch (error) {
-      console.error("Error handling OAuth success:", error);
       toast.error("Failed to process authentication. Please try again.");
       return false;
     }
@@ -94,18 +97,11 @@ const UserContextProvider = ({ children }) => {
           },
         }
       );
-      toast.success("Password updated successfully");
+      toast.success(response.data?.message || "Password updated successfully");
       return response.data;
     } catch (error) {
-      console.error("Password update error:", error);
-
-      // Extract the error message from the response if available
-      if (error.response && error.response.data && error.response.data.errMsg) {
-        throw new Error(error.response.data.errMsg);
-      }
-
-      // Generic error handling
-      throw new Error("Failed to update password. Please try again.");
+      const errorMsg = error.response?.data?.message || "Failed to update password. Please try again.";
+      throw new Error(errorMsg);
     }
   };
 
@@ -129,7 +125,7 @@ const UserContextProvider = ({ children }) => {
     }
 
     if (!window.confirm("Are you sure you want to delete your account? This action is irreversible!")) {
-      return; // Stop execution if the user cancels
+      return;
     }
 
     try {
@@ -138,15 +134,12 @@ const UserContextProvider = ({ children }) => {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      // Remove user session and clear local storage
       window.localStorage.removeItem("token");
       setIsLoggedIn(false);
       setUser(null);
-      toast.success(response.data?.msg || "Account deleted successfully");
+      toast.success(response.data?.message || "Account deleted successfully");
     } catch (error) {
-      console.error("Error deleting account:", error);
-      toast.error(error.response?.data?.errMsg || "Failed to delete account. Please try again.");
+      toast.error(error.response?.data?.message || "Failed to delete account. Please try again.");
     }
   };
 
@@ -158,30 +151,23 @@ const UserContextProvider = ({ children }) => {
     }
 
     try {
-      // Set up for file download
       const response = await axios.get("http://localhost:8000/user/download-data", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        responseType: "blob", // Important for handling the file download
+        responseType: "blob",
       });
-
-      // Create a blob URL and trigger download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", `user_data_${new Date().toISOString().split("T")[0]}.json`);
       document.body.appendChild(link);
       link.click();
-
-      // Clean up
       window.URL.revokeObjectURL(url);
       document.body.removeChild(link);
-
       toast.success("User data downloaded successfully");
     } catch (error) {
-      console.error("Error downloading user data:", error);
-      toast.error(error.response?.data?.errMsg || "Failed to download user data");
+      toast.error(error.response?.data?.message || "Failed to download user data");
     }
   };
 

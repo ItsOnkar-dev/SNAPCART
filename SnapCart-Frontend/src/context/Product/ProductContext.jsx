@@ -19,23 +19,15 @@ export const ProductProvider = ({ children }) => {
     try {
       setLoading(true);
       const res = await axios.get('http://localhost:8000/api/products');
-      
-      // Handle different response structures
-      if (Array.isArray(res.data)) {
-        setProducts(res.data);
-      } else if (res.data && Array.isArray(res.data.data)) {
+      if (res.data && Array.isArray(res.data.data)) {
         setProducts(res.data.data);
-      } else if (res.data && Array.isArray(res.data.products)) {
-        setProducts(res.data.products);
       } else {
-        console.error('Unexpected response format:', res.data);
         setProducts([]);
+        setError(res.data?.message || 'Unexpected response format');
       }
-      
       setError(null);
     } catch (err) {
-      console.error('Error fetching products:', err);
-      setError('Failed to load products. Please try again.');
+      setError(err.response?.data?.message || 'Failed to load products. Please try again.');
       setProducts([]);
     } finally {
       setLoading(false);
@@ -51,14 +43,13 @@ export const ProductProvider = ({ children }) => {
   const addProduct = async (productData) => {
     try {
       const response = await axios.post('http://localhost:8000/api/products', productData);
-      if (response.data) {
-        setProducts([...products, response.data]);
-        return { success: true, data: response.data };
+      if (response.data && response.data.data) {
+        setProducts([...products, response.data.data]);
+        return { success: true, data: response.data.data };
       }
-      return { success: false, error: 'Unexpected response format' };
+      return { success: false, error: response.data?.message || 'Unexpected response format' };
     } catch (err) {
-      console.error('Error adding product:', err);
-      return { success: false, error: err.message || 'Failed to add product' };
+      return { success: false, error: err.response?.data?.message || 'Failed to add product' };
     }
   };
 
@@ -72,22 +63,23 @@ export const ProductProvider = ({ children }) => {
         ));
         return { success: true, data: response.data.data };
       }
-      return { success: false, error: 'Unexpected response format' };
+      return { success: false, error: response.data?.message || 'Unexpected response format' };
     } catch (err) {
-      console.error('Error updating product:', err);
-      return { success: false, error: err.message || 'Failed to update product' };
+      return { success: false, error: err.response?.data?.message || 'Failed to update product' };
     }
   };
 
   // Delete a product
   const deleteProduct = async (productId) => {
     try {
-      await axios.delete(`http://localhost:8000/api/products/${productId}`);
-      setProducts(products.filter(product => product._id !== productId));
-      return { success: true };
+      const response = await axios.delete(`http://localhost:8000/api/products/${productId}`);
+      if (response.data && response.data.status === 'success') {
+        setProducts(products.filter(product => product._id !== productId));
+        return { success: true };
+      }
+      return { success: false, error: response.data?.message || 'Failed to delete product' };
     } catch (err) {
-      console.error('Error deleting product:', err);
-      return { success: false, error: err.message || 'Failed to delete product' };
+      return { success: false, error: err.response?.data?.message || 'Failed to delete product' };
     }
   };
 

@@ -20,13 +20,16 @@ const SellerContextProvider = ({ children }) => {
       setIsSellerLoading(true);
       try {
         const response = await axios.get(`${API_BASE_URL}/sellers`);
-        console.log("Fetched Sellers Successfully", response.data);
-        setSellers(response.data);
+        if (response.data && Array.isArray(response.data.data)) {
+          setSellers(response.data.data);
+          console.log("[SellerContext] Sellers fetched:", response.data.data);
+        } else {
+          setSellers([]);
+          setErrors({ submit: response.data?.message || 'Unexpected response format' });
+        }
       } catch (error) {
-        console.error("An error occurred fetching sellers:", error);
-        // Only set error if it's not a "not found" error
         if (error.response && error.response.status !== 404) {
-          const errorMsg = error.response?.message || `Server error: ${error.response?.status}`;
+          const errorMsg = error.response?.data?.message || `Server error: ${error.response?.status}`;
           setErrors({ submit: errorMsg });
           toast.error(errorMsg);
         }
@@ -61,29 +64,26 @@ const SellerContextProvider = ({ children }) => {
   // Create new seller
   const createSeller = async (sellerData) => {
     try {
-      // Add validation
       if (!sellerData.name || !sellerData.email || !sellerData.storeName || !sellerData.storeDescription) {
         throw new Error("Missing required fields: name, email, storeName, and storeDescription are required");
       }
 
-      console.log("Creating seller with data:", sellerData);
       const response = await axios.post(`${API_BASE_URL}/sellers`, sellerData);
-      console.log("Seller created successfully:", response.data);
-      setSeller(response.data.data);
-      toast.success("Seller account created successfully!");
-      return response.data.data;
-    } catch (error) {
-      console.error("An error occurred:", error);
-      let errorMsg;
-      
-      if (error.response?.data?.message) {
-        errorMsg = error.response.data.message;
-      } else if (error.message) {
-        errorMsg = error.message;
+      if (response.data && response.data.data) {
+        setSeller(response.data.data);
+        console.log("[SellerContext] Seller created:", response.data.data);
+        toast.success(response.data.message || "Seller account created successfully!");
+        return response.data.data;
+      } else if (response.data) {
+        setSeller(response.data);
+        console.log("[SellerContext] Seller created:", response.data);
+        toast.success(response.data.message || "Seller account created successfully!");
+        return response.data;
       } else {
-        errorMsg = "Failed to create seller account";
+        throw new Error(response.data?.message || "Failed to create seller account");
       }
-      
+    } catch (error) {
+      let errorMsg = error.response?.data?.message || error.message || "Failed to create seller account";
       toast.error(errorMsg);
       setErrors({ submit: errorMsg });
       throw error;
@@ -96,14 +96,22 @@ const SellerContextProvider = ({ children }) => {
       if (!sellerId) {
         throw new Error("Seller ID is required to update seller information");
       }
-      
       const response = await axios.patch(`${API_BASE_URL}/sellers/${sellerId}`, sellerData);
-      setSeller(response.data.data);
-      toast.success("Seller information updated successfully!");
-      return response.data.data;
+      if (response.data && response.data.data) {
+        setSeller(response.data.data);
+        console.log("[SellerContext] Seller updated:", response.data.data);
+        toast.success(response.data.message || "Seller information updated successfully!");
+        return response.data.data;
+      } else if (response.data) {
+        setSeller(response.data);
+        console.log("[SellerContext] Seller updated:", response.data);
+        toast.success(response.data.message || "Seller information updated successfully!");
+        return response.data;
+      } else {
+        throw new Error(response.data?.message || "Failed to update seller information");
+      }
     } catch (error) {
-      console.error("An error occurred:", error);
-      const errorMsg = error.response?.data?.message || "Failed to update seller information";
+      const errorMsg = error.response?.data?.message || error.message || "Failed to update seller information";
       toast.error(errorMsg);
       setErrors({ submit: errorMsg });
       throw error;

@@ -119,7 +119,7 @@ const Profile = () => {
     );
   }
 
-  const userData = user && user.user && user.user._doc ? user.user._doc : {};
+  const userData = user || {};
 
   const styles = {
     label: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2",

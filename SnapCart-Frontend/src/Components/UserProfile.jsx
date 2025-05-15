@@ -133,7 +133,8 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
 
   if (!isOpen) return null;
 
-  const userData = user && user.user && user.user._doc ? user.user._doc : user?.user || {};
+  // Use the user object directly, as in the updated NavBar
+  const userData = user || {};
 
   return (
     <>
