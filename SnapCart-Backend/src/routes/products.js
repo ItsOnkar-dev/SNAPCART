@@ -19,7 +19,7 @@ const sendResponse = (res, { status = 'success', statusCode = 200, message = '',
 // Get All products
 router.get('/products', catchAsync(async(req, res) => {
   Logger.info("Fetch all products request received")
-  const products = await Product.find({})
+  const products = await Product.find({}).lean()
   if (!products || products.length === 0) throw BadRequestError('Products not found');
   return sendResponse(res, { message: 'Fetched all the products successfully', data: products });
 }));
@@ -58,7 +58,7 @@ router.route('/products/:productId')
 .get(catchAsync(async(req, res) => {
   Logger.info("Show the product request received")
   const { productId } = req.params;
-  const product = await Product.findById(productId);
+  const product = await Product.findById(productId).lean();
 
   if (!product) throw BadRequestError('Product not found');
 

@@ -20,7 +20,7 @@ const sendResponse = (res, { status = 'success', statusCode = 200, message = '',
 // Get all the sellers
 router.get('/sellers', catchAsync(async (req, res) => {
   Logger.info("Fetching all sellers");
-  const sellers = await Seller.find({});
+  const sellers = await Seller.find({}).lean();
   
   if (!sellers || sellers.length === 0) {
     throw BadRequestError('No sellers found');
@@ -69,12 +69,12 @@ router.post('/sellers', createSellerValidator, (req, res, next) => {
   }
   
   // Check if email or store name already exists
-  const existingEmail = await Seller.findOne({ email });
+  const existingEmail = await Seller.findOne({ email }).lean();
   if (existingEmail) {
     throw BadRequestError('This email is already used for a seller account');
   }
   
-  const existingStoreName = await Seller.findOne({ storeName });
+  const existingStoreName = await Seller.findOne({ storeName }).lean();
   if (existingStoreName) {
     throw BadRequestError('This store name is already taken');
   }

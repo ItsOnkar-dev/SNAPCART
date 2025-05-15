@@ -39,8 +39,11 @@ passport.use(
             user.googleId = profile.id;
             // Store the original display name
             user.name = profile.displayName || user.name;
-            if (profile.photos && profile.photos[0]) {
+            if (profile.photos && profile.photos.length > 0 && profile.photos[0].value) {
               user.avatar = profile.photos[0].value;
+            } else {
+              // Use a default Google avatar if no photo is provided
+              user.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.displayName || user.username || 'User')}`;
             }
             await user.save();
           } else {
@@ -59,7 +62,9 @@ passport.use(
               googleId: profile.id,
               password: hashedPassword, // Store a random password hash for account security
               role: 'Buyer', // Default role
-              avatar: profile.photos && profile.photos[0] ? profile.photos[0].value : '',
+              avatar: profile.photos && profile.photos.length > 0 && profile.photos[0].value
+                ? profile.photos[0].value
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.displayName || username)}`,
               isOAuthUser: true
             });
             

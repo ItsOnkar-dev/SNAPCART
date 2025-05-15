@@ -6,11 +6,11 @@ class UserRepo{
   }
 
   static async findByEmail(email){
-    return await User.findOne({email})
+    return await User.findOne({email}).lean()
   }
 
   static async findByUserId(userId){
-    return await User.findById(userId)
+    return await User.findById(userId).lean()
   }
 
   static async CreateUser(username, hash, email, role){
