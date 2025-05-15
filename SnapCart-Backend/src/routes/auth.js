@@ -8,6 +8,7 @@ import { AuthenticationError, BadRequestError } from "../Core/ApiError.js";
 import passport from "../Config/passport-setup.js"
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { registerAuthValidator, loginAuthValidator } from '../Validators/authValidator.js';
 
 dotenv.config();
 
@@ -22,71 +23,73 @@ const loginLimiter = rateLimit({
   message: "Too many login attempts, please try again later",
 });
 
+// Utility for standardized API responses
+const sendResponse = (res, { status = 'success', statusCode = 200, message = '', data = null, errors = null }) => {
+  const response = { status, message };
+  if (data !== null) response.data = data;
+  if (errors !== null) response.errors = errors;
+  return res.status(statusCode).json(response);
+};
+
 // User Register
 router.post(
   "/register",
-  catchAsync(async (req, res) => {
-    // Input validation
+  registerAuthValidator,
+  (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return sendResponse(res, { status: 'error', statusCode: 400, message: 'Validation failed', errors: errors.array() });
     }
-
+    next();
+  },
+  catchAsync(async (req, res) => {
+    // Input validation is handled by validator
     const { username, password, email, role } = req.body;
-
-    if (!username || !password || !email || !role) {
-      return res.status(400).json({ msg: "Please enter all required credentials" });
-    }
 
     // Check user with the given username or email already exists?
     const existingUserByUsername = await UserRepo.findByUsername(username);
     const existingUserByEmail = await UserRepo.findByEmail(email);
 
     if (existingUserByUsername || existingUserByEmail) {
-      throw new BadRequestError(`${existingUserByUsername ? `Username` : `Email`} already exists`);
+      throw BadRequestError(`${existingUserByUsername ? `Username` : `Email`} already exists`);
     }
 
-    // To hash a password using bcrypt, you can use the hash() function. The first argument is the password you want to hash, and the second argument is ( saltRounds) the number of rounds you want to use. When you are hashing your data, the module will go through a series of rounds to give you a secure hash. The higher the number of rounds, the more secure the password will be.
     const passwordHash = await bcrypt.hash(password, 12);
-
     const newUser = await UserRepo.CreateUser(username, passwordHash, email, role);
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = newUser;
 
-    res.status(201).json({
-      msg: "Signed Up successful! Please login to get started.",
-      user: userWithoutPassword,
-    });
+    return sendResponse(res, { statusCode: 201, message: 'Signed Up successful! Please login to get started.', data: userWithoutPassword });
   })
 );
 
 // User Login
 router.post(
   "/registration",
-  loginLimiter,
-  catchAsync(async (req, res) => {
-    // Input validation
+  loginAuthValidator,
+  (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return sendResponse(res, { status: 'error', statusCode: 400, message: 'Validation failed', errors: errors.array() });
     }
-
+    next();
+  },
+  loginLimiter,
+  catchAsync(async (req, res) => {
+    // Input validation is handled by validator
     const { username, password } = req.body;
-    if (!username || !password) {
-      return res.status(400).json({ msg: "Please enter all required credentials" });
-    }
 
     // Find user with a single database call
     const user = await UserRepo.findByUsername(username);
     if (!user) {
-      throw new AuthenticationError("No user found with the provided credentials");
+      throw AuthenticationError('No user found with the provided credentials');
     }
 
     // Verify password (assuming you have a password verification function)
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new AuthenticationError("Invalid Username/Password");
+      throw AuthenticationError('Invalid Username/Password');
     }
 
     // Generate JWT token
@@ -95,11 +98,7 @@ router.post(
     // Before sending the response, remove the password from response
     const { password: _, ...userWithoutPassword } = user;
 
-    res.status(200).json({
-      msg: "Logged in successfully, Welcome back!",
-      user: userWithoutPassword,
-      token: jwtToken,
-    });
+    return sendResponse(res, { message: 'Logged in successfully, Welcome back!', data: { user: userWithoutPassword, token: jwtToken } });
   })
 );
 

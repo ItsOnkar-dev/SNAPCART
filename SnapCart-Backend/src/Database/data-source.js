@@ -7,14 +7,20 @@ dotenv.config()
 const DB_URL = process.env.DB_URL
 
 class AppDataSource{
-  static async connect(){
-    try { 
-      await mongoose.connect(DB_URL || 'mongodb://localhost:27017/SnapCart_DB') 
-      Logger.info("Successfully connected to database")
-    } catch (error) {
-      console.log(error, "error while connected to database")
+  static async connect(retries = 5) {
+    while (retries) {
+      try {
+        await mongoose.connect(DB_URL || 'mongodb://localhost:27017/SnapCart_DB') 
+        Logger.info("Successfully connected to database")
+        break;
+      } catch (error) {
+        Logger.error("DB connection failed, retrying...", { error });
+        retries -= 1;
+        await new Promise(res => setTimeout(res, 5000));
+      }
     }
-}
+    if (!retries) throw new Error("Could not connect to DB after multiple attempts");
+  }
 }
 
 export default AppDataSource;

@@ -4,8 +4,18 @@ import catchAsync from '../Core/catchAsync.js';
 import { InternalServerError, BadRequestError, NotFoundError, AuthenticationError } from '../Core/ApiError.js';
 import Logger from '../Config/Logger.js';
 import { isLoggedIn } from '../Middlewares/Auth.js'; 
+import { createSellerValidator, updateSellerValidator } from '../Validators/sellerValidator.js';
+import { validationResult } from 'express-validator';
 
 const router = express.Router(); 
+
+// Utility for standardized API responses
+const sendResponse = (res, { status = 'success', statusCode = 200, message = '', data = null, errors = null }) => {
+  const response = { status, message };
+  if (data !== null) response.data = data;
+  if (errors !== null) response.errors = errors;
+  return res.status(statusCode).json(response);
+};
 
 // Get all the sellers
 router.get('/sellers', catchAsync(async (req, res) => {
@@ -13,14 +23,10 @@ router.get('/sellers', catchAsync(async (req, res) => {
   const sellers = await Seller.find({});
   
   if (!sellers || sellers.length === 0) {
-    throw new NotFoundError('No sellers found');
+    throw BadRequestError('No sellers found');
   }
   
-  res.status(200).json({
-    status: 'success', 
-    message: 'Fetched all sellers successfully',
-    data: sellers,
-  });   
+  return sendResponse(res, { message: 'Fetched all sellers successfully', data: sellers });
 }));
 
 // Get the seller of the current user
@@ -46,26 +52,31 @@ router.get('/sellers', catchAsync(async (req, res) => {
 // }));
 
 // Create a new seller
-router.post('/sellers', catchAsync(async (req, res) => {
+router.post('/sellers', createSellerValidator, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return sendResponse(res, { status: 'error', statusCode: 400, message: 'Validation failed', errors: errors.array() });
+  }
+  next();
+}, catchAsync(async (req, res) => {
   Logger.info("Create the seller request received", { body: req.body });
   
-  // Extract data from request body
   const { name, email, storeName, storeDescription } = req.body;
   
-  // Validate required fields
+  // Validate required fields (redundant with validator, but kept for safety)
   if (!name || !email || !storeName || !storeDescription) {
-    throw new BadRequestError('Missing required fields: name, email, storeName, and storeDescription are required');
+    return sendResponse(res, { status: 'error', statusCode: 400, message: 'Missing required fields: name, email, storeName, and storeDescription are required' });
   }
   
   // Check if email or store name already exists
   const existingEmail = await Seller.findOne({ email });
   if (existingEmail) {
-    throw new BadRequestError('This email is already used for a seller account');
+    throw BadRequestError('This email is already used for a seller account');
   }
   
   const existingStoreName = await Seller.findOne({ storeName });
   if (existingStoreName) {
-    throw new BadRequestError('This store name is already taken');
+    throw BadRequestError('This store name is already taken');
   }
   
   // Create the new seller
@@ -81,18 +92,20 @@ router.post('/sellers', catchAsync(async (req, res) => {
   });
   
   if (!newSeller) {
-    throw new InternalServerError('Failed to create seller');
+    throw InternalServerError('Failed to create seller');
   }
   
-  res.status(201).json({
-    status: 'success',
-    message: 'Seller created successfully',
-    data: newSeller
-  });
+  return sendResponse(res, { statusCode: 201, message: 'Seller created successfully', data: newSeller });
 }));
 
 // Update the seller by ID
-router.patch('/sellers/:id', isLoggedIn, catchAsync(async (req, res) => {
+router.patch('/sellers/:id', updateSellerValidator, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return sendResponse(res, { status: 'error', statusCode: 400, message: 'Validation failed', errors: errors.array() });
+  }
+  next();
+}, isLoggedIn, catchAsync(async (req, res) => {
   Logger.info("Updating the seller data", { sellerId: req.params.id });
   
   const allowedFields = ['name', 'email', 'storeName', 'storeDescription'];
@@ -110,13 +123,9 @@ router.patch('/sellers/:id', isLoggedIn, catchAsync(async (req, res) => {
     { new: true, runValidators: true }
   );
   
-  if (!seller) throw new NotFoundError('Seller not found');
+  if (!seller) throw BadRequestError('Seller not found');
   
-  res.status(200).json({
-    status: 'success', 
-    message: 'Updated the seller successfully',
-    data: seller
-  });
+  return sendResponse(res, { message: 'Updated the seller successfully', data: seller });
 }));
 
 export default router;

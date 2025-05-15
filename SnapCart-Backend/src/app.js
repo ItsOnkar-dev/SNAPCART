@@ -7,6 +7,8 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import session from 'express-session';
 import passport from './Config/passport-setup.js';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 const app = express();
 
@@ -31,6 +33,16 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Help secure Express apps by setting HTTP response headers.
+app.use(helmet());
+
+//  global rate limiting for all endpoints.
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1000, // adjust as needed
+});
+app.use(globalLimiter);
+
 app.use('/api', productRoutes) // Add product routes
 app.use('/user', userRoutes)  // Add user routes
 app.use('/auth', authRoutes) // Add auth routes
@@ -38,13 +50,15 @@ app.use(sellersRoutes);
 
 // Global Express Error Handler
 app.use((err, req, res, next) => {
-  const { statusCode = 500, message = 'Internal Server Error' } = err;
-  res.status(statusCode).json({
+  const statusCode = err.status || err.statusCode || 500;
+  const message = err.message || 'Internal Server Error';
+  const errors = err.errors || null;
+  const response = {
     status: 'error',
-    statusCode,
-    errMsg: message
-  });
-})
+    message,
+  };
+  if (errors) response.errors = errors;
+  res.status(statusCode).json(response);
+});
 
 export default app
- 

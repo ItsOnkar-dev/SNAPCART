@@ -2,7 +2,7 @@ import User from '../Models/User.js'
 
 class UserRepo{
   static async findByUsername(username){
-    return await User.findOne({username})
+    return await User.findOne({username}).lean();
   }
 
   static async findByEmail(email){

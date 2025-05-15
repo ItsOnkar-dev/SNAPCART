@@ -3,25 +3,40 @@ import Product from '../Models/Product.js'
 import catchAsync from '../Core/catchAsync.js'
 import {BadRequestError, InternalServerError} from '../Core/ApiError.js'
 import Logger from '../Config/Logger.js'
+import { createProductValidator, updateProductValidator } from '../Validators/productValidator.js'
+import { validationResult } from 'express-validator'
 
 const router = express.Router(); // Creates a new instance of an Express Router. The Router in Express is like a mini Express application that you can use to handle routes separately instead of defining all routes in server.js.
+
+// Utility for standardized API responses
+const sendResponse = (res, { status = 'success', statusCode = 200, message = '', data = null, errors = null }) => {
+  const response = { status, message };
+  if (data !== null) response.data = data;
+  if (errors !== null) response.errors = errors;
+  return res.status(statusCode).json(response);
+};
 
 // Get All products
 router.get('/products', catchAsync(async(req, res) => {
   Logger.info("Fetch all products request received")
   const products = await Product.find({})
-  if (!products || products.length === 0) throw new BadRequestError('Products not found');
-  res.status(200).json({status: 'success', message: 'Fetched all the products successfully',  data: products });
-  // Logger.info("All products received successfully", {data: products})
+  if (!products || products.length === 0) throw BadRequestError('Products not found');
+  return sendResponse(res, { message: 'Fetched all the products successfully', data: products });
 }));
 
 // Creating the new Product
-router.post('/products', catchAsync(async(req, res) => {
+router.post('/products', createProductValidator, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return sendResponse(res, { status: 'error', statusCode: 400, message: 'Validation failed', errors: errors.array() });
+  }
+  next();
+}, catchAsync(async(req, res) => {
   Logger.info("Create the product request received", { body: req.body })
   const { title, description, image, price } = req.body;
 
-  if(!title || description || !image || !price) {
-    return res.status(400).json({ message: "All fields are required" });
+  if(!title || !description || !image || !price) {
+    return sendResponse(res, { status: 'error', statusCode: 400, message: 'All fields are required' });
   }
 
   const newProduct = await Product.create(
@@ -33,9 +48,9 @@ router.post('/products', catchAsync(async(req, res) => {
     }
   );
 
-  if (!newProduct) throw new InternalServerError('Failed to create product');
+  if (!newProduct) throw InternalServerError('Failed to create product');
 
-  res.status(201).json({status: 'success', message: 'Product created successfully',  data: newProduct });
+  return sendResponse(res, { statusCode: 201, message: 'Product created successfully', data: newProduct });
 }));
 
 router.route('/products/:productId')
@@ -45,12 +60,18 @@ router.route('/products/:productId')
   const { productId } = req.params;
   const product = await Product.findById(productId);
 
-  if (!product) throw new BadRequestError('Product not found');
+  if (!product) throw BadRequestError('Product not found');
 
-  res.status(200).json(product);
+  return sendResponse(res, { message: 'Product fetched successfully', data: product });
 }))
 // Update a product
-.patch(catchAsync(async(req, res) => {
+.patch(updateProductValidator, (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return sendResponse(res, { status: 'error', statusCode: 400, message: 'Validation failed', errors: errors.array() });
+  }
+  next();
+}, catchAsync(async(req, res) => {
   Logger.info("Update the product request received")
   const { productId } = req.params;
   const { title, description, image, price } = req.body;
@@ -64,9 +85,9 @@ router.route('/products/:productId')
     }, 
     { new: true, runValidators: true }); // Returns the updated document
 
-  if (!product) throw new BadRequestError('Product not found');
+  if (!product) throw BadRequestError('Product not found');
 
-  res.status(200).json({status: 'success', message: 'product updated successfully',  data: product });
+  return sendResponse(res, { message: 'Product updated successfully', data: product });
 }))
 // Delete a product
 .delete(catchAsync(async(req, res) => {
@@ -74,9 +95,9 @@ router.route('/products/:productId')
   const { productId } = req.params;
   const product = await Product.findByIdAndDelete(productId);
 
-  if (!product) throw new BadRequestError('Product not found');
+  if (!product) throw BadRequestError('Product not found');
 
-  res.status(200).json({status: 'success', message: 'product deleted successfully' });
+  return sendResponse(res, { message: 'Product deleted successfully' });
 }));
 
 export default router;
