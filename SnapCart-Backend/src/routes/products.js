@@ -53,7 +53,6 @@ router.post('/products', isLoggedIn, createProductValidator, (req, res, next) =>
       description, 
       image, 
       price: parseFloat(price),
-      sellerId: req.userId
     }
   );
 

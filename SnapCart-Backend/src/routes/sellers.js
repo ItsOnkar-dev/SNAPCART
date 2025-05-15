@@ -4,6 +4,7 @@ import catchAsync from '../Core/catchAsync.js';
 import { InternalServerError, BadRequestError, NotFoundError, AuthenticationError } from '../Core/ApiError.js';
 import Logger from '../Config/Logger.js';
 import { isLoggedIn } from '../Middlewares/Auth.js'; 
+import UserRepo from "../Repositories/UserRepo.js";
 import { createSellerValidator, updateSellerValidator } from '../Validators/sellerValidator.js';
 import { validationResult } from 'express-validator';
 
@@ -85,6 +86,10 @@ router.post('/sellers', createSellerValidator, (req, res, next) => {
   Logger.info("Create the seller request received", { body: req.body });
   
   const { name, email, storeName, storeDescription } = req.body;
+
+  const { userId } = req;
+  // Find user by ID from the token, excluding password
+  const sellerId = await UserRepo.findByUserId(userId);
   
   // Validate required fields (redundant with validator, but kept for safety)
   if (!name || !email || !storeName || !storeDescription) {
@@ -102,15 +107,12 @@ router.post('/sellers', createSellerValidator, (req, res, next) => {
     throw BadRequestError('This store name is already taken');
   }
   
-   // Create the new seller with the user ID from the authenticated user
-  const userId = req.user._id;
-  
   const newSeller = await Seller.create({
     name,
     email,
     storeName,
     storeDescription,
-    userId
+    sellerId
   });
   
   if (!newSeller) {
