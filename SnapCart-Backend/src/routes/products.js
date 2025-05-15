@@ -5,6 +5,7 @@ import {BadRequestError, InternalServerError} from '../Core/ApiError.js'
 import Logger from '../Config/Logger.js'
 import { createProductValidator, updateProductValidator } from '../Validators/productValidator.js'
 import { validationResult } from 'express-validator'
+import { isLoggedIn } from '../Middlewares/Auth.js'
 
 const router = express.Router(); // Creates a new instance of an Express Router. The Router in Express is like a mini Express application that you can use to handle routes separately instead of defining all routes in server.js.
 
@@ -16,7 +17,7 @@ const sendResponse = (res, { status = 'success', statusCode = 200, message = '',
   return res.status(statusCode).json(response);
 };
 
-// Get All products
+// Get All products (public)
 router.get('/products', catchAsync(async(req, res) => {
   Logger.info("Fetch all products request received")
   const products = await Product.find({}).lean()
@@ -24,8 +25,15 @@ router.get('/products', catchAsync(async(req, res) => {
   return sendResponse(res, { message: 'Fetched all the products successfully', data: products });
 }));
 
-// Creating the new Product
-router.post('/products', createProductValidator, (req, res, next) => {
+// Get products for the logged-in seller (private)
+router.get('/my-products', isLoggedIn, catchAsync(async(req, res) => {
+  Logger.info("Fetch seller's own products request received")
+  const products = await Product.find({ sellerId: req.userId }).lean();
+  return sendResponse(res, { message: 'Fetched your products successfully', data: products });
+}));
+
+// Creating the new Product (private)
+router.post('/products', isLoggedIn, createProductValidator, (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return sendResponse(res, { status: 'error', statusCode: 400, message: 'Validation failed', errors: errors.array() });
@@ -44,7 +52,8 @@ router.post('/products', createProductValidator, (req, res, next) => {
       title, 
       description, 
       image, 
-      price: parseFloat(price) 
+      price: parseFloat(price),
+      sellerId: req.userId
     }
   );
 
@@ -54,7 +63,7 @@ router.post('/products', createProductValidator, (req, res, next) => {
 }));
 
 router.route('/products/:productId')
-// Show a product
+// Show a product (public)
 .get(catchAsync(async(req, res) => {
   Logger.info("Show the product request received")
   const { productId } = req.params;
@@ -64,8 +73,8 @@ router.route('/products/:productId')
 
   return sendResponse(res, { message: 'Product fetched successfully', data: product });
 }))
-// Update a product
-.patch(updateProductValidator, (req, res, next) => {
+// Update a product (private, only owner)
+.patch(isLoggedIn, updateProductValidator, (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return sendResponse(res, { status: 'error', statusCode: 400, message: 'Validation failed', errors: errors.array() });
@@ -75,27 +84,25 @@ router.route('/products/:productId')
   Logger.info("Update the product request received")
   const { productId } = req.params;
   const { title, description, image, price } = req.body;
-  const product = await Product.findByIdAndUpdate(
-    productId, 
-    { 
-      title, 
-      description, 
-      image, 
-      price: parseFloat(price) 
-    }, 
-    { new: true, runValidators: true }); // Returns the updated document
+  // Only allow update if the product belongs to the logged-in seller
+  const product = await Product.findOneAndUpdate(
+    { _id: productId, sellerId: req.userId },
+    { title, description, image, price: parseFloat(price) },
+    { new: true, runValidators: true }
+  );
 
-  if (!product) throw BadRequestError('Product not found');
+  if (!product) throw BadRequestError('Product not found or you do not have permission to update this product');
 
   return sendResponse(res, { message: 'Product updated successfully', data: product });
 }))
-// Delete a product
-.delete(catchAsync(async(req, res) => {
+// Delete a product (private, only owner)
+.delete(isLoggedIn, catchAsync(async(req, res) => {
   Logger.info("Delete the product request received")
   const { productId } = req.params;
-  const product = await Product.findByIdAndDelete(productId);
+  // Only allow delete if the product belongs to the logged-in seller
+  const product = await Product.findOneAndDelete({ _id: productId, sellerId: req.userId });
 
-  if (!product) throw BadRequestError('Product not found');
+  if (!product) throw BadRequestError('Product not found or you do not have permission to delete this product');
 
   return sendResponse(res, { message: 'Product deleted successfully' });
 }));

@@ -66,7 +66,7 @@ router.post(
 
 // User Login
 router.post(
-  "/registration",
+  "/login",
   loginAuthValidator,
   (req, res, next) => {
     const errors = validationResult(req);
