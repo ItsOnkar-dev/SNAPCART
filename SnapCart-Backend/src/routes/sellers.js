@@ -30,26 +30,49 @@ router.get('/sellers', catchAsync(async (req, res) => {
 }));
 
 // Get the seller of the current user
-// router.get('/sellers/current', isLoggedIn, catchAsync(async (req, res) => {
-//   Logger.info("Fetching the seller data of the current user");
+router.get('/sellers/current', isLoggedIn, catchAsync(async (req, res) => {
+  Logger.info("Fetching the seller data of the current user");
   
-//   // Make sure req.user exists and has an _id
-//   if (!req.user || !req.user._id) {
-//     throw new AuthenticationError('User is not authenticated');
-//   }
+  // Make sure req.user exists and has an _id
+  if (!req.user || !req.user._id) {
+    throw new AuthenticationError('User is not authenticated');
+  }
   
-//   const seller = await Seller.findOne({ userId: req.user._id });
+  const seller = await Seller.findOne({ userId: req.user._id });
   
-//   if (!seller) {
-//     throw new NotFoundError('User is not a seller');
-//   }
+  if (!seller) {
+    return res.status(404).json({
+      status: 'error',
+      message: 'User is not a seller'
+    });
+  }
   
-//   res.status(200).json({
-//     status: 'success', 
-//     message: 'Fetched seller data successfully',
-//     data: seller,
-//   });   
-// }));
+  return sendResponse(res, { 
+    message: 'Fetched seller data successfully',
+    data: seller
+  });   
+}));
+
+
+// Check if an email is associated with a seller account
+router.get('/sellers/check-email', catchAsync(async (req, res) => {
+  const { email } = req.query;
+  
+  if (!email) {
+    return sendResponse(res, { 
+      status: 'error', 
+      statusCode: 400, 
+      message: 'Email parameter is required' 
+    });
+  }
+  
+  const seller = await Seller.findOne({ email }).lean();
+  
+  return sendResponse(res, { 
+    message: seller ? 'Email is associated with a seller account' : 'Email is not associated with a seller account',
+    data: { exists: !!seller }
+  });
+}));
 
 // Create a new seller
 router.post('/sellers', createSellerValidator, (req, res, next) => {
@@ -79,16 +102,15 @@ router.post('/sellers', createSellerValidator, (req, res, next) => {
     throw BadRequestError('This store name is already taken');
   }
   
-  // Create the new seller
-  // If user auth is implemented, uncomment the userId line:
-  // const userId = req.user ? req.user._id : null;
+   // Create the new seller with the user ID from the authenticated user
+  const userId = req.user._id;
   
   const newSeller = await Seller.create({
     name,
     email,
     storeName,
     storeDescription,
-    // userId // Uncomment when user authentication is implemented
+    userId
   });
   
   if (!newSeller) {

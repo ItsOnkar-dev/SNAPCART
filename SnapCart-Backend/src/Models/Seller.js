@@ -19,10 +19,20 @@ const sellerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  // approved: {
-  //   type: Boolean,
-  //   default: false, // Initially, sellers are not approved
-  // },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    unique: true
+  },
+  approved: {
+    type: Boolean,
+    default: true, // Initially sellers are approved by default (can be changed to false if admin approval is needed)
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
 const Seller = mongoose.model('Seller', sellerSchema);
