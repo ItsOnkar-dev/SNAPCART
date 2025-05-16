@@ -33,28 +33,17 @@ export const isLoggedIn = (req, res, next) => {
   }
 };
 
-// export const restrictTo = (...roles) => {
-//   return (req, res, next) => {
-//     // Check if user role is included in the allowed roles
-//     if (!roles.includes(req.user.role)) {
-//       Logger.warn("User does not have permission", { userRole: req.user.role, requiredRoles: roles });
-//       return next(new UnauthorizedError('You do not have permission to perform this action'));
-//     }
-    
-//     next();
-//   };
-// };
+export const restrictTo = (role) => {
+  return (req, res, next) => {
+    // Check if user exists and their role matches the required role
+    if (!req.user || req.user.role !== role) {
+      return next(new AuthorizationError('You do not have permission to perform this action'));
+    }
 
-// export const isAdmin = (req, res, next) => {
-//   Logger.info("Checking if user is admin");
-  
-//   if (!req.user || req.user.role !== 'admin') {
-//     Logger.warn("Access denied: User is not an admin", { user: req.user ? req.user._id : 'unknown' });
-//     return next(new UnauthorizedError('Access denied. Admin privileges required.'));
-//   }
-  
-//   next();
-// };
+    next();
+  };
+};
+
 
 
 

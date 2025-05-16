@@ -5,7 +5,7 @@ import {BadRequestError, InternalServerError} from '../Core/ApiError.js'
 import Logger from '../Config/Logger.js'
 import { createProductValidator, updateProductValidator } from '../Validators/productValidator.js'
 import { validationResult } from 'express-validator'
-import { isLoggedIn } from '../Middlewares/Auth.js'
+import { isLoggedIn, restrictTo } from '../Middlewares/Auth.js'
 
 const router = express.Router(); // Creates a new instance of an Express Router. The Router in Express is like a mini Express application that you can use to handle routes separately instead of defining all routes in server.js.
 
@@ -26,7 +26,7 @@ router.get('/products', catchAsync(async(req, res) => {
 }));
 
 // Get products for the logged-in seller (private)
-router.get('/my-products', isLoggedIn, catchAsync(async(req, res) => {
+router.get('/my-products', isLoggedIn, restrictTo('Seller'), catchAsync(async(req, res) => {
   Logger.info("Fetch seller's own products request received")
   const products = await Product.find({ sellerId: req.userId }).lean();
   return sendResponse(res, { message: 'Fetched your products successfully', data: products });
@@ -73,7 +73,7 @@ router.route('/products/:productId')
   return sendResponse(res, { message: 'Product fetched successfully', data: product });
 }))
 // Update a product (private, only owner)
-.patch(isLoggedIn, updateProductValidator, (req, res, next) => {
+.patch(isLoggedIn, restrictTo('Seller'), updateProductValidator, (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return sendResponse(res, { status: 'error', statusCode: 400, message: 'Validation failed', errors: errors.array() });
@@ -95,7 +95,7 @@ router.route('/products/:productId')
   return sendResponse(res, { message: 'Product updated successfully', data: product });
 }))
 // Delete a product (private, only owner)
-.delete(isLoggedIn, catchAsync(async(req, res) => {
+.delete(isLoggedIn, restrictTo('Seller'), catchAsync(async(req, res) => {
   Logger.info("Delete the product request received")
   const { productId } = req.params;
   // Only allow delete if the product belongs to the logged-in seller

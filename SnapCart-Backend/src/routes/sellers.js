@@ -75,51 +75,31 @@ router.get('/sellers/check-email', catchAsync(async (req, res) => {
   });
 }));
 
-// Create a new seller
-router.post('/sellers', createSellerValidator, (req, res, next) => {
+// Create a new seller profile for the logged-in user
+router.post('/sellers', isLoggedIn, createSellerValidator, (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return sendResponse(res, { status: 'error', statusCode: 400, message: 'Validation failed', errors: errors.array() });
   }
   next();
 }, catchAsync(async (req, res) => {
-  Logger.info("Create the seller request received", { body: req.body });
-  
-  const { name, email, storeName, storeDescription } = req.body;
+  Logger.info("Create seller profile request received", { userId: req.user._id, body: req.body });
 
-  const { userId } = req;
-  // Find user by ID from the token, excluding password
-  const sellerId = await UserRepo.findByUserId(userId);
-  
-  // Validate required fields (redundant with validator, but kept for safety)
-  if (!name || !email || !storeName || !storeDescription) {
-    return sendResponse(res, { status: 'error', statusCode: 400, message: 'Missing required fields: name, email, storeName, and storeDescription are required' });
+  const { user, storeName, address, phoneNumber } = req.body;
+
+  // Check if the user already has a seller profile
+  const existingSeller = await Seller.findOne({ userId: req.user._id }).lean();
+  if (existingSeller) {
+    throw BadRequestError('User already has a seller profile');
   }
-  
-  // Check if email or store name already exists
-  const existingEmail = await Seller.findOne({ email }).lean();
-  if (existingEmail) {
-    throw BadRequestError('This email is already used for a seller account');
-  }
-  
-  const existingStoreName = await Seller.findOne({ storeName }).lean();
-  if (existingStoreName) {
-    throw BadRequestError('This store name is already taken');
-  }
-  
+
   const newSeller = await Seller.create({
-    name,
-    email,
+    user,
     storeName,
-    storeDescription,
-    sellerId
-  });
-  
-  if (!newSeller) {
-    throw InternalServerError('Failed to create seller');
-  }
-  
-  return sendResponse(res, { statusCode: 201, message: 'Seller created successfully', data: newSeller });
+    address,
+    phoneNumber,
+    userId: req.user._id // Link the seller profile to the logged-in user's ID
+  })
 }));
 
 // Update the seller by ID

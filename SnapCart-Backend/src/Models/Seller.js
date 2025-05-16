@@ -1,27 +1,22 @@
 import mongoose from 'mongoose';
 
 const sellerSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     unique: true,
+    type: String,
+    required: true,
   },
   storeName: {
     type: String,
     required: true,
-    unique: true,
   },
-  storeDescription: {
+  address: {
     type: String,
-    required: true,
   },
-  approved: {
-    type: Boolean,
-    default: true, // Initially sellers are approved by default (can be changed to false if admin approval is needed)
+  phone: {
+    type: String
   },
   createdAt: {
     type: Date,
