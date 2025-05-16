@@ -1,15 +1,32 @@
-import { body } from 'express-validator';
+import { check } from 'express-validator'
 
 export const createSellerValidator = [
-  body('name').notEmpty().withMessage('Name is required'),
-  body('email').isEmail().withMessage('Valid email is required'),
-  body('storeName').notEmpty().withMessage('Store name is required'),
-  body('storeDescription').notEmpty().withMessage('Store description is required'),
-];
+  check('username')
+    .trim()
+    .notEmpty().withMessage('Username is required')
+    .isLength({ min: 3 }).withMessage('Username must be at least 3 characters long'),
 
-export const updateSellerValidator = [
-  body('name').optional().notEmpty().withMessage('Name cannot be empty'),
-  body('email').optional().isEmail().withMessage('Valid email is required'),
-  body('storeName').optional().notEmpty().withMessage('Store name cannot be empty'),
-  body('storeDescription').optional().notEmpty().withMessage('Store description cannot be empty'),
-]; 
+  check('email')
+    .trim()
+    .notEmpty().withMessage('Email is required')
+    .isEmail().withMessage('Please provide a valid email address'),
+
+  check('phone')
+    .trim()
+    .notEmpty().withMessage('Phone number is required')
+    .isLength({ min: 10, max: 15 }).withMessage('Please provide a valid phone number')
+]
+
+export const sellerLoginValidator = [
+  check('email')
+    .trim()
+    .notEmpty().withMessage('Email is required')
+    .isEmail().withMessage('Please provide a valid email address')
+]
+
+// export const updateSellerValidator = [
+//   body('username').optional().notEmpty().withMessage('username cannot be empty'),
+//   body('email').optional().isEmail().withMessage('Valid email is required'),
+//   body('storeName').optional().notEmpty().withMessage('Store name cannot be empty'),
+//   body('storeDescription').optional().notEmpty().withMessage('Store description cannot be empty')
+// ]

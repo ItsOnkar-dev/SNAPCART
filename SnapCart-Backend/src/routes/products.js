@@ -83,14 +83,25 @@ router.route('/products/:productId')
   Logger.info("Update the product request received")
   const { productId } = req.params;
   const { title, description, image, price } = req.body;
-  // Only allow update if the product belongs to the logged-in seller
-  const product = await Product.findOneAndUpdate(
-    { _id: productId, sellerId: req.userId },
+  
+  // First check if product exists
+  const productExists = await Product.findById(productId);
+  if (!productExists) throw InternalServerError('Failed to update product');
+  // Then check if user owns the product
+  if (productExists.sellerId.toString() !== req.userId.toString()) {
+    return sendResponse(res, { 
+      status: 'error', 
+      statusCode: 403, 
+      message: 'You do not have permission to update this product' 
+    });
+  }
+
+  // Now update the product
+  const product = await Product.findByIdAndUpdate(
+    productId,
     { title, description, image, price: parseFloat(price) },
     { new: true, runValidators: true }
   );
-
-  if (!product) throw BadRequestError('Product not found or you do not have permission to update this product');
 
   return sendResponse(res, { message: 'Product updated successfully', data: product });
 }))
@@ -98,10 +109,22 @@ router.route('/products/:productId')
 .delete(isLoggedIn, restrictTo('Seller'), catchAsync(async(req, res) => {
   Logger.info("Delete the product request received")
   const { productId } = req.params;
-  // Only allow delete if the product belongs to the logged-in seller
-  const product = await Product.findOneAndDelete({ _id: productId, sellerId: req.userId });
+  
+  // First check if product exists
+  const productExists = await Product.findById(productId);
+  if (!productExists) throw InternalServerError('Failed to delete product');
 
-  if (!product) throw BadRequestError('Product not found or you do not have permission to delete this product');
+  // Then check if user owns the product
+  if (productExists.sellerId.toString() !== req.userId.toString()) {
+    return sendResponse(res, { 
+      status: 'error', 
+      statusCode: 403, 
+      message: 'You do not have permission to delete this product' 
+    });
+  }
+
+  // Now delete the product
+  await Product.findByIdAndDelete(productId);
 
   return sendResponse(res, { message: 'Product deleted successfully' });
 }));
