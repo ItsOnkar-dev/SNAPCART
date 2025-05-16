@@ -4,8 +4,8 @@ import ProductContext from './ProductContext';
 import PropTypes from 'prop-types';
 
 const ProductContextProvider = ({ children }) => {
-  const [products, setProducts] = useState([]); // Public products
-  const [sellerProducts, setSellerProducts] = useState([]); // Only for logged-in seller
+  const [products, setProducts] = useState([]);
+  const [sellerProducts, setSellerProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -34,23 +34,28 @@ const ProductContextProvider = ({ children }) => {
     const token = window.localStorage.getItem('token');
     if (!token) {
       setSellerProducts([]);
-      return;
+      return { success: false, error: 'Authentication required' };
     }
+
     try {
       setLoading(true);
+      // Use the my-products endpoint which uses the token to identify the seller
       const res = await axios.get('http://localhost:8000/api/my-products', {
         headers: { Authorization: `Bearer ${token}` }
       });
+
       if (res.data && Array.isArray(res.data.data)) {
         setSellerProducts(res.data.data);
+        return { success: true, data: res.data.data };
       } else {
         setSellerProducts([]);
         setError(res.data?.message || 'Unexpected response format');
+        return { success: false, error: res.data?.message || 'Unexpected response format' };
       }
-      setError(null);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load your products. Please try again.');
       setSellerProducts([]);
+      return { success: false, error: err.response?.data?.message || 'Failed to load products' };
     } finally {
       setLoading(false);
     }
@@ -65,11 +70,14 @@ const ProductContextProvider = ({ children }) => {
   const addProduct = async (productData) => {
     const token = window.localStorage.getItem('token');
     if (!token) return { success: false, error: 'Authentication required' };
+
     try {
       const response = await axios.post('http://localhost:8000/api/products', productData, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
       if (response.data && response.data.data) {
+        // Update the local state with the new product
         setSellerProducts(prev => [...prev, response.data.data]);
         setProducts(prev => [...prev, response.data.data]); // Optionally update public list
         return { success: true, data: response.data.data };
@@ -84,15 +92,18 @@ const ProductContextProvider = ({ children }) => {
   const updateProduct = async (productId, productData) => {
     const token = window.localStorage.getItem('token');
     if (!token) return { success: false, error: 'Authentication required' };
+
     try {
       const response = await axios.patch(`http://localhost:8000/api/products/${productId}`, productData, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
       if (response.data && response.data.data) {
-        setSellerProducts(prev => prev.map(product => 
+        // Update the product in both seller products and all products arrays
+        setSellerProducts(prev => prev.map(product =>
           product._id === productId ? response.data.data : product
         ));
-        setProducts(prev => prev.map(product => 
+        setProducts(prev => prev.map(product =>
           product._id === productId ? response.data.data : product
         ));
         return { success: true, data: response.data.data };
@@ -107,11 +118,14 @@ const ProductContextProvider = ({ children }) => {
   const deleteProduct = async (productId) => {
     const token = window.localStorage.getItem('token');
     if (!token) return { success: false, error: 'Authentication required' };
+
     try {
       const response = await axios.delete(`http://localhost:8000/api/products/${productId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
       if (response.data && response.data.status === 'success') {
+        // Remove the deleted product from both arrays
         setSellerProducts(prev => prev.filter(product => product._id !== productId));
         setProducts(prev => prev.filter(product => product._id !== productId));
         return { success: true };
@@ -129,10 +143,10 @@ const ProductContextProvider = ({ children }) => {
       .slice(0, limit);
   };
 
-  // Load products on mount
+  // Load all products on mount
   useEffect(() => {
     fetchProducts();
-    fetchSellerProducts();
+    // We'll load seller products in the ProductManagement component when we know the seller
   }, []);
 
   // Context value
@@ -161,4 +175,4 @@ ProductContextProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export default ProductContextProvider; 
+export default ProductContextProvider;

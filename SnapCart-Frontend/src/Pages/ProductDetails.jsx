@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useCartContext from "../context/Cart/useCartContext";
 import useProductContext from "../context/Product/useProductContext";
@@ -29,7 +29,7 @@ const ProductDetails = () => {
     }
   }, [wishlist, product]);
 
-    const handleCardClick = (id) => {
+  const handleCardClick = (id) => {
     navigate(`/products/${id}`);
     window.scrollTo(0, 0);
   };
@@ -310,33 +310,30 @@ const ProductDetails = () => {
           <nav className='flex flex-wrap space-x-2 sm:space-x-8' aria-label='Product information'>
             <button
               onClick={() => setActiveTab("description")}
-              className={`py-4 px-2 border-b-2 font-medium transition-colors duration-200 ${
-                activeTab === "description"
+              className={`py-4 px-2 border-b-2 font-medium transition-colors duration-200 ${activeTab === "description"
                   ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
                   : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
-              }`}
+                }`}
               aria-selected={activeTab === "description"}
               aria-controls='tab-description'>
               Description
             </button>
             <button
               onClick={() => setActiveTab("specifications")}
-              className={`py-4 px-2 border-b-2 font-medium transition-colors duration-200 ${
-                activeTab === "specifications"
+              className={`py-4 px-2 border-b-2 font-medium transition-colors duration-200 ${activeTab === "specifications"
                   ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
                   : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
-              }`}
+                }`}
               aria-selected={activeTab === "specifications"}
               aria-controls='tab-specifications'>
               Specifications
             </button>
             <button
               onClick={() => setActiveTab("reviews")}
-              className={`py-4 px-2 border-b-2 font-medium transition-colors duration-200 ${
-                activeTab === "reviews"
+              className={`py-4 px-2 border-b-2 font-medium transition-colors duration-200 ${activeTab === "reviews"
                   ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
                   : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
-              }`}
+                }`}
               aria-selected={activeTab === "reviews"}
               aria-controls='tab-reviews'>
               Reviews ({reviews.length})

@@ -11,7 +11,6 @@ const SellerContextProvider = ({ children }) => {
   const [errors, setErrors] = useState({});
   const [hasCheckedSellerStatus, setHasCheckedSellerStatus] = useState(false);
 
-  // Base API URL - make it configurable
   const API_BASE_URL = "http://localhost:8000";
 
   // Try to fetch current seller if user is logged in
@@ -20,14 +19,21 @@ const SellerContextProvider = ({ children }) => {
       try {
         setIsSellerLoading(true);
         const token = localStorage.getItem("token");
-        
+
         if (!token) {
           // No token means not logged in
           setIsSellerLoading(false);
           setHasCheckedSellerStatus(true);
           return;
         }
-        const response = await axios.get(`${API_BASE_URL}/sellers/current`);
+
+        // Make sure to use consistent paths (with or without API prefix)
+        const response = await axios.get(`${API_BASE_URL}/sellers/current`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
         console.log("Fetched Current Seller Successfully", response.data.data);
         if (response.data.status === "success") {
           setSeller(response.data.data);
@@ -55,7 +61,12 @@ const SellerContextProvider = ({ children }) => {
         throw new Error("You must be logged in to become a seller");
       }
 
-      const response = await axios.post(`${API_BASE_URL}/sellers`, sellerData);
+      const response = await axios.post(`${API_BASE_URL}/sellers`, sellerData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
       if (response.data && response.data.data) {
         setSeller(response.data.data);
         console.log("[SellerContext] Seller created:", response.data.data);
@@ -80,14 +91,14 @@ const SellerContextProvider = ({ children }) => {
   // Check if email has a seller account but not logged in as that seller
   const checkSellerEmail = async (email) => {
     try {
-      const response = await axios.get(`/api/sellers/check-email?email=${email}`);
+      const response = await axios.get(`${API_BASE_URL}/sellers/check-email?email=${email}`);
       return response.data.exists;
     } catch (error) {
       console.error("Error checking seller email:", error);
       return false;
     }
   };
-  
+
   // Helper to check if user is logged in as seller
   const isLoggedInAsSeller = () => {
     return seller !== null;
@@ -99,7 +110,18 @@ const SellerContextProvider = ({ children }) => {
       if (!sellerId) {
         throw new Error("Seller ID is required to update seller information");
       }
-      const response = await axios.patch(`${API_BASE_URL}/sellers/${sellerId}`, sellerData);
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("You must be logged in to update seller information");
+      }
+
+      const response = await axios.patch(`${API_BASE_URL}/api/sellers/${sellerId}`, sellerData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
       if (response.data && response.data.data) {
         setSeller(response.data.data);
         console.log("[SellerContext] Seller updated:", response.data.data);
@@ -125,22 +147,22 @@ const SellerContextProvider = ({ children }) => {
   const logoutSeller = () => {
     setSeller(null);
     // Note: This doesn't remove the token, as the user is still logged in
-    toast.info("Logged out from seller account");
+    toast.success("Successfully logged out from seller account!");
     return true;
   };
 
 
   return (
-    <SellerContext.Provider value={{ 
-      seller, 
+    <SellerContext.Provider value={{
+      seller,
       isSellerLoading,
-      errors, 
+      errors,
       createSeller,
       checkSellerEmail,
       hasCheckedSellerStatus,
       isLoggedInAsSeller,
       updateSeller,
-      logoutSeller
+      logoutSeller,
     }}>
       {children}
     </SellerContext.Provider>

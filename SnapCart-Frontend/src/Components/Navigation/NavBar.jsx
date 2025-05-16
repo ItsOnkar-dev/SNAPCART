@@ -10,7 +10,6 @@ import { ChevronDown, BadgeIndianRupee, Heart, UserRound, Sun, Moon } from "luci
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import useCartContext from "../../context/Cart/useCartContext";
 import useUserContext from "../../context/User/useUserContext";
-import useSellerContext from "../../context/Seller/useSellerContext";
 import UserProfile from "../../Components/UserProfile";
 import Sidebar from "./Sidebar";
 import { toast } from "react-toastify";
@@ -29,7 +28,6 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const location = useLocation();
   const cartContext = useCartContext();
   const { user, isLoggedIn } = useUserContext();
-  const {seller} = useSellerContext()
 
   // Update displayName whenever user data changes
   useEffect(() => {
@@ -80,9 +78,9 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   };
 
   const handleIsLoggedIn = () => {
-    if (isLoggedIn && seller) {
-      navigate("/seller/product-management");
-      toast.success("You are already logged in as a seller! Redirecting to product management...");
+    if (!isLoggedIn && !user) {
+      navigate("/become-seller");
+      toast.success("You are already logged in as a seller!");
     }
   };
 
@@ -179,11 +177,10 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
               <div ref={profileModalRef} onMouseEnter={handleProfileHover} onMouseLeave={handleProfileLeave}>
                 <div
                   ref={profileIconRef}
-                  className={`${
-                    location.pathname === "/profile"
-                      ? "hidden sm:flex gap-2 items-center text-pink-600 placeholder:font-bold cursor-pointer"
-                      : "hidden sm:flex items-center gap-2 cursor-pointer text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white"
-                  }`}>
+                  className={`${location.pathname === "/profile"
+                    ? "hidden sm:flex gap-2 items-center text-pink-600 placeholder:font-bold cursor-pointer"
+                    : "hidden sm:flex items-center gap-2 cursor-pointer text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white"
+                    }`}>
                   {hasValidAvatar ? (
                     <img
                       src={userAvatar}
@@ -208,7 +205,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             ) : (
               <NavLink to='/registration' className='hidden sm:flex items-center gap-1 text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white'>
                 <UserRound />
-                <span className=''>Register</span>
+                <span className=''>Login/Register</span>
               </NavLink>
             )}
           </div>

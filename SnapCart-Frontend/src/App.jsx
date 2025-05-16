@@ -13,8 +13,10 @@ import { ToastContainer, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BecomeSeller from "./Pages/BecomeSeller";
 import AdminDashboard from "./Pages/AdminDashboard";
+import PrivateRoute from "./Components/PrivateRoute";
 import ProductManagement from "./Components/Products/ProductManagement";
 import ProductDetails from "./Pages/ProductDetails";
+import useUserContext from "./context/User/useUserContext";
 
 // Get initial theme from localStorage or system preference
 const getInitialTheme = () => {
@@ -32,6 +34,7 @@ const getInitialTheme = () => {
 
 const App = () => {
   const [isDark, setIsDark] = useState(getInitialTheme);
+  const {isLoggedIn} = useUserContext();
 
   // Update theme in localStorage and document class
   useEffect(() => {
@@ -63,13 +66,17 @@ const App = () => {
           <Route path='/oauth-success' element={<OAuthSuccess />} />
           <Route path='/about' element={<About />} />
           <Route path='/contact' element={<Contact />} />
-          <Route path='/products/:productId' element={<ProductDetails />} />
-          <Route path='/cart' element={<Cart />} />
-          <Route path='/wishlist' element={<WishList />} />
           <Route path='/profile' element={<Profile />} />
           <Route path='/become-seller' element={<BecomeSeller />} />
           <Route path='/admin' element={<AdminDashboard />} />
-          <Route path='/seller/product-management' element={<ProductManagement />} />
+
+           {/* Private routes starts here! */}
+          <Route element={<PrivateRoute isAuthenticated={isLoggedIn} />}>
+              <Route path='/products/:productId' element={<ProductDetails />} />
+              <Route path='/cart' element={<Cart />} />
+              <Route path='/wishlist' element={<WishList />} />
+              <Route path='/seller/product-management' element={<ProductManagement />} />
+          </Route>
         </Routes>
         <ToastContainer
           position='top-center'

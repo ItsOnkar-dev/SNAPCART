@@ -1,162 +1,54 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import useSellerContext from "../context/Seller/useSellerContext";
-import useUserContext from "../context/User/useUserContext";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import SellerLoginModal from '../Components/Seller/SellerLoginModal';
+import SellerRegisterModal from '../Components/Seller/SellerRegisterModal';
+import SellerNavbar from '../Components/Navigation/SellerNavBar';
+import useUserContext from '../context/User/useUserContext';
+import useSellerContext from '../context/Seller/useSellerContext';
+import { toast } from 'react-toastify';
 
-const BecomeSeller = () => {
+const BecomeSeller = ({ isDark, toggleDarkMode }) => {
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const { isLoggedIn } = useUserContext();
+  const { seller, isSellerLoading, hasCheckedSellerStatus } = useSellerContext();
   const navigate = useNavigate();
-  const { seller, isSellerLoading, createSeller,  hasCheckedSellerStatus, errors: contextErrors } = useSellerContext();
-  const { user, isLoggedIn } = useUserContext();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    storeName: "",
-    storeDescription: "",
-    agreeToTerms: false,
-  });
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasExistingSellerAccount, setHasExistingSellerAccount] = useState(false);
-
-   // Check authentication status first
+  // Check if user is already a seller and redirect if needed
   useEffect(() => {
-    if (hasCheckedSellerStatus && !isLoggedIn) {
-      toast.error("You must be logged in to become a seller");
-      navigate("/become-seller");
+    if (hasCheckedSellerStatus && !isSellerLoading && seller) {
+      toast.info("You are already registered as a seller!");
+      navigate('/seller/product-management');
     }
-  }, [isLoggedIn, hasCheckedSellerStatus, navigate]);
+  }, [hasCheckedSellerStatus, isSellerLoading, seller, navigate]);
 
-  // If seller data exists, redirect to product management
-  useEffect(() => {
-    if (!isSellerLoading && hasCheckedSellerStatus && seller) {
-      toast.info("You are already a seller! Redirecting to product management...");
-      // Add a small delay to allow the toast to be seen
-      setTimeout(() => {
-        navigate("/seller/product-management");
-      }, 1500);
-    }
-  }, [seller, navigate, isSellerLoading, hasCheckedSellerStatus]);
-
-  // Pre-fill form with user data if available
-  useEffect(() => {
-    if (user && user.email) {
-      setFormData((prev) => ({
-        ...prev,
-        name: user.name || "",
-        email: user.email || "",
-      }));
-      // Check if this email already has a seller account
-      const checkEmail = async () => {
-        if (user.email) {
-          try {
-            const response = await fetch(`http://localhost:8000/sellers/check-email?email=${user.email}`);
-            const data = await response.json();
-            if (data.data?.exists) {
-              setHasExistingSellerAccount(true);
-            }
-          } catch (error) {
-            console.error("Error checking email:", error);
-          }
-        }
-      };
-      
-      checkEmail();
-    }
-  }, [user]);
-
-  const handleChange = (event) => {
-    const { name, value, type, checked } = event.target;
-
-    // Update form data
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-
-    // Clear any errors for this field
-    if (errors[name]) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        [name]: null,
-      }));
-    }
+  const openLoginModal = () => {
+    setIsLoginModalOpen(true);
+    setIsRegisterModalOpen(false);
   };
 
-  const validateForm = () => {
-    const validationErrors = {};
-
-    if (!formData.name.trim()) validationErrors.name = "Name is required";
-
-    if (!formData.email.trim()) {
-      validationErrors.email = "Email is required";
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      validationErrors.email = "Please enter a valid email address";
-    }
-
-    if (!formData.storeName.trim()) validationErrors.storeName = "Store name is required";
-    if (!formData.storeDescription.trim()) validationErrors.storeDescription = "Store description is required";
-    if (!formData.agreeToTerms) validationErrors.agreeToTerms = "You must agree to the terms and conditions";
-
-    return validationErrors;
+  const openRegisterModal = () => {
+    setIsRegisterModalOpen(true);
+    setIsLoginModalOpen(false);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    // Reset errors
-    setErrors({});
-    setIsSubmitting(true);
-
-    // Client-side validation
-    const validationErrors = validateForm();
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      console.log("Submitting seller form with data:", formData);
-      // Use the createSeller function from context
-      const result = await createSeller(formData);
-      if (result.success) {
-        // Navigate to product management on success
-        toast.success("Seller account created successfully! Redirecting to product management...");
-        setTimeout(() => {
-          navigate("/seller/product-management");
-        }, 1500);
-      } else {
-        throw new Error(result.error || "Failed to create seller account");
-      }
-    } catch (error) {
-     
-      let errorMessage;
-
-      if (error.response) {
-        errorMessage = error.response.data?.message || `Server error: ${error.response.status}`;
-      } else if (error.request) {
-        errorMessage = "No response from server. Please check your connection and try again.";
-      } else {
-        errorMessage = error.message || "An error occurred while submitting the form. Please try again.";
-      }
-
-      setErrors({ submit: errorMessage });
-      setIsSubmitting(false);
-    }
+  const closeLoginModal = () => {
+    setIsLoginModalOpen(false);
   };
 
-  const styles = {
-    input:
-      "shadow appearance-none border dark:border-gray-500 rounded w-full py-3 px-4 text-gray-700 dark:text-white/80 dark:bg-slate-800 leading-tight focus:outline-none focus:border-transparent transition-all duration-300",
-    featureCard: "p-6 rounded-lg shadow-md hover:shadow-lg transition-all ease-in-out duration-300 transform hover:-translate-y-1",
-    formLabel: "block text-gray-700 dark:text-white/80 text-sm font-bold mb-2",
-    errorText: "text-red-500 text-sm mt-1",
-    submitButton:
-      "w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+  const closeRegisterModal = () => {
+    setIsRegisterModalOpen(false);
+  };
+
+  const switchToLogin = () => {
+    setIsRegisterModalOpen(false);
+    setIsLoginModalOpen(true);
+  };
+
+  const switchToRegister = () => {
+    setIsLoginModalOpen(false);
+    setIsRegisterModalOpen(true);
   };
 
   // Features data for the Why Sell With Us section
@@ -188,25 +80,16 @@ const BecomeSeller = () => {
     {
       bg: "bg-blue-300",
       icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
-      title: "Secure Payments",
-      description: "Get paid quickly and securely with our trusted payment processing.",
+      title: "Seller Analytics",
+      description: "Access detailed analytics to optimize your products and boost sales.",
     },
     {
       bg: "bg-purple-300",
       icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
-      title: "Analytics",
+      title: "Growth Insights",
       description: "Gain insights from detailed analytics to optimize your sales strategy.",
     },
   ];
-
-  // Show loading while checking seller status
-  if (isSellerLoading || !hasCheckedSellerStatus) {
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500'></div>
-      </div>
-    );
-  }
 
   // Trust badges data
   const trustBadges = [
@@ -216,184 +99,168 @@ const BecomeSeller = () => {
     { value: "100%", label: "Secure transactions" },
   ];
 
-  // Show existing seller account message
-  if (hasExistingSellerAccount && !seller) {
-    return (
-      <div className='min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4'>
-        <div className='bg-white dark:bg-slate-800 border dark:border-gray-600 shadow-lg rounded-lg overflow-hidden max-w-md w-full'>
-          <div className='p-8 text-center'>
-            <div className='w-20 h-20 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-6'>
-              <svg xmlns='http://www.w3.org/2000/svg' className='h-10 w-10 text-yellow-500' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 9v2m0 4h.01M12 22c-5.523 0-10-4.477-10-10S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z' />
-              </svg>
-            </div>
-            <h2 className='text-2xl font-bold text-gray-800 dark:text-white mb-4'>Seller Account Exists</h2>
-            <p className='text-gray-600 dark:text-gray-300 mb-6'>
-              It looks like this email address already has a seller account. Please log in with your seller credentials to access your seller dashboard.
-            </p>
-            <div className='flex flex-col space-y-4'>
-              <button
-                onClick={() => navigate("/become-seller")}
-                className='w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-3 px-4 rounded-lg transition-colors'>
-                Log In as Seller
-              </button>
-              <button
-                onClick={() => navigate("/")}
-                className='w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-3 px-4 rounded-lg transition-colors'>
-                Return to Home
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Reusable form input component using refs to maintain focus
-  const FormInput = ({ id, name, label, type = "text", placeholder, value, error, onChange }) => (
-    <div>
-      <label htmlFor={id} className={styles.formLabel}>
-        {label}
-      </label>
-      <input
-        type={type}
-        id={id}
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className={`${styles.input} ${error ? "border-red-500 bg-red-50 dark:bg-red-900/20" : "border-gray-300"}`}
-      />
-      {error && <p className={styles.errorText}>{error}</p>}
-    </div>
-  );
-
-  // Error component for displaying submission errors
-  const ErrorAlert = ({ message }) => (
-    <div className='p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-400 rounded mb-4'>
-      <div className='flex'>
-        <svg xmlns='http://www.w3.org/2000/svg' className='h-6 w-6 text-red-500 mr-3' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
-        </svg>
-        <p>{message}</p>
-      </div>
-    </div>
-  );
+  // Seller journey steps
+  const sellerJourney = [
+    {
+      step: "1",
+      title: "Create Account",
+      description: "Register and set up your seller profile in minutes.",
+      icon: "M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+    },
+    {
+      step: "2",
+      title: "List Products",
+      description: "Upload products with images, descriptions, and pricing.",
+      icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+    },
+    {
+      step: "3",
+      title: "Receive Orders",
+      description: "Get notified instantly when customers purchase your items.",
+      icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+    },
+    {
+      step: "4",
+      title: "Ship & Grow",
+      description: "Fulfill orders and watch your business expand.",
+      icon: "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+    }
+  ];
 
   return (
-    <div className='min-h-screen py-24'>
-      <div className='container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl'>
-        <div className='bg-white dark:bg-slate-900 border dark:border-gray-600 shadow-lg rounded-lg overflow-hidden'>
-          {/* Header */}
-          <div className='bg-white dark:bg-slate-900 px-6 py-8 text-center border-b border-gray-300 dark:border-gray-600'>
-            <h1 className='text-3xl font-extrabold dark:text-white mb-3'>Become a Seller</h1>
-            <p className='dark:text-indigo-100 text-gray-500 text-lg max-w-2xl mx-auto'>
-              Start selling your products and reach customers worldwide with your unique products. Expand your reach and grow your business by becoming a seller on SnapCart. We offer you a platform to
-              connect with millions of customers eager to discover unique products like yours.
-            </p>
-          </div> 
+    <div className="min-h-screen pt-16 pb-20 bg-gray-50 dark:bg-slate-900">
+      {/* Custom Navbar for Seller Page */}
+      <SellerNavbar
+        isDark={isDark}
+        toggleDarkMode={toggleDarkMode}
+        openLoginModal={openLoginModal}
+        openRegisterModal={isLoggedIn ? openRegisterModal : () => {
+          toast.warning("Please login first to become a seller");
+          navigate("/registration");
+        }}
+      />
 
-          <div className='p-6'>
-            {/* Features - Simplified */}
-            <section className='mb-8'>
-              <h2 className='text-2xl font-bold mb-6 text-center text-indigo-500 dark:text-indigo-400'>Why Sell With Us?</h2>
-              <div className='grid md:grid-cols-3 gap-6'>
-                {features.map((feature, index) => (
-                  <div key={index} className={`${styles.featureCard} ${feature.bg}`}>
-                    <div className='w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mb-4'>
-                      <svg xmlns='http://www.w3.org/2000/svg' className='h-6 w-6 text-indigo-500' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d={feature.icon} />
-                      </svg>
-                    </div>
-                    <h3 className='text-lg font-semibold mb-2 text-black'>{feature.title}</h3>
-                    <p className='text-sm text-slate-700'>{feature.description}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Show context or form errors if any */}
-            {contextErrors && contextErrors.submit && <ErrorAlert message={contextErrors.submit} />}
-            {errors.submit && <ErrorAlert message={errors.submit} />}
-
-            {/* Application Form */}
-            <section className='bg-transparent rounded-lg p-6 border border-gray-300 dark:border-gray-600'>
-              <h2 className='text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white/80'>Create Your Seller Account</h2>
-              <form onSubmit={handleSubmit} className='space-y-4'>
-                <FormInput id='name' name='name' label='Your Name' placeholder='Enter your full name' value={formData.name} error={errors.name} onChange={handleChange} />
-                <FormInput id='email' name='email' label='Email Address' type='email' placeholder='your@email.com' value={formData.email} error={errors.email} onChange={handleChange} />
-                <FormInput id='storeName' name='storeName' label='Store Name' placeholder='Your store name' value={formData.storeName} error={errors.storeName} onChange={handleChange} />
-
-                <div>
-                  <label htmlFor='storeDescription' className={styles.formLabel}>
-                    Store Description
-                  </label>
-                  <textarea
-                    id='storeDescription'
-                    name='storeDescription'
-                    placeholder='Tell us about your store and products...'
-                    value={formData.storeDescription}
-                    onChange={handleChange}
-                    rows='4'
-                    className={`${styles.input} ${errors.storeDescription ? "border-red-500 bg-red-50 dark:bg-red-900/20" : "border-gray-300"}`}
-                  />
-                  {errors.storeDescription && <p className={styles.errorText}>{errors.storeDescription}</p>}
-                </div>
-
-                <div className='flex items-start'>
-                  <div className='flex items-center h-5'>
-                    <input
-                      type='checkbox'
-                      id='agreeToTerms'
-                      name='agreeToTerms'
-                      checked={formData.agreeToTerms}
-                      onChange={handleChange}
-                      className='w-4 h-4 text-indigo-500 dark:text-white/80 border-gray-300 rounded focus:ring-blue-500'
-                    />
-                  </div>
-                  <div className='ml-3 text-sm'>
-                    <label htmlFor='agreeToTerms' className='font-medium text-gray-700 dark:text-white/80'>
-                      I agree to the{" "}
-                      <a href='/terms' className='text-indigo-500 dark:text-indigo-400 hover:text-blue-800 underline'>
-                        Terms and Conditions
-                      </a>
-                    </label>
-                    {errors.agreeToTerms && <p className={styles.errorText}>{errors.agreeToTerms}</p>}
-                  </div>
-                </div>
-
-                <button type='submit' disabled={isSubmitting} className={`${styles.submitButton} ${isSubmitting ? "opacity-75 cursor-not-allowed" : ""}`}>
-                  {isSubmitting ? (
-                    <>
-                      <svg className='animate-spin -ml-1 mr-3 h-5 w-5 text-white' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
-                        <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
-                        <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
-                      </svg>
-                      Processing...
-                    </>
-                  ) : (
-                    "Become a Seller"
-                  )}
-                </button>
-              </form>
-            </section>
-          </div>
-          {/* Trust badges at the bottom */}
-          {!seller && (
-            <div className='bg-transparent border-t border-gray-300 dark:border-gray-600 py-8 px-6'>
-              <p className='text-center text-gray-600 dark:text-white/60 mb-4'>Trusted by thousands of sellers worldwide</p>
-              <div className='flex justify-center space-x-8'>
-                {trustBadges.map((badge, index) => (
-                  <div key={index} className='text-center'>
-                    <div className='text-2xl font-bold text-indigo-500 dark:text-indigo-400'>{badge.value}</div>
-                    <div className='text-sm text-gray-500 dark:text-white/60'>{badge.label}</div>
-                  </div>
-                ))}
-              </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        {/* Hero Section */}
+        <div className="text-center mb-16">
+          <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
+            <span className="block">Grow Your Business </span>
+            <span className="block text-indigo-600 dark:text-indigo-400">Sell with SnapCart</span>
+          </h1>
+          <p className="mt-3 max-w-md mx-auto text-base text-gray-500 dark:text-gray-300 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+            Join thousands of successful sellers and turn your passion into profit. Reach millions of customers and scale your business with our powerful selling tools.
+          </p>
+          <div className="mt-8 flex justify-center">
+            <div className="inline-flex rounded-md shadow">
+              <button
+                onClick={isLoggedIn ? openRegisterModal : () => {
+                  toast.warning("Please login first to become a seller");
+                  navigate("/registration");
+                }}
+                className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:text-lg"
+              >
+                Start Selling Today
+              </button>
             </div>
-          )}
+            <div className="ml-3 inline-flex">
+              <button
+                onClick={openLoginModal}
+                className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 md:text-lg"
+              >
+                Login as Seller
+              </button>
+            </div>
+          </div>
         </div>
+
+        {/* Features Grid Section */}
+        <section className="mb-20">
+          <h2 className="text-3xl font-bold mb-10 text-center text-gray-900 dark:text-white">Why Sell With Us?</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className={`p-6 rounded-lg shadow-md hover:shadow-lg transition-all ease-in-out duration-300 transform hover:-translate-y-1 ${feature.bg} bg-opacity-20 dark:bg-opacity-10`}>
+                <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={feature.icon} />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{feature.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Seller Journey Section */}
+        <section className="mb-20">
+          <h2 className="text-3xl font-bold mb-10 text-center text-gray-900 dark:text-white">Your Seller Journey</h2>
+          <div className="grid md:grid-cols-4 gap-8">
+            {sellerJourney.map((step, index) => (
+              <div key={index} className="flex flex-col items-center text-center">
+                <div className="bg-indigo-100 dark:bg-indigo-900 rounded-full w-16 h-16 flex items-center justify-center mb-4">
+                  <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{step.step}</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{step.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300">{step.description}</p>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-600 dark:text-indigo-400 mt-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={step.icon} />
+                </svg>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Trust Badges */}
+        <section className="bg-white dark:bg-slate-800 rounded-lg shadow-md py-10 px-6 mb-20">
+          <h2 className="text-2xl font-bold mb-8 text-center text-gray-900 dark:text-white">Trusted by Thousands of Sellers</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {trustBadges.map((badge, index) => (
+              <div key={index} className="text-center">
+                <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{badge.value}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">{badge.label}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="bg-indigo-700 dark:bg-indigo-900 rounded-lg shadow-xl p-10 text-center text-white">
+          <h2 className="text-3xl font-bold mb-4">Ready to Start Selling?</h2>
+          <p className="mb-8 text-indigo-100 max-w-2xl mx-auto">
+            Join our marketplace today and reach millions of potential customers. It only takes a few minutes to set up your seller account.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <button
+              onClick={isLoggedIn ? openRegisterModal : () => {
+                toast.warning("Please login first to become a seller");
+                navigate("/registration");
+              }}
+              className="px-8 py-3 bg-white text-indigo-700 rounded-md hover:bg-gray-100 font-medium"
+            >
+              Start Selling
+            </button>
+            <button
+              onClick={openLoginModal}
+              className="px-8 py-3 border border-white text-white rounded-md hover:bg-indigo-800 font-medium"
+            >
+              Login to Seller Account
+            </button>
+          </div>
+        </section>
       </div>
+
+      {/* Modals */}
+      <SellerLoginModal
+        isOpen={isLoginModalOpen}
+        onClose={closeLoginModal}
+        switchToRegister={switchToRegister}
+      />
+
+      <SellerRegisterModal
+        isOpen={isRegisterModalOpen}
+        onClose={closeRegisterModal}
+        switchToLogin={switchToLogin}
+      />
     </div>
   );
 };
