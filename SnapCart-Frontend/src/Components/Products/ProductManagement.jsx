@@ -24,8 +24,8 @@ const ProductManagement = () => {
   const productFormRef = useRef(null);
 
   // Get product and seller context
-  const { sellerProducts, addProduct, updateProduct, deleteProduct } = useProductContext();
-  const { seller, logoutSeller, fetchSellerProducts } = useSellerContext();
+  const { sellerProducts, addProduct, updateProduct, deleteProduct, fetchSellerProducts } = useProductContext();
+  const { seller, logoutSeller } = useSellerContext();
 
   // Fetch products when seller data is available
   useEffect(() => {
@@ -46,7 +46,7 @@ const ProductManagement = () => {
     return () => {
       isMounted = false;
     };
-  }, [seller?._id, fetchSellerProducts]);
+  }, [seller?._id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

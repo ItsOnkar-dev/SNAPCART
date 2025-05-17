@@ -13,20 +13,20 @@ const OAuthSuccess = () => {
       const params = new URLSearchParams(location.search);
       const token = params.get('token');
       const userDataStr = params.get('userData');
-      
+
       if (!token || !userDataStr) {
         console.error('Missing token or user data in URL');
         navigate('/registration', { state: { error: 'Authentication failed' } });
         return;
       }
-      
+
       try {
         // Parse the user data
         const userData = JSON.parse(decodeURIComponent(userDataStr));
-        
+
         // Call the context handler function
         const success = handleOAuthSuccess(token, userData);
-        
+
         if (success) {
           // Redirect to the home page or dashboard on success
           navigate('/');
@@ -38,7 +38,7 @@ const OAuthSuccess = () => {
         navigate('/registration', { state: { error: 'Invalid authentication data' } });
       }
     };
-    
+
     processOAuthRedirect();
   }, [location.search, navigate]);
 

@@ -30,12 +30,20 @@ const ProductContextProvider = ({ children }) => {
   };
 
   // Fetch products for the logged-in seller
-  const fetchSellerProducts = async () => {
+  const fetchSellerProducts = async (sellerId) => {
+    // Require a valid sellerId parameter
+    if (!sellerId) {
+      return { success: false, error: "Seller ID is required" };
+    }
+
     const token = window.localStorage.getItem("token");
     if (!token) {
       setSellerProducts([]);
       return { success: false, error: "Authentication required" };
     }
+
+    // Create a cache key unique to this seller
+    const sellerProductsCacheKey = `sellerProducts_${sellerId}`;
 
     try {
       setLoading(true);
@@ -46,7 +54,8 @@ const ProductContextProvider = ({ children }) => {
 
       if (res.data && Array.isArray(res.data.data)) {
         setSellerProducts(res.data.data);
-        localStorage.setItem("sellerProducts", JSON.stringify(res.data.data));
+        // Cache with seller-specific key
+        localStorage.setItem(sellerProductsCacheKey, JSON.stringify(res.data.data));
         return { success: true, data: res.data.data };
       } else {
         setSellerProducts([]);
@@ -54,16 +63,16 @@ const ProductContextProvider = ({ children }) => {
         return { success: false, error: res.data?.message || "Unexpected response format" };
       }
     } catch (err) {
-      // Try to load from cache if API call fails
-      const cachedProducts = localStorage.getItem("sellerProducts");
+      // Try to load from seller-specific cache if API call fails
+      const cachedProducts = localStorage.getItem(sellerProductsCacheKey);
       if (cachedProducts) {
         try {
           const parsedProducts = JSON.parse(cachedProducts);
           setSellerProducts(parsedProducts);
           return { success: true, data: parsedProducts, fromCache: true };
-        } catch (err) {
-          console.log(err);
-          localStorage.removeItem("sellerProducts");
+        } catch (parseErr) {
+          console.error("Error parsing cached products:", parseErr);
+          localStorage.removeItem(sellerProductsCacheKey);
         }
       }
 
@@ -74,18 +83,6 @@ const ProductContextProvider = ({ children }) => {
       setLoading(false);
     }
   };
-
-  // Load seller products on mount and when token changes
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const sellerData = localStorage.getItem("sellerData");
-
-    if (token && sellerData) {
-      fetchSellerProducts();
-    }
-    // Also load public products
-    fetchProducts();
-  }, []);
 
   // Get a single product by ID (from public list)
   const getProductById = (productId) => {
@@ -107,6 +104,15 @@ const ProductContextProvider = ({ children }) => {
         // Update the local state with the new product
         setSellerProducts((prev) => [...prev, response.data.data]);
         setProducts((prev) => [...prev, response.data.data]); // Optionally update public list
+
+        // Update seller-specific cache
+        const sellerData = JSON.parse(localStorage.getItem("sellerData") || "{}");
+        if (sellerData && sellerData._id) {
+          const cacheKey = `sellerProducts_${sellerData._id}`;
+          const cachedProducts = JSON.parse(localStorage.getItem(cacheKey) || "[]");
+          localStorage.setItem(cacheKey, JSON.stringify([...cachedProducts, response.data.data]));
+        }
+
         return { success: true, data: response.data.data };
       }
       return { success: false, error: response.data?.message || "Unexpected response format" };
@@ -131,10 +137,31 @@ const ProductContextProvider = ({ children }) => {
       });
 
       if (response.data && response.data.data) {
+        const updatedProduct = response.data.data;
+
         // Update the product in both seller products and all products arrays
-        setSellerProducts((prev) => prev.map((product) => (product && product._id === productId ? response.data.data : product)));
-        setProducts((prev) => prev.map((product) => (product && product._id === productId ? response.data.data : product)));
-        return { success: true, data: response.data.data };
+        setSellerProducts((prev) => prev.map((product) =>
+          (product && product._id === productId ? updatedProduct : product)
+        ));
+
+        setProducts((prev) => prev.map((product) =>
+          (product && product._id === productId ? updatedProduct : product)
+        ));
+
+        // Update seller-specific cache
+        const sellerData = JSON.parse(localStorage.getItem("sellerData") || "{}");
+        if (sellerData && sellerData._id) {
+          const cacheKey = `sellerProducts_${sellerData._id}`;
+          const cachedProducts = JSON.parse(localStorage.getItem(cacheKey) || "[]");
+          localStorage.setItem(
+            cacheKey,
+            JSON.stringify(cachedProducts.map(product =>
+              product._id === productId ? updatedProduct : product
+            ))
+          );
+        }
+
+        return { success: true, data: updatedProduct };
       }
       return { success: false, error: response.data?.message || "Unexpected response format" };
     } catch (err) {
@@ -156,6 +183,18 @@ const ProductContextProvider = ({ children }) => {
         // Remove the deleted product from both arrays
         setSellerProducts((prev) => prev.filter((product) => product._id !== productId));
         setProducts((prev) => prev.filter((product) => product._id !== productId));
+
+        // Update seller-specific cache
+        const sellerData = JSON.parse(localStorage.getItem("sellerData") || "{}");
+        if (sellerData && sellerData._id) {
+          const cacheKey = `sellerProducts_${sellerData._id}`;
+          const cachedProducts = JSON.parse(localStorage.getItem(cacheKey) || "[]");
+          localStorage.setItem(
+            cacheKey,
+            JSON.stringify(cachedProducts.filter(product => product._id !== productId))
+          );
+        }
+
         return { success: true };
       }
       return { success: false, error: response.data?.message || "Failed to delete product" };

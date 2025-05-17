@@ -5,8 +5,6 @@ import { ShoppingBag, Truck, Shield, Award, TrendingUp, Check, Gift } from "luci
 import Register from "../Pages/Register";
 import SnapCartLogo from "../assets/SnapCart.png";
 import SnapCartLogo1 from "../assets/SnapCart1.png";
-import SnapCartLogo2 from "../assets/SnapCartLog01.png";
-import SnapCartLogo3 from "../assets/SnapCartLogo2.png";
 
 // Framer Motion variants
 const containerVariants = {
@@ -139,9 +137,8 @@ const Registration = () => {
                 {features.map((feature, index) => (
                   <div
                     key={index}
-                    className={`flex items-center gap-4 transition-all duration-500 ${
-                      index === activeFeature ? "opacity-100 transform scale-100" : "opacity-0 absolute top-8 left-8 transform scale-95"
-                    }`}>
+                    className={`flex items-center gap-4 transition-all duration-500 ${index === activeFeature ? "opacity-100 transform scale-100" : "opacity-0 absolute top-8 left-8 transform scale-95"
+                      }`}>
                     <div className='p-3 bg-gradient-to-br from-purple-500 to-blue-500 text-white rounded-lg shadow-md'>{feature.icon}</div>
                     <div>
                       <h3 className='text-xl text-gray-800 dark:text-white font-semibold'>{feature.title}</h3>
@@ -157,9 +154,8 @@ const Registration = () => {
                   <button
                     key={index}
                     onClick={() => setActiveFeature(index)}
-                    className={`rounded-full transition-all flex items-center justify-center ${
-                      index === activeFeature ? "bg-gradient-to-r from-purple-600 to-blue-500 w-8 h-3 shadow-md" : "bg-gray-300 dark:bg-gray-600 w-3 h-3 hover:bg-gray-400 dark:hover:bg-gray-500"
-                    }`}
+                    className={`rounded-full transition-all flex items-center justify-center ${index === activeFeature ? "bg-gradient-to-r from-purple-600 to-blue-500 w-8 h-3 shadow-md" : "bg-gray-300 dark:bg-gray-600 w-3 h-3 hover:bg-gray-400 dark:hover:bg-gray-500"
+                      }`}
                     aria-label={`Feature ${index + 1}`}>
                     {index === activeFeature && <div className='w-1.5 h-1.5 bg-white rounded-full'></div>}
                   </button>
@@ -187,7 +183,7 @@ const Registration = () => {
                 </div>
 
                 <div className='flex items-center gap-2'>
-                  <h2 className='text-xl bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-400 dark:to-blue-400 font-semibold text-center'>
+                  <h2 className='text-xl text-gradient1 dark:text-gradient font-semibold text-center'>
                     Welcome to your shopping journey
                   </h2>
                 </div>
@@ -210,7 +206,7 @@ const Registration = () => {
               <div className='space-y-4'>
                 <button
                   onClick={openLoginModal}
-                  className='flex items-center justify-center rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 px-6 py-3 text-white shadow-lg shadow-purple-200 dark:shadow-purple-900/30 w-full transform transition-all duration-300 hover:-translate-y-1'>
+                  className='flex items-center justify-center rounded-xl bg-gradient px-6 py-3 text-white shadow-lg shadow-purple-200 dark:shadow-purple-900/30 w-full transform transition-all duration-300 hover:-translate-y-1'>
                   <span className='mr-2'>Login to Your Account</span>
                   <div className='w-5 h-5 rounded-full bg-white/20 flex items-center justify-center'>
                     <Check className='w-3 h-3 text-white' />

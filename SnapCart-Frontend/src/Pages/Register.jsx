@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-/* eslint-disable no-unused-vars */
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowLeft, Mail, Lock, User, Eye, EyeOff, Loader2, X } from "lucide-react";
@@ -8,7 +7,6 @@ import { FaSackDollar } from "react-icons/fa6";
 import axios from "axios";
 import { toast } from "react-toastify";
 import useUserContext from "../context/User/useUserContext";
-import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 
 // Framer Motion variants
 const overlayVariants = {
@@ -70,7 +68,6 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
   const [role, setRole] = useState("Buyer");
   const modalRef = useRef(null);
   const { login } = useUserContext();
-  const navigate = useNavigate(); // Initialize navigate hook
 
   // Add effect to scroll the modal into view when it opens
   useEffect(() => {
@@ -180,8 +177,8 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
                 <p className="text-purple-100">{isLogin ? "Sign in to access your account" : "Sign up to get started with our service"}</p>
 
                 <div className="cursor-pointer absolute top-6 right-5" onClick={closeModal}>
-                 <X/>
-               </div>
+                  <X/>
+                </div>
               </div>
 
               {/* Form */}
