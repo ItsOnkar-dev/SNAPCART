@@ -21,25 +21,43 @@ const SellerContextProvider = ({ children }) => {
         const token = localStorage.getItem("token");
 
         if (!token) {
-          // No token means not logged in
+          setSeller(null);
           setIsSellerLoading(false);
           setHasCheckedSellerStatus(true);
           return;
         }
 
-        // Make sure to use consistent paths (with or without API prefix)
+        const cachedSeller = localStorage.getItem("sellerData");
+        if (cachedSeller) {
+          try {
+            setSeller(JSON.parse(cachedSeller));
+          } catch (err) {
+            console.log(err)
+            localStorage.removeItem("sellerData");
+          }
+        }
+
         const response = await axios.get(`${API_BASE_URL}/sellers/current`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
 
-        console.log("Fetched Current Seller Successfully", response.data.data);
-        if (response.data.status === "success") {
+        console.log("Fetched Current Seller Successfully", response.data);
+
+        if (response.data.status === "success" && response.data.data) {
+          // Save seller data in state and localStorage
           setSeller(response.data.data);
+          localStorage.setItem("sellerData", JSON.stringify(response.data.data));
+          localStorage.setItem("sellerId", response.data.data._id);
         }
       } catch (error) {
-        if (error.response && error.response.status !== 404) {
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          setSeller(null);
+          localStorage.removeItem("sellerData");
+          localStorage.removeItem("sellerId");
+          console.error("Authentication error fetching seller data:", error);
+        } else if (error.response && error.response.status !== 404) {
           console.error("Error fetching seller data:", error);
           setErrors({ fetch: "Failed to fetch seller information" });
         }

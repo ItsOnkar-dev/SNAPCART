@@ -6,7 +6,7 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
   font-display: swap;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -37,8 +37,8 @@ html {
 }
 
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
-  scrollbar-width: none;      /* Hide scrollbar for Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
 }
 
 @layer base {
@@ -46,6 +46,9 @@ html {
     @apply text-transparent bg-clip-text brightness-105 bg-gradient-to-r from-cyan-500 to-purple-500 hover:bg-gradient-to-r hover:from-purple-600 hover:to-cyan-500 dark:from-cyan-400 dark:to-purple-300 dark:hover:from-purple-300 dark:hover:to-cyan-400;
   }
   .text-gradient1 {
-    @apply text-transparent bg-clip-text brightness-105 bg-gradient-to-r from-indigo-700 to-cyan-500 hover:bg-gradient-to-r hover:from-cyan-500 hover:to-indigo-700 dark:from-cyan-400 dark:to-purple-300 dark:hover:from-purple-300 dark:hover:to-cyan-400;
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400;
+  }
+  .bg-gradient {
+    @apply bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700;
   }
 }

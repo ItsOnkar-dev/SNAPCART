@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import SellerLoginModal from '../Components/Seller/SellerLoginModal';
 import SellerRegisterModal from '../Components/Seller/SellerRegisterModal';
 import SellerNavbar from '../Components/Navigation/SellerNavBar';
@@ -145,15 +146,18 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
         openLoginModal={openLoginModal}
         openRegisterModal={handleStartSelling}
       />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         {/* Hero Section */}
         <div className="text-center mb-16">
+          <NavLink to="/" className='flex items-center gap-1 max-w-fit text-white/70 hover:text-white'>
+            <ArrowLeft size={16} />
+            <h2>Back to Home</h2>
+          </NavLink>
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
             <span className="block">Grow Your Business </span>
-            <span className="block text-indigo-600 dark:text-indigo-400">Sell with SnapCart</span>
+            <span className="block text-gradient1">Sell with SnapCart</span>
           </h1>
-          <p className="mt-3 max-w-md mx-auto text-base text-gray-500 dark:text-gray-300 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+          <p className="max-w-lg md:max-w-3xl mx-auto text-base text-gray-500 dark:text-gray-300 sm:text-lg mt-5 md:text-xl">
             Join thousands of successful sellers and turn your passion into profit. Reach millions of customers and scale your business with our powerful selling tools.
           </p>
           <div className="mt-8 flex justify-center">
@@ -164,7 +168,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
                   navigate("/registration");
                 }}
                 aria-label="Start selling"
-                className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:text-lg"
+                className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gradient md:text-lg"
               >
                 Start Selling Today
               </button>
@@ -232,7 +236,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
         </section>
 
         {/* CTA Section */}
-        <section className="bg-indigo-700 dark:bg-indigo-900 rounded-lg shadow-xl p-10 text-center text-white">
+        <section className="bg-gradient rounded-lg shadow-xl p-10 text-center text-white">
           <h2 className="text-3xl font-bold mb-4">Ready to Start Selling?</h2>
           <p className="mb-8 text-indigo-100 max-w-2xl mx-auto">
             Join our marketplace today and reach millions of potential customers. It only takes a few minutes to set up your seller account.
