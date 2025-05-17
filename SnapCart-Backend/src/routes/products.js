@@ -1,7 +1,7 @@
 import express from 'express'
 import Product from '../Models/Product.js'
 import catchAsync from '../Core/catchAsync.js'
-import {BadRequestError, InternalServerError} from '../Core/ApiError.js'
+import {BadRequestError, InternalServerError, NotFoundError, AuthorizationError} from '../Core/ApiError.js'
 import Logger from '../Config/Logger.js'
 import { createProductValidator, updateProductValidator } from '../Validators/productValidator.js'
 import { validationResult } from 'express-validator'
@@ -21,7 +21,7 @@ const sendResponse = (res, { status = 'success', statusCode = 200, message = '',
 router.get('/products', catchAsync(async(req, res) => {
   Logger.info("Fetch all products request received")
   const products = await Product.find({}).lean()
-  if (!products || products.length === 0) throw BadRequestError('Products not found');
+  if (!products || products.length === 0) throw NotFoundError('Products not found');
   return sendResponse(res, { message: 'Fetched all the products successfully', data: products });
 }));
 
@@ -44,7 +44,7 @@ router.post('/products', isLoggedIn, createProductValidator, (req, res, next) =>
   const { title, description, image, price } = req.body;
 
   if(!title || !description || !image || !price) {
-    return sendResponse(res, { status: 'error', statusCode: 400, message: 'All fields are required' });
+    throw BadRequestError('All fields are required');
   }
 
   const newProduct = await Product.create(
@@ -53,6 +53,7 @@ router.post('/products', isLoggedIn, createProductValidator, (req, res, next) =>
       description, 
       image, 
       price: parseFloat(price),
+      sellerId: req.userId
     }
   );
 
@@ -68,12 +69,12 @@ router.route('/products/:productId')
   const { productId } = req.params;
   const product = await Product.findById(productId).lean();
 
-  if (!product) throw BadRequestError('Product not found');
+  if (!product) throw NotFoundError('Product not found');
 
   return sendResponse(res, { message: 'Product fetched successfully', data: product });
 }))
 // Update a product (private, only owner)
-.patch(isLoggedIn, restrictTo('Seller'), updateProductValidator, (req, res, next) => {
+.patch(isLoggedIn, updateProductValidator, (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return sendResponse(res, { status: 'error', statusCode: 400, message: 'Validation failed', errors: errors.array() });
@@ -86,14 +87,11 @@ router.route('/products/:productId')
   
   // First check if product exists
   const productExists = await Product.findById(productId);
-  if (!productExists) throw InternalServerError('Failed to update product');
+  if (!productExists) throw NotFoundError('Failed to update product');
+
   // Then check if user owns the product
   if (productExists.sellerId.toString() !== req.userId.toString()) {
-    return sendResponse(res, { 
-      status: 'error', 
-      statusCode: 403, 
-      message: 'You do not have permission to update this product' 
-    });
+    throw AuthorizationError('You do not have permission to update this product');
   }
 
   // Now update the product
@@ -103,28 +101,34 @@ router.route('/products/:productId')
     { new: true, runValidators: true }
   );
 
+  if (!product) {
+    throw InternalServerError('Failed to update product');
+  }
+
   return sendResponse(res, { message: 'Product updated successfully', data: product });
 }))
 // Delete a product (private, only owner)
-.delete(isLoggedIn, restrictTo('Seller'), catchAsync(async(req, res) => {
+.delete(isLoggedIn, catchAsync(async(req, res) => {
   Logger.info("Delete the product request received")
   const { productId } = req.params;
   
   // First check if product exists
   const productExists = await Product.findById(productId);
-  if (!productExists) throw InternalServerError('Failed to delete product');
+  if (!productExists) {
+    throw NotFoundError('Product not found');
+  }
 
   // Then check if user owns the product
   if (productExists.sellerId.toString() !== req.userId.toString()) {
-    return sendResponse(res, { 
-      status: 'error', 
-      statusCode: 403, 
-      message: 'You do not have permission to delete this product' 
-    });
+    throw AuthorizationError('You do not have permission to delete this product');
   }
 
   // Now delete the product
-  await Product.findByIdAndDelete(productId);
+    const deleteResult = await Product.findByIdAndDelete(productId);
+    
+    if (!deleteResult) {
+      throw InternalServerError('Failed to delete product');
+    }
 
   return sendResponse(res, { message: 'Product deleted successfully' });
 }));

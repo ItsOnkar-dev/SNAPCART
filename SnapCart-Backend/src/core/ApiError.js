@@ -10,4 +10,4 @@ export const BadRequestError = (message = 'Bad Request') => new CustomError(mess
 export const InternalServerError = (message = 'Internal Server Error') => new CustomError(message, 500)
 export const NotFoundError = (message = 'Not Found') => new CustomError(message, 404)
 export const AuthenticationError = (message = 'Authentication Error') => new CustomError(message, 401)
-export const AuthorizationError = (message = 'Authorization Error') => new CustomError(message, 401)
+export const AuthorizationError = (message = 'Authorization Error') => new CustomError(message, 403)

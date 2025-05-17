@@ -93,7 +93,7 @@ router.post(
     }
 
     // Generate JWT token
-    const jwtToken = jwt.sign({ userId: user._id }, JWT_SECRET_KEY, { expiresIn: "24h" });
+    const jwtToken = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET_KEY, { expiresIn: "24h" });
 
     // Before sending the response, remove the password from response
     const { password: _, ...userWithoutPassword } = user;
@@ -123,7 +123,7 @@ router.get(
       
       // Ensure user exists in database (double-check)
       if (!req.user || !req.user._id) {
-        throw new Error("User authentication failed");
+        throw AuthenticationError("User authentication failed");
       }
 
       // Generate JWT token for OAuth user

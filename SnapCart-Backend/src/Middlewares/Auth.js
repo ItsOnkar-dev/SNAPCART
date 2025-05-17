@@ -10,7 +10,7 @@ export const isLoggedIn = (req, res, next) => {
   // Check if Authorization header exists
   const authHeader = req.headers.authorization
   if (!authHeader) {
-    return next(new AuthorizationError('No token provided. Please login.'))
+    return next(AuthorizationError('No token provided. Please login.'))
   }
 
   // Extract token and verify
@@ -18,30 +18,31 @@ export const isLoggedIn = (req, res, next) => {
     const token = authHeader.replace('Bearer ', '').trim()
     if (!token) {
       console.error('Empty token')
-      return next(new AuthorizationError('Invalid token format'))
+      return next(AuthorizationError('Invalid token format'))
     }
 
-    const { userId } = jwt.verify(token, JWT_SECRET_KEY)
-    req.user = { _id: userId }
+    const decoded = jwt.verify(token, JWT_SECRET_KEY)
 
-    req.userId = userId
+    // Store the complete user object
+    req.user = decoded
+    // For backward compatibility
+    req.userId = decoded.userId
 
     return next() // this will call the next middleware function in the stack
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
-      return next(new AuthorizationError('Session expired. Please login again.'))
+      return next(AuthorizationError('Session expired. Please login again.'))
     }
-    return next(new AuthorizationError('Invalid Token. Please login to continue'))
+    return next(AuthorizationError('Invalid Token. Please login to continue'))
   }
 }
 
-export const restrictTo = (role) => {
+export const restrictTo = (...roles) => {
   return (req, res, next) => {
     // Check if user exists and their role matches the required role
-    if (!req.user || req.user.role !== role) {
-      return next(new AuthorizationError('You do not have permission to perform this action'))
+    if (!req.user || !roles.includes(req.user.role)) {
+      return next(AuthorizationError('You do not have permission to perform this action'))
     }
-
     next()
   }
 }

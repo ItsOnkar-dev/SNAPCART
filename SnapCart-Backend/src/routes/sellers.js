@@ -1,7 +1,7 @@
 import express from 'express';
 import Seller from '../Models/Seller.js';
 import catchAsync from '../Core/catchAsync.js';
-import { BadRequestError, AuthenticationError } from '../Core/ApiError.js';
+import { BadRequestError, AuthenticationError, NotFoundError, InternalServerError } from '../Core/ApiError.js';
 import Logger from '../Config/Logger.js';
 import { isLoggedIn } from '../Middlewares/Auth.js';
 import { createSellerValidator } from '../Validators/sellerValidator.js';
@@ -23,7 +23,7 @@ router.get('/sellers', catchAsync(async (req, res) => {
   const sellers = await Seller.find({}).lean();
   
   if (!sellers || sellers.length === 0) {
-    throw BadRequestError('No sellers found');
+    throw NotFoundError('No sellers found');
   }
   
   return sendResponse(res, { message: 'Fetched all sellers successfully', data: sellers });
@@ -41,10 +41,7 @@ router.get('/sellers/current', isLoggedIn, catchAsync(async (req, res) => {
   const seller = await Seller.findOne({ userId: req.userId });
   
   if (!seller) {
-    return res.status(404).json({
-      status: 'error',
-      message: 'User is not a seller'
-    });
+    throw InternalServerError('No seller found');
   }
   
   return sendResponse(res, { 
@@ -58,11 +55,7 @@ router.get('/sellers/check-email', catchAsync(async (req, res) => {
   const { email } = req.query;
   
   if (!email) {
-    return sendResponse(res, { 
-      status: 'error', 
-      statusCode: 400, 
-      message: 'Email parameter is required' 
-    });
+    throw BadRequestError("Email parameter is required")
   }
   
   const seller = await Seller.findOne({ email }).lean();
@@ -79,11 +72,7 @@ router.post('/sellers', isLoggedIn, createSellerValidator, catchAsync(async (req
 
   // Check if user is properly authenticated
   if (!req.user || !req.userId) {
-    return sendResponse(res, { 
-      status: 'error', 
-      statusCode: 401, 
-      message: 'User not authenticated properly' 
-    });
+    throw AuthenticationError("User not authenticated properly")
   }
 
   const errors = validationResult(req);
@@ -101,11 +90,7 @@ router.post('/sellers', isLoggedIn, createSellerValidator, catchAsync(async (req
   // Check if the user already has a seller profile
   const existingSeller = await Seller.findOne({ userId: req.userId }).lean();
   if (existingSeller) {
-    return sendResponse(res, { 
-      status: 'error', 
-      statusCode: 400, 
-      message: 'User already has a seller profile' 
-    });
+    throw InternalServerError("User already has a seller profile")
   }
 
   const newSeller = await Seller.create({
@@ -126,11 +111,7 @@ router.post('/sellers/login', isLoggedIn, catchAsync(async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
-    return sendResponse(res, { 
-      status: 'error', 
-      statusCode: 400, 
-      message: 'Email is required' 
-    });
+    throw BadRequestError("Email is required")
   }
 
   // First try to find seller by both email and userId (most secure approach)
@@ -145,11 +126,7 @@ router.post('/sellers/login', isLoggedIn, catchAsync(async (req, res) => {
   }
   
   if (!seller) {
-    return sendResponse(res, { 
-      status: 'error', 
-      statusCode: 404, 
-      message: 'No seller account found with this email' 
-    });
+    throw InternalServerError("No seller account found with this email")
   }
 
   // In a real application, you would check password here

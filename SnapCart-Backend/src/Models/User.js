@@ -1,28 +1,27 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
     unique: true,
-    index: true,
+    index: true
   },
   name: {
-    type: String,
-    // Store the full display name here
+    type: String
   },
   email: {
     type: String,
-    required: function() {
+    required: function () {
       // Only required if password is set (local account)
-      return this.password ? true : false;
+      return this.password ? true : false
     }
   },
   password: {
     type: String,
-    required: function() {
+    required: function () {
       // Only required if no googleId (local account)
-      return this.googleId ? false : true;
+      return this.googleId ? false : true
     }
   },
   googleId: {
@@ -31,17 +30,17 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ['Seller', 'Buyer', 'Admin'],
-    default: 'Buyer',
-  }, 
+    default: 'Buyer'
+  },
   avatar: {
     type: String
   },
   createdAt: {
     type: Date,
     default: Date.now
-  },
-}, { timestamps: true, versionKey: false });
+  }
+}, { timestamps: true, versionKey: false })
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema)
 
-export default User;
+export default User
