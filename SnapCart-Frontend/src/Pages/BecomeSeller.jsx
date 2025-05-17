@@ -17,11 +17,11 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
 
   // Check if user is already a seller and redirect if needed
   useEffect(() => {
-    if (hasCheckedSellerStatus && !isSellerLoading && seller) {
+    if (isLoggedIn && hasCheckedSellerStatus && !isSellerLoading && seller) {
       toast.info("You are already registered as a seller!");
       navigate('/seller/product-management');
     }
-  }, [hasCheckedSellerStatus, isSellerLoading, seller, navigate]);
+  }, [isLoggedIn, hasCheckedSellerStatus, isSellerLoading, seller, navigate]);
 
   const openLoginModal = () => {
     setIsLoginModalOpen(true);
@@ -49,6 +49,15 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
   const switchToRegister = () => {
     setIsLoginModalOpen(false);
     setIsRegisterModalOpen(true);
+  };
+
+  const handleStartSelling = () => {
+    if (!isLoggedIn) {
+      toast.warning("Please login first to become a seller");
+      navigate("/registration");
+      return;
+    }
+    openRegisterModal();
   };
 
   // Features data for the Why Sell With Us section
@@ -134,10 +143,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
         isDark={isDark}
         toggleDarkMode={toggleDarkMode}
         openLoginModal={openLoginModal}
-        openRegisterModal={isLoggedIn ? openRegisterModal : () => {
-          toast.warning("Please login first to become a seller");
-          navigate("/registration");
-        }}
+        openRegisterModal={handleStartSelling}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
@@ -157,6 +163,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
                   toast.warning("Please login first to become a seller");
                   navigate("/registration");
                 }}
+                aria-label="Start selling"
                 className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:text-lg"
               >
                 Start Selling Today
@@ -165,6 +172,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
             <div className="ml-3 inline-flex">
               <button
                 onClick={openLoginModal}
+                aria-label="Login as Seller"
                 className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 md:text-lg"
               >
                 Login as Seller
@@ -194,7 +202,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
         {/* Seller Journey Section */}
         <section className="mb-20">
           <h2 className="text-3xl font-bold mb-10 text-center text-gray-900 dark:text-white">Your Seller Journey</h2>
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-16">
             {sellerJourney.map((step, index) => (
               <div key={index} className="flex flex-col items-center text-center">
                 <div className="bg-indigo-100 dark:bg-indigo-900 rounded-full w-16 h-16 flex items-center justify-center mb-4">

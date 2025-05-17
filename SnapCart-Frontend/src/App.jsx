@@ -34,7 +34,7 @@ const getInitialTheme = () => {
 
 const App = () => {
   const [isDark, setIsDark] = useState(getInitialTheme);
-  const {isLoggedIn} = useUserContext();
+  const { isLoggedIn } = useUserContext();
 
   // Update theme in localStorage and document class
   useEffect(() => {
@@ -67,15 +67,15 @@ const App = () => {
           <Route path='/about' element={<About />} />
           <Route path='/contact' element={<Contact />} />
           <Route path='/profile' element={<Profile />} />
-          <Route path='/become-seller' element={<BecomeSeller />} />
+          <Route path='/seller/product-management' element={<ProductManagement />} />
+          <Route path='/become-seller' element={<BecomeSeller isDark={isDark} toggleDarkMode={toggleDarkMode} />} />
           <Route path='/admin' element={<AdminDashboard />} />
 
-           {/* Private routes starts here! */}
+          {/* Private routes starts here! */}
           <Route element={<PrivateRoute isAuthenticated={isLoggedIn} />}>
-              <Route path='/products/:productId' element={<ProductDetails />} />
-              <Route path='/cart' element={<Cart />} />
-              <Route path='/wishlist' element={<WishList />} />
-              <Route path='/seller/product-management' element={<ProductManagement />} />
+            <Route path='/products/:productId' element={<ProductDetails />} />
+            <Route path='/cart' element={<Cart />} />
+            <Route path='/wishlist' element={<WishList />} />
           </Route>
         </Routes>
         <ToastContainer

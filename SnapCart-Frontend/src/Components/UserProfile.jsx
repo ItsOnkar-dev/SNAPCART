@@ -9,7 +9,6 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
   const { isLoggedIn, user } = useUserContext();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isLoading, setIsLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
@@ -45,15 +44,6 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
     }
   }, [isOpen, showLogoutConfirmation]);
 
-  // Check if user data is loaded
-  useEffect(() => {
-    if (user) {
-      setIsLoading(false);
-    } else if (!isLoggedIn) {
-      setIsLoading(false);
-    }
-  }, [user, isLoggedIn]);
-
   const handleLogin = () => {
     handleClose();
     setTimeout(() => {
@@ -63,7 +53,7 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
 
   const handleTabClick = (tab) => {
     setActiveTab(tab.path);
-    
+
     if (tab.onClick) {
       tab.onClick();
       return;
@@ -72,7 +62,7 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
     setTimeout(() => {
       onClose();
       navigate(tab.path);
-    }, 300); 
+    }, 300);
   };
 
   // Handle closing with animation
@@ -80,7 +70,7 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
     setIsVisible(false);
     setTimeout(() => {
       onClose();
-    }, 300); 
+    }, 300);
   };
 
   // Handle logout modal close
@@ -97,17 +87,6 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
     // No need to set showLogoutConfirmation to false as the component will unmount
     onClose();
   };
-
-  // If still loading, show loading indicator
-  if (isLoading) {
-    return (
-      <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"} transition-opacity duration-300`}>
-        <div className='bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full'>
-          <h2 className='text-2xl font-bold mb-4 text-center'>Loading your profile...</h2>
-        </div>
-      </div>
-    );
-  }
 
   const modalClasses = `
     fixed z-50 right-0 
@@ -161,9 +140,8 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
                     console.log("Avatar failed to load:", userData.avatar);
                     e.target.onerror = null;
                     e.target.style.display = "none";
-                    e.target.parentNode.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold">${
-                      userData.name?.charAt(0).toUpperCase() || userData.username?.charAt(0).toUpperCase() || "?"
-                    }</div>`;
+                    e.target.parentNode.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold">${userData.name?.charAt(0).toUpperCase() || userData.username?.charAt(0).toUpperCase() || "?"
+                      }</div>`;
                   }}
                 />
               ) : (
@@ -186,9 +164,8 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
               <button
                 key={tab.id}
                 onClick={() => handleTabClick(tab)}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md transition-all duration-500 transform hover:translate-x-1 ${
-                  tab.path && activeTab === tab.path ? "bg-gray-100 dark:bg-gray-700" : ""
-                }`}>
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md transition-all duration-500 transform hover:translate-x-1 ${tab.path && activeTab === tab.path ? "bg-gray-100 dark:bg-gray-700" : ""
+                  }`}>
                 <tab.icon size={18} />
                 <span>{tab.label}</span>
               </button>
@@ -199,8 +176,8 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
 
       {/* Logout Confirmation Dialog */}
       {showLogoutConfirmation && (
-        <LogOutModal 
-          isOpen={showLogoutConfirmation} 
+        <LogOutModal
+          isOpen={showLogoutConfirmation}
           onClose={handleLogoutModalClose}
           onLogoutComplete={handleLogoutComplete}
         />

@@ -63,7 +63,8 @@ const ProductContextProvider = ({ children }) => {
 
   // Get a single product by ID (from public list)
   const getProductById = (productId) => {
-    return products.find(product => product._id === productId);
+    if (!productId) return null;
+    return products.find(product => product && product._id === productId);
   };
 
   // Add a new product (seller only)
@@ -93,6 +94,11 @@ const ProductContextProvider = ({ children }) => {
     const token = window.localStorage.getItem('token');
     if (!token) return { success: false, error: 'Authentication required' };
 
+    // Check if productId is valid
+    if (!productId) {
+      return { success: false, error: 'Product ID is required' };
+    }
+
     try {
       const response = await axios.patch(`http://localhost:8000/api/products/${productId}`, productData, {
         headers: { Authorization: `Bearer ${token}` }
@@ -101,10 +107,10 @@ const ProductContextProvider = ({ children }) => {
       if (response.data && response.data.data) {
         // Update the product in both seller products and all products arrays
         setSellerProducts(prev => prev.map(product =>
-          product._id === productId ? response.data.data : product
+          product && product._id === productId ? response.data.data : product
         ));
         setProducts(prev => prev.map(product =>
-          product._id === productId ? response.data.data : product
+          product && product._id === productId ? response.data.data : product
         ));
         return { success: true, data: response.data.data };
       }
