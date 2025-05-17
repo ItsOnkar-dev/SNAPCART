@@ -1,11 +1,12 @@
 import express from 'express'
 import Product from '../Models/Product.js'
 import catchAsync from '../Core/catchAsync.js'
-import {BadRequestError, InternalServerError, NotFoundError, AuthorizationError} from '../Core/ApiError.js'
+import {BadRequestError, InternalServerError, NotFoundError, AuthorizationError, AuthenticationError} from '../Core/ApiError.js'
 import Logger from '../Config/Logger.js'
 import { createProductValidator, updateProductValidator } from '../Validators/productValidator.js'
 import { validationResult } from 'express-validator'
 import { isLoggedIn, restrictTo } from '../Middlewares/Auth.js'
+import Seller from '../Models/Seller.js'
 
 const router = express.Router(); // Creates a new instance of an Express Router. The Router in Express is like a mini Express application that you can use to handle routes separately instead of defining all routes in server.js.
 
@@ -131,6 +132,33 @@ router.route('/products/:productId')
     }
 
   return sendResponse(res, { message: 'Product deleted successfully' });
+}));
+
+// Get products by seller ID
+router.get('/products/seller/:sellerId', isLoggedIn, catchAsync(async (req, res) => {
+  const { sellerId } = req.params;
+  
+  if (!sellerId) {
+    throw BadRequestError("Seller ID is required");
+  }
+
+  // Find the seller to verify ownership
+  const seller = await Seller.findOne({ 
+    _id: sellerId,
+    userId: req.userId 
+  });
+
+  if (!seller) {
+    throw AuthenticationError("You are not authorized to view these products");
+  }
+
+  const products = await Product.find({ sellerId }).sort({ createdAt: -1 });
+
+  return res.status(200).json({
+    status: 'success',
+    message: 'Products fetched successfully',
+    data: products
+  });
 }));
 
 export default router;

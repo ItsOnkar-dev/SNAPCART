@@ -114,23 +114,15 @@ router.post('/sellers/login', isLoggedIn, catchAsync(async (req, res) => {
     throw BadRequestError("Email is required")
   }
 
-  // First try to find seller by both email and userId (most secure approach)
-  let seller = await Seller.findOne({ 
+  // Find seller by both email and userId (strict matching)
+  const seller = await Seller.findOne({ 
     email: email,
     userId: req.userId 
   }).lean();
   
-   // If not found by both, try just by email for backward compatibility
   if (!seller) {
-    seller = await Seller.findOne({ email }).lean();
+    throw AuthenticationError("No seller account found with this email for your user account. Please register as a seller first.")
   }
-  
-  if (!seller) {
-    throw InternalServerError("No seller account found with this email")
-  }
-
-  // In a real application, you would check password here
-  // For now, we'll just return success
   
   return sendResponse(res, { 
     message: 'Seller login successful', 
