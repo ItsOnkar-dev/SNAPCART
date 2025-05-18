@@ -49,11 +49,11 @@ const styles = {
   labelText: "text-sm font-medium text-gray-700 dark:text-white block",
   formGroup: "space-y-2",
   radioButtons: "cursor-pointer relative px-4 py-1 rounded-lg border-2 text-center transition-all duration-300 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-600 dark:hover:border-gray-200 hover:border-gray-600",
-  gradientButton: "w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-2 rounded-lg shadow-md hover:from-indigo-500 hover:to-purple-500 transition-colors flex items-center justify-center",
+  gradientButton: "w-full bg-gradient text-white py-2 rounded-lg shadow-md hover:from-indigo-500 hover:to-purple-500 transition-colors flex items-center justify-center",
   socialButton: "flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500",
   socialButtonInner: "flex items-center justify-center gap-2",
   toggleLink: "dark:text-indigo-300 text-indigo-500 dark:hover:text-indigo-400",
-  headerGradient: "relative bg-gradient-to-r from-purple-500 to-indigo-500 p-6 text-white",
+  headerGradient: "relative bg-gradient p-6 text-white",
   cardContainer: "rounded-xl shadow-xl overflow-hidden border border-gray-300 dark:border-slate-600",
   formContainer: "p-6 space-y-4 bg-white dark:bg-slate-900 dark:text-white",
 };

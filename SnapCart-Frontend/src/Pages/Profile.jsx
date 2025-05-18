@@ -1,16 +1,21 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import useUserContext from "../context/User/useUserContext";
 import { useNavigate } from "react-router-dom";
+import LogOutModal from "../Components/LogOutModal";
 import { User, ShoppingBag, Package, Heart, CreditCard, Settings, LogOut, AlertCircle } from "lucide-react";
 import { toast } from "react-toastify";
 
-const Profile = () => {
+const Profile = ({isOpen, onClose}) => {
   const { isLoggedIn, logout, user, updatePassword, deletedAccount, downloadUserData } = useUserContext();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [showUsernameTooltip, setShowUsernameTooltip] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
   // Password state
   const [passwordData, setPasswordData] = useState({
@@ -35,11 +40,6 @@ const Profile = () => {
       setIsLoading(false);
     }
   }, [user, isLoggedIn]);
-
-  const handleLogOut = () => {
-    logout();
-    navigate("/");
-  };
 
   const handleDelete = () => {
     deletedAccount();
@@ -96,25 +96,32 @@ const Profile = () => {
     }
   };
 
+   // Control visibility for smooth transitions
+  useEffect(() => {
+    if (isOpen && !showLogoutConfirmation) {
+      setTimeout(() => setIsVisible(true), 10);
+    } else {
+      setIsVisible(false);
+    }
+  }, [isOpen, showLogoutConfirmation]);
+
+   // Handle logout modal close
+  const handleLogoutModalClose = () => {
+    setShowLogoutConfirmation(false);
+    if (isOpen) {
+      setTimeout(() => setIsVisible(true), 10);
+    }
+  };
+
+  const handleLogoutComplete = () => {
+    onClose();
+  };
+
   // If still loading, show loading indicator
   if (isLoading) {
     return (
       <div className='flex flex-col items-center justify-center h-screen'>
         <h2 className='text-2xl font-bold mb-4'>Loading your profile...</h2>
-      </div>
-    );
-  }
-
-  // If user is not logged in, redirect to login
-  if (!isLoggedIn || !user) {
-    return (
-      <div className='flex flex-col items-center justify-center h-screen'>
-        <h2 className='text-2xl font-bold mb-4'>{!isLoggedIn ? "Please login to view your profile" : "Loading your profile..."}</h2>
-        {!isLoggedIn && (
-          <button onClick={() => navigate("/login")} className='bg-cyan-600 text-white font-semibold rounded-md px-6 py-2'>
-            Login
-          </button>
-        )}
       </div>
     );
   }
@@ -137,9 +144,12 @@ const Profile = () => {
               {userData.avatar ? (
                 <img src={userData.avatar} alt='Profile' className='w-full h-full object-cover' />
               ) : (
-                <div className='w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold'>{userData.username?.charAt(0).toUpperCase() || "?"}</div>
+                <div className='w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold'>
+                  {userData.name?.charAt(0).toUpperCase() || userData.username?.charAt(0).toUpperCase() || "?"}
+                </div>
               )}
             </div>
+
             <div>
               <h1 className='text-2xl font-bold text-gray-800 dark:text-white'>{userData.name || userData.username || "User"}</h1>
               <p className='text-gray-600 dark:text-gray-300'>{userData.email || "No email provided"}</p>
@@ -147,7 +157,7 @@ const Profile = () => {
             </div>
           </div>
           <div>
-            <button onClick={handleLogOut} className='bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md px-4 py-1.5 flex items-center'>
+            <button onClick={() => setShowLogoutConfirmation(true)} className='bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md px-4 py-1.5 flex items-center'>
               <LogOut size={16} className='mr-2' />
               Log Out
             </button>
@@ -177,31 +187,31 @@ const Profile = () => {
                 <label className={styles.label}>Full Name</label>
                 <input type='text' className={styles.input} defaultValue={userData.name || ""} placeholder='Enter your full name' />
               </div>
-              <div className='relative'>
+              <div>
                 <label className={styles.label}>Username</label>
-                <div className='relative' onMouseEnter={() => setShowUsernameTooltip(true)} onMouseLeave={() => setShowUsernameTooltip(false)}>
+                <input type='text' className={styles.input} defaultValue={userData.username || ""} placeholder='Enter Username' />
+              </div>
+              <div className='relative'  onMouseEnter={() => setShowUsernameTooltip(true)}
+                    onMouseLeave={() => setShowUsernameTooltip(false)}>
+                <label className={styles.label}>Email</label>
+                <div className='relative'>
                   <input
-                    type='text'
-                    className='w-full px-4 py-2 rounded-md bg-gray-300 dark:bg-slate-700 dark:text-white/80 focus:outline-none cursor-not-allowed'
-                    value={userData.username}
+                    type='email'
+                    defaultValue={userData.email}
                     disabled
+                    className='w-full px-4 py-2 rounded-md bg-gray-300 dark:bg-slate-700 dark:text-white/80 focus:outline-none cursor-not-allowed'
                   />
                   <div className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500'>
                     <AlertCircle size={16} />
                   </div>
-
-                  {/* Tooltip */}
-                  {showUsernameTooltip && (
-                    <div className='absolute z-10 w-64 px-4 py-3 text-sm text-white bg-gray-800 dark:text-slate-800 dark:bg-white rounded-lg shadow-lg -top-4 right-0 transform translate-y-1'>
-                      Username cannot be changed once your account is created.
-                      <div className='absolute right-0 -bottom-2 w-4 h-4 transform rotate-45 bg-gray-800 dark:bg-white translate-y-1 translate-x-1'></div>
-                    </div>
-                  )}
                 </div>
-              </div>
-              <div>
-                <label className={styles.label}>Email</label>
-                <input type='email' className={styles.input} defaultValue={userData.email} />
+                {/* Tooltip */}
+                {showUsernameTooltip && (
+                  <div className='absolute z-10 w-64 px-4 py-3 text-sm text-white bg-gray-800 dark:text-slate-800 dark:bg-white rounded-lg shadow-lg top-0 right-0 transform translate-y-1'>
+                    Email cannot be changed once your account is created.
+                    <div className='absolute right-0 -bottom-2 w-4 h-4 transform rotate-45 bg-gray-800 dark:bg-white translate-y-1 translate-x-1'></div>
+                  </div>
+                )}
               </div>
               <div>
                 <label className={styles.label}>Phone Number</label>
@@ -483,6 +493,14 @@ const Profile = () => {
           </div>
         )}
       </div>
+      {/* Logout Confirmation Dialog */}
+            {showLogoutConfirmation && (
+              <LogOutModal
+                isOpen={showLogoutConfirmation}
+                onClose={handleLogoutModalClose}
+                onLogoutComplete={handleLogoutComplete}
+              />
+            )}
     </div>
   );
 };
