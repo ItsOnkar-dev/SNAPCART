@@ -140,25 +140,16 @@ const ProductContextProvider = ({ children }) => {
         const updatedProduct = response.data.data;
 
         // Update the product in both seller products and all products arrays
-        setSellerProducts((prev) => prev.map((product) =>
-          (product && product._id === productId ? updatedProduct : product)
-        ));
+        setSellerProducts((prev) => prev.map((product) => (product && product._id === productId ? updatedProduct : product)));
 
-        setProducts((prev) => prev.map((product) =>
-          (product && product._id === productId ? updatedProduct : product)
-        ));
+        setProducts((prev) => prev.map((product) => (product && product._id === productId ? updatedProduct : product)));
 
         // Update seller-specific cache
         const sellerData = JSON.parse(localStorage.getItem("sellerData") || "{}");
         if (sellerData && sellerData._id) {
           const cacheKey = `sellerProducts_${sellerData._id}`;
           const cachedProducts = JSON.parse(localStorage.getItem(cacheKey) || "[]");
-          localStorage.setItem(
-            cacheKey,
-            JSON.stringify(cachedProducts.map(product =>
-              product._id === productId ? updatedProduct : product
-            ))
-          );
+          localStorage.setItem(cacheKey, JSON.stringify(cachedProducts.map((product) => (product._id === productId ? updatedProduct : product))));
         }
 
         return { success: true, data: updatedProduct };
@@ -189,10 +180,7 @@ const ProductContextProvider = ({ children }) => {
         if (sellerData && sellerData._id) {
           const cacheKey = `sellerProducts_${sellerData._id}`;
           const cachedProducts = JSON.parse(localStorage.getItem(cacheKey) || "[]");
-          localStorage.setItem(
-            cacheKey,
-            JSON.stringify(cachedProducts.filter(product => product._id !== productId))
-          );
+          localStorage.setItem(cacheKey, JSON.stringify(cachedProducts.filter((product) => product._id !== productId)));
         }
 
         return { success: true };

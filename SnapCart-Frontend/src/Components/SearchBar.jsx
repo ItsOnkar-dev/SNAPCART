@@ -26,8 +26,8 @@ const SearchBar = () => {
   const styles = useMemo(
     () => ({
       inputStyles: (expand) =>
-        `block border border-slate-300 dark:border-slate-600 text-sm py-1.5 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${
-          expand ? "w-[38vw]" : "w-[35vw]"
+        `block border border-slate-300 dark:border-slate-600 text-sm py-2 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-700 dark:text-white tracking-wider transition-all duration-300 ease-in-out ${
+          expand ? "w-[30vw]" : "w-[25vw]"
         }`,
       mobileInputStyles: (expand) =>
         `block w-full border border-slate-300 dark:border-slate-600 text-sm py-2 px-5 rounded-lg focus:outline-none focus:border-blue-400 shadow-sm focus:shadow-md bg-gray-100 dark:bg-slate-800 dark:text-white tracking-widest transition-all duration-300 ease-in-out ${
