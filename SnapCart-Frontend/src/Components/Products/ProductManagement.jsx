@@ -34,7 +34,9 @@ const ProductManagement = () => {
     const loadProducts = async () => {
       if (seller?._id && isMounted) {
         try {
-          await fetchSellerProducts(seller._id);
+          console.log("Fetching products for seller:", seller._id);
+          const result = await fetchSellerProducts();
+          console.log("Fetched products result:", result);
         } catch (error) {
           console.error("Error loading products:", error);
         }
@@ -53,21 +55,27 @@ const ProductManagement = () => {
     setNewProduct({ ...newProduct, [name]: value });
   };
 
-  const handleCreateProduct = async (e) => {
-    e.preventDefault();
-
+  const handleCreateProduct = async (productData) => {
     try {
-      const result = await addProduct(newProduct);
+      console.log("Creating product with data:", productData);
+      const result = await addProduct(productData);
+      console.log("Create product result:", result);
 
       if (result.success) {
-        setNewProduct({ title: "", description: "", image: "", price: "" });
         toast.success("Product created successfully!");
+        // Clear form or reset state as needed
+        setNewProduct({
+          title: '',
+          description: '',
+          image: '',
+          price: ''
+        });
       } else {
         toast.error(result.error || "Failed to create product");
       }
     } catch (error) {
       console.error("Error creating product:", error);
-      toast.error(error.response?.data?.message || "Failed to create product");
+      toast.error(error.message || "Failed to create product");
     }
   };
 
@@ -366,9 +374,7 @@ const ProductManagement = () => {
               <div className='mt-8 flex flex-wrap gap-3'>
                 <button
                   type='submit'
-                  className={`${editMode
-                    ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:ring-blue-500"
-                    : "bg-gradient"
+                  className={`${editMode ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:ring-blue-500" : "bg-gradient"
                     } text-white font-bold py-3 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-300 transform hover:-translate-y-1 flex items-center`}>
                   {editMode ? (
                     <>

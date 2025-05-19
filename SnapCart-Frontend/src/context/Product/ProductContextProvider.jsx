@@ -16,11 +16,11 @@ const ProductContextProvider = ({ children }) => {
       const res = await axios.get("http://localhost:8000/api/products");
       if (res.data && Array.isArray(res.data.data)) {
         setProducts(res.data.data);
+        setError(null);
       } else {
         setProducts([]);
         setError(res.data?.message || "Unexpected response format");
       }
-      setError(null);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load products. Please try again.");
       setProducts([]);
@@ -30,52 +30,36 @@ const ProductContextProvider = ({ children }) => {
   };
 
   // Fetch products for the logged-in seller
-  const fetchSellerProducts = async (sellerId) => {
-    // Require a valid sellerId parameter
-    if (!sellerId) {
-      return { success: false, error: "Seller ID is required" };
-    }
-
-    const token = window.localStorage.getItem("token");
+  const fetchSellerProducts = async () => {
+    const token = localStorage.getItem("token");
     if (!token) {
+      console.log("No token found, cannot fetch seller products");
       setSellerProducts([]);
       return { success: false, error: "Authentication required" };
     }
 
-    // Create a cache key unique to this seller
-    const sellerProductsCacheKey = `sellerProducts_${sellerId}`;
-
     try {
       setLoading(true);
+      console.log("Fetching seller products with token:", token);
       // Use the my-products endpoint which uses the token to identify the seller
       const res = await axios.get("http://localhost:8000/api/my-products", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      console.log("Seller products response:", res.data);
+
       if (res.data && Array.isArray(res.data.data)) {
         setSellerProducts(res.data.data);
-        // Cache with seller-specific key
-        localStorage.setItem(sellerProductsCacheKey, JSON.stringify(res.data.data));
+        setError(null);
         return { success: true, data: res.data.data };
       } else {
+        console.error("Unexpected response format:", res.data);
         setSellerProducts([]);
         setError(res.data?.message || "Unexpected response format");
         return { success: false, error: res.data?.message || "Unexpected response format" };
       }
     } catch (err) {
-      // Try to load from seller-specific cache if API call fails
-      const cachedProducts = localStorage.getItem(sellerProductsCacheKey);
-      if (cachedProducts) {
-        try {
-          const parsedProducts = JSON.parse(cachedProducts);
-          setSellerProducts(parsedProducts);
-          return { success: true, data: parsedProducts, fromCache: true };
-        } catch (parseErr) {
-          console.error("Error parsing cached products:", parseErr);
-          localStorage.removeItem(sellerProductsCacheKey);
-        }
-      }
-
+      console.error("Error fetching seller products:", err);
       setError(err.response?.data?.message || "Failed to load your products. Please try again.");
       setSellerProducts([]);
       return { success: false, error: err.response?.data?.message || "Failed to load products" };
@@ -92,69 +76,62 @@ const ProductContextProvider = ({ children }) => {
 
   // Add a new product (seller only)
   const addProduct = async (productData) => {
-    const token = window.localStorage.getItem("token");
-    if (!token) return { success: false, error: "Authentication required" };
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.log("No token found, cannot add product");
+      return { success: false, error: "Authentication required" };
+    }
 
     try {
+      console.log("Adding product with data:", productData);
       const response = await axios.post("http://localhost:8000/api/products", productData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      console.log("Add product response:", response.data);
+
       if (response.data && response.data.data) {
-        // Update the local state with the new product
-        setSellerProducts((prev) => [...prev, response.data.data]);
-        setProducts((prev) => [...prev, response.data.data]); // Optionally update public list
-
-        // Update seller-specific cache
-        const sellerData = JSON.parse(localStorage.getItem("sellerData") || "{}");
-        if (sellerData && sellerData._id) {
-          const cacheKey = `sellerProducts_${sellerData._id}`;
-          const cachedProducts = JSON.parse(localStorage.getItem(cacheKey) || "[]");
-          localStorage.setItem(cacheKey, JSON.stringify([...cachedProducts, response.data.data]));
-        }
-
+        // Re-fetch seller products to ensure state is in sync with backend
+        await fetchSellerProducts();
         return { success: true, data: response.data.data };
+      } else {
+        console.error("Unexpected response format:", response.data);
+        return { success: false, error: response.data?.message || "Failed to add product" };
       }
-      return { success: false, error: response.data?.message || "Unexpected response format" };
     } catch (err) {
+      console.error("Error adding product:", err);
       return { success: false, error: err.response?.data?.message || "Failed to add product" };
     }
   };
 
   // Update an existing product (seller only)
   const updateProduct = async (productId, productData) => {
-    const token = window.localStorage.getItem("token");
-    if (!token) return { success: false, error: "Authentication required" };
+    const token = localStorage.getItem("token");
+    const sellerId = localStorage.getItem("sellerId");
 
-    // Check if productId is valid
+    if (!token || !sellerId) {
+      return { success: false, error: "Authentication required" };
+    }
+
     if (!productId) {
       return { success: false, error: "Product ID is required" };
     }
 
     try {
-      const response = await axios.patch(`http://localhost:8000/api/products/${productId}`, productData, {
+      const response = await axios.patch(`http://localhost:8000/api/products/${productId}`, {
+        ...productData,
+        sellerId // Include sellerId in the update data
+      }, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.data && response.data.data) {
-        const updatedProduct = response.data.data;
-
-        // Update the product in both seller products and all products arrays
-        setSellerProducts((prev) => prev.map((product) => (product && product._id === productId ? updatedProduct : product)));
-
-        setProducts((prev) => prev.map((product) => (product && product._id === productId ? updatedProduct : product)));
-
-        // Update seller-specific cache
-        const sellerData = JSON.parse(localStorage.getItem("sellerData") || "{}");
-        if (sellerData && sellerData._id) {
-          const cacheKey = `sellerProducts_${sellerData._id}`;
-          const cachedProducts = JSON.parse(localStorage.getItem(cacheKey) || "[]");
-          localStorage.setItem(cacheKey, JSON.stringify(cachedProducts.map((product) => (product._id === productId ? updatedProduct : product))));
-        }
-
-        return { success: true, data: updatedProduct };
+        // Re-fetch seller products to ensure state is in sync with backend
+        await fetchSellerProducts();
+        return { success: true, data: response.data.data };
+      } else {
+        return { success: false, error: response.data?.message || "Failed to update product" };
       }
-      return { success: false, error: response.data?.message || "Unexpected response format" };
     } catch (err) {
       return { success: false, error: err.response?.data?.message || "Failed to update product" };
     }
@@ -162,8 +139,12 @@ const ProductContextProvider = ({ children }) => {
 
   // Delete a product (seller only)
   const deleteProduct = async (productId) => {
-    const token = window.localStorage.getItem("token");
-    if (!token) return { success: false, error: "Authentication required" };
+    const token = localStorage.getItem("token");
+    const sellerId = localStorage.getItem("sellerId");
+
+    if (!token || !sellerId) {
+      return { success: false, error: "Authentication required" };
+    }
 
     try {
       const response = await axios.delete(`http://localhost:8000/api/products/${productId}`, {
@@ -171,21 +152,12 @@ const ProductContextProvider = ({ children }) => {
       });
 
       if (response.data && response.data.status === "success") {
-        // Remove the deleted product from both arrays
-        setSellerProducts((prev) => prev.filter((product) => product._id !== productId));
-        setProducts((prev) => prev.filter((product) => product._id !== productId));
-
-        // Update seller-specific cache
-        const sellerData = JSON.parse(localStorage.getItem("sellerData") || "{}");
-        if (sellerData && sellerData._id) {
-          const cacheKey = `sellerProducts_${sellerData._id}`;
-          const cachedProducts = JSON.parse(localStorage.getItem(cacheKey) || "[]");
-          localStorage.setItem(cacheKey, JSON.stringify(cachedProducts.filter((product) => product._id !== productId)));
-        }
-
+        // Re-fetch seller products to ensure state is in sync with backend
+        await fetchSellerProducts();
         return { success: true };
+      } else {
+        return { success: false, error: response.data?.message || "Failed to delete product" };
       }
-      return { success: false, error: response.data?.message || "Failed to delete product" };
     } catch (err) {
       return { success: false, error: err.response?.data?.message || "Failed to delete product" };
     }
@@ -199,7 +171,7 @@ const ProductContextProvider = ({ children }) => {
   // Load all products on mount
   useEffect(() => {
     fetchProducts();
-    // We'll load seller products in the ProductManagement component when we know the seller
+    // We'll load seller products in the ProductManagement component when needed
   }, []);
 
   // Context value

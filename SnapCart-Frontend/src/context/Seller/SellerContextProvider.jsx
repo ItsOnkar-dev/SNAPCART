@@ -27,38 +27,25 @@ const SellerContextProvider = ({ children }) => {
           return;
         }
 
-        const cachedSeller = localStorage.getItem("sellerData");
-        if (cachedSeller) {
-          try {
-            setSeller(JSON.parse(cachedSeller));
-          } catch (err) {
-            console.log(err)
-            localStorage.removeItem("sellerData");
-          }
-        }
-
         const response = await axios.get(`${API_BASE_URL}/sellers/current`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
 
-        console.log("Fetched Current Seller Successfully", response.data);
-
         if (response.data.status === "success" && response.data.data) {
-          // Save seller data in state and localStorage
           setSeller(response.data.data);
-          localStorage.setItem("sellerData", JSON.stringify(response.data.data));
+          // Store seller ID in localStorage for persistence
           localStorage.setItem("sellerId", response.data.data._id);
+        } else {
+          setSeller(null);
+          localStorage.removeItem("sellerId");
         }
       } catch (error) {
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-          setSeller(null);
-          localStorage.removeItem("sellerData");
-          localStorage.removeItem("sellerId");
-          console.error("Authentication error fetching seller data:", error);
-        } else if (error.response && error.response.status !== 404) {
-          console.error("Error fetching seller data:", error);
+        console.error("Error fetching seller data:", error);
+        setSeller(null);
+        localStorage.removeItem("sellerId");
+        if (error.response && error.response.status !== 404) {
           setErrors({ fetch: "Failed to fetch seller information" });
         }
       } finally {
@@ -87,30 +74,25 @@ const SellerContextProvider = ({ children }) => {
 
       if (response.data && response.data.data) {
         setSeller(response.data.data);
-        console.log("[SellerContext] Seller created:", response.data.data);
+        localStorage.setItem("sellerId", response.data.data._id);
         toast.success(response.data.message || "Seller account created successfully!");
         return response.data.data;
-      } else if (response.data) {
-        setSeller(response.data);
-        console.log("[SellerContext] Seller created:", response.data);
-        toast.success(response.data.message || "Seller account created successfully!");
-        return response.data;
       } else {
         throw new Error(response.data?.message || "Failed to create seller account");
       }
     } catch (error) {
-      let errorMsg = error.response?.data?.message || error.message || "Failed to create seller account";
+      const errorMsg = error.response?.data?.message || error.message || "Failed to create seller account";
       toast.error(errorMsg);
       setErrors({ submit: errorMsg });
       throw error;
     }
   };
 
-  // Check if email has a seller account but not logged in as that seller
+  // Check if email has a seller account
   const checkSellerEmail = async (email) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/sellers/check-email?email=${email}`);
-      return response.data.exists;
+      return response.data.data.exists;
     } catch (error) {
       console.error("Error checking seller email:", error);
       return false;
@@ -134,7 +116,7 @@ const SellerContextProvider = ({ children }) => {
         throw new Error("You must be logged in to update seller information");
       }
 
-      const response = await axios.patch(`${API_BASE_URL}/api/sellers/${sellerId}`, sellerData, {
+      const response = await axios.patch(`${API_BASE_URL}/sellers/${sellerId}`, sellerData, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -142,14 +124,8 @@ const SellerContextProvider = ({ children }) => {
 
       if (response.data && response.data.data) {
         setSeller(response.data.data);
-        console.log("[SellerContext] Seller updated:", response.data.data);
         toast.success(response.data.message || "Seller information updated successfully!");
         return response.data.data;
-      } else if (response.data) {
-        setSeller(response.data);
-        console.log("[SellerContext] Seller updated:", response.data);
-        toast.success(response.data.message || "Seller information updated successfully!");
-        return response.data;
       } else {
         throw new Error(response.data?.message || "Failed to update seller information");
       }
@@ -164,11 +140,10 @@ const SellerContextProvider = ({ children }) => {
   // Logout from seller account (but maintain user login)
   const logoutSeller = () => {
     setSeller(null);
-    // Note: This doesn't remove the token, as the user is still logged in
+    localStorage.removeItem("sellerId");
     toast.success("Successfully logged out from seller account!");
     return true;
   };
-
 
   return (
     <SellerContext.Provider value={{
