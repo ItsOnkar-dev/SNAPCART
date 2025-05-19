@@ -27,8 +27,15 @@ router.get('/products', catchAsync(async(req, res) => {
 }));
 
 // Get products for the logged-in seller (private)
-router.get('/my-products', isLoggedIn, restrictTo('Seller'), catchAsync(async(req, res) => {
+router.get('/my-products', isLoggedIn, catchAsync(async(req, res) => {
   Logger.info("Fetch seller's own products request received")
+  
+  // Check if user has a seller profile
+  const seller = await Seller.findOne({ userId: req.userId });
+  if (!seller) {
+    throw AuthenticationError("You need to create a seller profile first");
+  }
+
   const products = await Product.find({ sellerId: req.userId }).lean();
   return sendResponse(res, { message: 'Fetched your products successfully', data: products });
 }));

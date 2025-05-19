@@ -1,5 +1,6 @@
 import express from 'express';
 import Seller from '../Models/Seller.js';
+import User from '../Models/User.js';
 import catchAsync from '../Core/catchAsync.js';
 import { BadRequestError, AuthenticationError, NotFoundError, InternalServerError } from '../Core/ApiError.js';
 import Logger from '../Config/Logger.js';
@@ -93,12 +94,16 @@ router.post('/sellers', isLoggedIn, createSellerValidator, catchAsync(async (req
     throw InternalServerError("User already has a seller profile")
   }
 
+  // Create the seller profile
   const newSeller = await Seller.create({
     username,
     email,
     phone,
     userId: req.userId // Link the seller profile to the logged-in user's ID
   });
+
+  // Update the user's role to Seller
+  await User.findByIdAndUpdate(req.userId, { role: 'Seller' });
 
   return sendResponse(res, { 
     message: 'Seller profile created successfully', 
