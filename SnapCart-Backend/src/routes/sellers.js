@@ -133,7 +133,7 @@ router.post('/sellers/login', isLoggedIn, catchAsync(async (req, res) => {
     message: 'Seller login successful', 
     data: { 
       sellerId: seller._id,
-      data: seller
+      sellerInfo: seller
     } 
   });
 }));
