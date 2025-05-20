@@ -29,12 +29,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const location = useLocation();
   const cartContext = useCartContext();
   const { user, isLoggedIn } = useUserContext();
-  const { seller, isSellerLoading, hasCheckedSellerStatus } = useSellerContext();
-
-  // Add effect to monitor seller status
-  useEffect(() => {
-    console.log("[NavBar] Seller status:", { seller, isSellerLoading, hasCheckedSellerStatus });
-  }, [seller, isSellerLoading, hasCheckedSellerStatus]);
+  const { seller } = useSellerContext()
 
   // Update displayName whenever user data changes
   useEffect(() => {
@@ -85,10 +80,9 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   };
 
   const handleIsLoggedIn = () => {
-    if (!isLoggedIn) {
-      toast.warning("Please login first to become a seller");
-      navigate("/registration");
-      return;
+    if (isLoggedIn && seller) {
+      navigate("/seller/product-management");
+      toast.success("You are already logged in as a seller!");
     }
   };
 

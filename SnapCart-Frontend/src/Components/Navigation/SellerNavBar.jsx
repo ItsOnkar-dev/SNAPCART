@@ -1,7 +1,5 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable react/prop-types */
-import { useCallback, useState, useEffect } from 'react';
-import axios from 'axios';
+import { useCallback, useEffect } from 'react';
 import SnapCartLogo from '../../assets/SnapCart.png';
 import SnapCartLogo1 from '../../assets/SnapCart1.png';
 import SnapCartLogo2 from '../../assets/SnapCartLog01.png';
@@ -16,12 +14,18 @@ const SellerNavBar = ({ isDark, toggleDarkMode, openLoginModal, openRegisterModa
   const {
     seller,
     logoutSeller,
-    isLoggedInAsSeller
+    isLoggedInAsSeller,
+    refreshSellerData
   } = useSellerContext();
+
+  useEffect(() => {
+    if (isLoggedIn && isLoggedInAsSeller) {
+      refreshSellerData()
+    }
+  }, [isLoggedIn, isLoggedInAsSeller])
 
   const navigate = useNavigate();
   const location = useLocation();
-
 
   const handleThemeToggle = useCallback(
     (e) => {
@@ -32,8 +36,6 @@ const SellerNavBar = ({ isDark, toggleDarkMode, openLoginModal, openRegisterModa
   );
 
   const handleLogout = () => {
-    // First clear local storage token
-    // localStorage.removeItem("token");
     logoutSeller();
     navigate('/become-seller');
   }
@@ -52,7 +54,6 @@ const SellerNavBar = ({ isDark, toggleDarkMode, openLoginModal, openRegisterModa
         <div className='flex items-center gap-2 cursor-pointer transition-all duration-300 ease-in-out hover:skew-x-6 hover:skew-y-3'>
           <img src={isDark ? SnapCartLogo : SnapCartLogo1} alt='Logo' className='w-8 h-8 rounded-full' />
           <div onClick={() => navigate("/")}>
-            {/* <span>SnapCart</span> */}
             <img src={isDark ? SnapCartLogo2 : SnapCartLogo3} alt='Logo' className='w-32 sm:w-40' />
           </div>
         </div>

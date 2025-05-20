@@ -14,48 +14,85 @@ const SellerContextProvider = ({ children }) => {
   const API_BASE_URL = "http://localhost:8000";
 
   // Try to fetch current seller if user is logged in
-  useEffect(() => {
-    const fetchSellerData = async () => {
-      try {
-        setIsSellerLoading(true);
-        const token = localStorage.getItem("token");
+  const fetchSellerData = async () => {
+    try {
+      setIsSellerLoading(true);
+      const token = localStorage.getItem("token");
 
-        if (!token) {
-          console.log("No token found, clearing seller state");
-          setSeller(null);
-          setIsSellerLoading(false);
-          setHasCheckedSellerStatus(true);
-          return;
-        }
-
-        console.log("Fetching seller data with token");
-        const response = await axios.get(`${API_BASE_URL}/sellers/current`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (response.data.status === "success" && response.data.data) {
-          console.log("Seller data fetched successfully:", response.data.data);
-          setSeller(response.data.data);
-        } else {
-          console.log("No seller data found in response");
-          setSeller(null);
-        }
-      } catch (error) {
-        console.error("Error fetching seller data:", error);
+      if (!token) {
+        console.log("No token found, clearing seller state");
         setSeller(null);
-        if (error.response && error.response.status !== 404) {
-          setErrors({ fetch: "Failed to fetch seller information" });
-        }
-      } finally {
         setIsSellerLoading(false);
         setHasCheckedSellerStatus(true);
+        return;
       }
-    };
 
+      console.log("Fetching seller data with token");
+      const response = await axios.get(`${API_BASE_URL}/sellers/current`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data.status === "success" && response.data.data) {
+        console.log("Seller data fetched successfully:", response.data.data);
+        setSeller(response.data.data);
+      } else {
+        console.log("No seller data found in response");
+        setSeller(null);
+      }
+    } catch (error) {
+      console.error("Error fetching seller data:", error);
+      setSeller(null);
+      if (error.response && error.response.status !== 404) {
+        setErrors({ fetch: "Failed to fetch seller information" });
+      }
+    } finally {
+      setIsSellerLoading(false);
+      setHasCheckedSellerStatus(true);
+    }
+  };
+
+  // Load seller data on initial mount
+  useEffect(() => {
     fetchSellerData();
   }, []);
+
+  // Login as seller
+  const loginSeller = async (credentials) => {
+    setErrors(null);
+    try {
+      // Get the token from localStorage
+      const token = localStorage.getItem("token");
+      if (!token) {
+        const errorMsg = "You must be logged in to access seller features";
+        toast.error(errorMsg);
+        setErrors({ login: errorMsg });
+        throw new Error(errorMsg);
+      }
+
+      // Include the token in the request header
+      const response = await axios.post(`${API_BASE_URL}/sellers/login`, credentials, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data && response.data.data) {
+        // Update seller state immediately
+        setSeller(response.data.data);
+        toast.success(response.data.message || "Logged in successfully!");
+        return response.data.data;
+      } else {
+        throw new Error(response.data?.message || "Failed to login");
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || error.message || "Failed to login";
+      toast.error(errorMsg);
+      setErrors({ login: errorMsg });
+      throw error;
+    }
+  };
 
   // Create new seller
   const createSeller = async (sellerData) => {
@@ -73,6 +110,7 @@ const SellerContextProvider = ({ children }) => {
       });
 
       if (response.data && response.data.data) {
+        // Update seller state immediately
         setSeller(response.data.data);
         toast.success(response.data.message || "Seller account created successfully!");
         return response.data.data;
@@ -137,31 +175,28 @@ const SellerContextProvider = ({ children }) => {
   // Logout from seller account (but maintain user login)
   const logoutSeller = () => {
     setSeller(null);
-    setHasCheckedSellerStatus(false);
     toast.success("Successfully logged out from seller account!");
     return true;
   };
 
-  // Debug logging
-  useEffect(() => {
-    console.log("SellerContext state update:", {
-      seller,
-      isLoggedInAsSeller,
-      hasCheckedSellerStatus
-    });
-  }, [seller, isLoggedInAsSeller, hasCheckedSellerStatus]);
+  // Refresh seller data (can be called after login or other operations)
+  const refreshSellerData = () => {
+    return fetchSellerData();
+  };
 
   return (
     <SellerContext.Provider value={{
       seller,
       isSellerLoading,
       errors,
+      loginSeller,
       createSeller,
       checkSellerEmail,
       hasCheckedSellerStatus,
       isLoggedInAsSeller,
       updateSeller,
       logoutSeller,
+      refreshSellerData,
     }}>
       {children}
     </SellerContext.Provider>

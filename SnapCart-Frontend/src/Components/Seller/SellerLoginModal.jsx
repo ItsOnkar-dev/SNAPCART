@@ -2,16 +2,17 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { toast } from 'react-toastify';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-const API_BASE_URL = "http://localhost:8000";
+import useSellerContext from '../../context/Seller/useSellerContext'; // Adjust path if needed
 
 const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+
+  // Use the seller context
+  const { loginSeller, errors: contextErrors } = useSellerContext();
 
   const validateForm = () => {
     if (!email.trim()) {
@@ -34,32 +35,35 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
     setIsSubmitting(true);
 
     try {
-      // Get auth token
+      // Check if user is logged in first
       const token = localStorage.getItem('token');
       if (!token) {
-        toast.error('You must be logged in to access your seller account');
+        setError('You must be logged in as a user first before accessing your seller account');
+        toast.error('You must be logged in as a user first before accessing your seller account');
         setIsSubmitting(false);
         return;
       }
 
-      const response = await axios.post(`${API_BASE_URL}/sellers/login`,
-        { email },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      // Use the loginSeller function from context
+      await loginSeller({ email });
 
-      if (response.data.status === 'success') {
-        toast.success('Login successful!');
-        navigate('/seller/product-management');
-        onClose();
-      }
+      // If successful, navigate and close modal
+      toast.success('Login successful!');
+      navigate('/seller/product-management');
+      onClose();
     } catch (error) {
       console.error('Error logging in:', error);
-      const errorMessage = error.response?.data?.message || 'No seller account found with this email';
-      toast.error(errorMessage);
+
+      // Extract the most useful error message
+      let errorMessage;
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (contextErrors?.login) {
+        errorMessage = contextErrors.login;
+      } else {
+        errorMessage = error.message || 'No seller account found with this email';
+      }
+
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -85,6 +89,13 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
         {/* Form */}
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
+            {/* Display context errors if any */}
+            {contextErrors?.login && (
+              <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md">
+                {contextErrors.login}
+              </div>
+            )}
+
             {/* Email field */}
             <div>
               <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 dark:text-white mb-2">

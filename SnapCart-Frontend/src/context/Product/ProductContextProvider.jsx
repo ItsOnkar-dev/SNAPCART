@@ -107,9 +107,9 @@ const ProductContextProvider = ({ children }) => {
   // Update an existing product (seller only)
   const updateProduct = async (productId, productData) => {
     const token = localStorage.getItem("token");
-    const sellerId = localStorage.getItem("sellerId");
 
-    if (!token || !sellerId) {
+    if (!token) {
+      console.log("No token found, cannot update product");
       return { success: false, error: "Authentication required" };
     }
 
@@ -118,12 +118,14 @@ const ProductContextProvider = ({ children }) => {
     }
 
     try {
+      console.log(`Updating product ${productId} with data:`, productData);
       const response = await axios.patch(`http://localhost:8000/api/products/${productId}`, {
         ...productData,
-        sellerId // Include sellerId in the update data
       }, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      console.log("Update product response:", response.data);
 
       if (response.data && response.data.data) {
         // Re-fetch seller products to ensure state is in sync with backend
@@ -140,9 +142,8 @@ const ProductContextProvider = ({ children }) => {
   // Delete a product (seller only)
   const deleteProduct = async (productId) => {
     const token = localStorage.getItem("token");
-    const sellerId = localStorage.getItem("sellerId");
 
-    if (!token || !sellerId) {
+    if (!token) {
       return { success: false, error: "Authentication required" };
     }
 

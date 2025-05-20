@@ -1,10 +1,10 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import SellerLoginModal from '../Components/Seller/SellerLoginModal';
 import SellerRegisterModal from '../Components/Seller/SellerRegisterModal';
 import SellerNavbar from '../Components/Navigation/SellerNavBar';
-import SellerFooter from '../Components/Footer/SellerFooter';
 import useUserContext from '../context/User/useUserContext';
 import useSellerContext from '../context/Seller/useSellerContext';
 import { toast } from 'react-toastify';
@@ -35,6 +35,15 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
 
     checkSellerStatus();
   }, [isLoggedIn, hasCheckedSellerStatus, isSellerLoading, seller, navigate]);
+
+  // Add a separate effect to handle initial load
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token && seller) {
+      console.log("Initial load: User is a seller, redirecting to product management");
+      navigate('/seller/product-management');
+    }
+  }, [seller, navigate]);
 
   const openLoginModal = () => {
     setIsLoginModalOpen(true);
@@ -150,7 +159,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
   ];
 
   return (
-    <div className="min-h-screen pt-20 bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen pt-16 pb-20 bg-gray-50 dark:bg-slate-900">
       {/* Custom Navbar for Seller Page */}
       <SellerNavbar
         isDark={isDark}
@@ -160,11 +169,11 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         {/* Hero Section */}
-        <div className="text-center my-12">
-          {/* <NavLink to="/" className='flex items-center gap-1 max-w-fit text-white/70 hover:text-white'>
+        <div className="text-center mb-16">
+          <NavLink to="/" className='flex items-center gap-1 max-w-fit text-white/70 hover:text-white'>
             <ArrowLeft size={16} />
             <h2>Back to Home</h2>
-          </NavLink> */}
+          </NavLink>
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
             <span className="block">Grow Your Business </span>
             <span className="block text-gradient1">Sell with SnapCart</span>
@@ -172,10 +181,33 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
           <p className="max-w-lg md:max-w-3xl mx-auto text-base text-gray-500 dark:text-gray-300 sm:text-lg mt-5 md:text-xl">
             Join thousands of successful sellers and turn your passion into profit. Reach millions of customers and scale your business with our powerful selling tools.
           </p>
+          <div className="mt-8 flex justify-center">
+            <div className="inline-flex rounded-md shadow">
+              <button
+                onClick={isLoggedIn ? openRegisterModal : () => {
+                  toast.warning("Please login first to become a seller");
+                  navigate("/registration");
+                }}
+                aria-label="Start selling"
+                className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gradient md:text-lg"
+              >
+                Start Selling Today
+              </button>
+            </div>
+            <div className="ml-3 inline-flex">
+              <button
+                onClick={openLoginModal}
+                aria-label="Login as Seller"
+                className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 md:text-lg"
+              >
+                Login as Seller
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Features Grid Section */}
-        <section className="my-20">
+        <section className="mb-20">
           <h2 className="text-3xl font-bold mb-10 text-center text-gray-900 dark:text-white">Why Sell With Us?</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
@@ -193,7 +225,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
         </section>
 
         {/* Seller Journey Section */}
-        <section className="my-28">
+        <section className="mb-20">
           <h2 className="text-3xl font-bold mb-10 text-center text-gray-900 dark:text-white">Your Seller Journey</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-16">
             {sellerJourney.map((step, index) => (
@@ -212,7 +244,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
         </section>
 
         {/* Trust Badges */}
-        <section className="bg-white dark:bg-slate-800 rounded-lg shadow-md py-16 px-6 my-28">
+        <section className="bg-white dark:bg-slate-800 rounded-lg shadow-md py-10 px-6 mb-20">
           <h2 className="text-2xl font-bold mb-8 text-center text-gray-900 dark:text-white">Trusted by Thousands of Sellers</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {trustBadges.map((badge, index) => (
@@ -225,7 +257,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
         </section>
 
         {/* CTA Section */}
-        <section className="bg-gradient rounded-lg shadow-xl p-10 text-center text-white my-12">
+        <section className="bg-gradient rounded-lg shadow-xl p-10 text-center text-white">
           <h2 className="text-3xl font-bold mb-4">Ready to Start Selling?</h2>
           <p className="mb-8 text-indigo-100 max-w-2xl mx-auto">
             Join our marketplace today and reach millions of potential customers. It only takes a few minutes to set up your seller account.
@@ -262,7 +294,6 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
         onClose={closeRegisterModal}
         switchToLogin={switchToLogin}
       />
-      <SellerFooter />
     </div>
   );
 };

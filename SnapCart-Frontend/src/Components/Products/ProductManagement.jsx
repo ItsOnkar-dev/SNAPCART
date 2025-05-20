@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useProductContext from "../../context/Product/useProductContext";
@@ -18,14 +17,18 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
   });
 
   const [editMode, setEditMode] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  // const [isLoading, setIsLoading] = useState(true);
+
+  // For page navigation
+  const navigate = useNavigate();
 
   // Create a ref for the form
   const productFormRef = useRef(null);
 
   // Get product and seller context
   const { sellerProducts, addProduct, updateProduct, deleteProduct, fetchSellerProducts } = useProductContext();
-  const { seller } = useSellerContext();
+  const { seller, logoutSeller } = useSellerContext();
 
   // Fetch products when seller data is available
   useEffect(() => {
@@ -55,20 +58,22 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
     setNewProduct({ ...newProduct, [name]: value });
   };
 
-  const handleCreateProduct = async (productData) => {
+  const handleCreateProduct = async (e) => {
+    e.preventDefault(); // Prevent the default form submission
+
     try {
-      console.log("Creating product with data:", productData);
-      const result = await addProduct(productData);
+      console.log("Creating product with data:", newProduct);
+      const result = await addProduct(newProduct);
       console.log("Create product result:", result);
 
       if (result.success) {
         toast.success("Product created successfully!");
         // Clear form or reset state as needed
         setNewProduct({
-          title: "",
-          description: "",
-          image: "",
-          price: "",
+          title: '',
+          description: '',
+          image: '',
+          price: ''
         });
       } else {
         toast.error(result.error || "Failed to create product");
@@ -131,6 +136,24 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
     setNewProduct({ title: "", description: "", image: "", price: "" });
   };
 
+  // Handle logout functionality
+  const handleLogout = () => {
+    console.log("Logging out seller");
+    logoutSeller();
+    // Ensure we're logged out before redirecting
+    setTimeout(() => {
+      navigate("/become-seller");
+    }, 100);
+  };
+
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-slate-800">
+  //       <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+  //     </div>
+  //   );
+  // }
+
   return (
     <>
       <SellerNavbar isDark={isDark} toggleDarkMode={toggleDarkMode} />
@@ -139,7 +162,7 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
           {/* Header Section with Stats */}
           <div className='mb-12 flex flex-col md:flex-row items-center justify-between gap-6'>
             <div className='flex flex-col gap-2 items-center md:items-start'>
-              <h1 className='text-5xl font-extrabold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400'>
+              <h1 className='text-3xl sm:text-5xl font-extrabold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400'>
                 Product Management
               </h1>
               {seller && (
@@ -372,7 +395,7 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
 
                 <div className='space-y-1'>
                   <label htmlFor='price' className='block text-gray-700 dark:text-white/80 text-sm font-semibold mb-2'>
-                    Price ($) <span className='text-red-500'>*</span>
+                    Price (₹) <span className='text-red-500'>*</span>
                   </label>
                   <input
                     type='number'
