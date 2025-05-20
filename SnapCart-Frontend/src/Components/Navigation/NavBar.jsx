@@ -14,6 +14,7 @@ import UserProfile from "../../Components/UserProfile";
 import Sidebar from "./Sidebar";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import useSellerContext from "../../context/Seller/useSellerContext";
 
 const NavBar = ({ isDark, toggleDarkMode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -28,6 +29,12 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const location = useLocation();
   const cartContext = useCartContext();
   const { user, isLoggedIn } = useUserContext();
+  const { seller, isSellerLoading, hasCheckedSellerStatus } = useSellerContext();
+
+  // Add effect to monitor seller status
+  useEffect(() => {
+    console.log("[NavBar] Seller status:", { seller, isSellerLoading, hasCheckedSellerStatus });
+  }, [seller, isSellerLoading, hasCheckedSellerStatus]);
 
   // Update displayName whenever user data changes
   useEffect(() => {
@@ -78,9 +85,10 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   };
 
   const handleIsLoggedIn = () => {
-    if (!isLoggedIn && !user) {
-      navigate("/become-seller");
-      toast.success("You are already logged in as a seller!");
+    if (!isLoggedIn) {
+      toast.warning("Please login first to become a seller");
+      navigate("/registration");
+      return;
     }
   };
 

@@ -13,48 +13,49 @@ const SellerContextProvider = ({ children }) => {
 
   const API_BASE_URL = "http://localhost:8000";
 
-  // Try to fetch current seller if user is logged in
-  useEffect(() => {
-    const fetchSellerData = async () => {
-      try {
-        setIsSellerLoading(true);
-        const token = localStorage.getItem("token");
+  // Fetch seller profile
+  const fetchSellerProfile = async () => {
+    try {
+      setIsSellerLoading(true);
+      const token = localStorage.getItem("token");
 
-        if (!token) {
-          setSeller(null);
-          setIsSellerLoading(false);
-          setHasCheckedSellerStatus(true);
-          return;
-        }
-
-        const response = await axios.get(`${API_BASE_URL}/sellers/current`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (response.data.status === "success" && response.data.data) {
-          setSeller(response.data.data);
-          // Store seller ID in localStorage for persistence
-          localStorage.setItem("sellerId", response.data.data._id);
-        } else {
-          setSeller(null);
-          localStorage.removeItem("sellerId");
-        }
-      } catch (error) {
-        console.error("Error fetching seller data:", error);
+      if (!token) {
+        console.log("No token found, clearing seller state");
         setSeller(null);
-        localStorage.removeItem("sellerId");
-        if (error.response && error.response.status !== 404) {
-          setErrors({ fetch: "Failed to fetch seller information" });
-        }
-      } finally {
         setIsSellerLoading(false);
         setHasCheckedSellerStatus(true);
+        return;
       }
-    };
 
-    fetchSellerData();
+      console.log("Fetching seller data with token");
+      const response = await axios.get(`${API_BASE_URL}/sellers/current`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data.status === "success" && response.data.data) {
+        console.log("Seller data fetched successfully:", response.data.data);
+        setSeller(response.data.data);
+      } else {
+        console.log("No seller data found in response");
+        setSeller(null);
+      }
+    } catch (error) {
+      console.error("Error fetching seller data:", error);
+      setSeller(null);
+      if (error.response && error.response.status !== 404) {
+        setErrors({ fetch: "Failed to fetch seller information" });
+      }
+    } finally {
+      setIsSellerLoading(false);
+      setHasCheckedSellerStatus(true);
+    }
+  };
+
+  // Try to fetch current seller if user is logged in
+  useEffect(() => {
+    fetchSellerProfile();
   }, []);
 
   // Create new seller
@@ -74,7 +75,6 @@ const SellerContextProvider = ({ children }) => {
 
       if (response.data && response.data.data) {
         setSeller(response.data.data);
-        localStorage.setItem("sellerId", response.data.data._id);
         toast.success(response.data.message || "Seller account created successfully!");
         return response.data.data;
       } else {
@@ -99,10 +99,7 @@ const SellerContextProvider = ({ children }) => {
     }
   };
 
-  // Helper to check if user is logged in as seller
-  const isLoggedInAsSeller = () => {
-    return seller !== null;
-  };
+  const isLoggedInAsSeller = Boolean(seller);
 
   // Update seller information
   const updateSeller = async (sellerId, sellerData) => {
@@ -140,10 +137,19 @@ const SellerContextProvider = ({ children }) => {
   // Logout from seller account (but maintain user login)
   const logoutSeller = () => {
     setSeller(null);
-    localStorage.removeItem("sellerId");
+    setHasCheckedSellerStatus(false);
     toast.success("Successfully logged out from seller account!");
     return true;
   };
+
+  // Debug logging
+  useEffect(() => {
+    console.log("SellerContext state update:", {
+      seller,
+      isLoggedInAsSeller,
+      hasCheckedSellerStatus
+    });
+  }, [seller, isLoggedInAsSeller, hasCheckedSellerStatus]);
 
   return (
     <SellerContext.Provider value={{
@@ -156,6 +162,7 @@ const SellerContextProvider = ({ children }) => {
       isLoggedInAsSeller,
       updateSeller,
       logoutSeller,
+      fetchSellerProfile,
     }}>
       {children}
     </SellerContext.Provider>

@@ -51,12 +51,16 @@ const UserContextProvider = ({ children }) => {
   const login = async (userCredentials) => {
     try {
       const response = await axios.post("http://localhost:8000/auth/login", userCredentials);
-      window.localStorage.setItem("token", response.data?.data?.token || response.data?.token);
-      // toast.success(response.data?.message || "Login successful");
+      const token = response.data?.data?.token || response.data?.token;
+      window.localStorage.setItem("token", token);
       setIsLoggedIn(true);
       const userObj = response.data?.data?.user || response.data?.data || response.data?.user || response.data;
       setUser(userObj);
       console.log("[UserContext] User logged in:", userObj);
+
+      // Dispatch custom login event
+      window.dispatchEvent(new Event('userLogin'));
+
       return true;
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed. Please try again.");
@@ -67,7 +71,7 @@ const UserContextProvider = ({ children }) => {
   // Handle OAuth success (called from OAuthSuccess component)
   const handleOAuthSuccess = async (token, userData) => {
     try {
-      if(token && userData) {
+      if (token && userData) {
         window.localStorage.setItem("token", token);
         setIsLoggedIn(true);
         setUser(userData);

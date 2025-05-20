@@ -67,7 +67,7 @@ const App = () => {
           <Route path='/about' element={<About />} />
           <Route path='/contact' element={<Contact />} />
           <Route path='/profile' element={<Profile />} />
-          <Route path='/seller/product-management' element={<ProductManagement />} />
+          <Route path='/seller/product-management' element={<ProductManagement isDark={isDark} toggleDarkMode={toggleDarkMode} />} />
           <Route path='/become-seller' element={<BecomeSeller isDark={isDark} toggleDarkMode={toggleDarkMode} />} />
           <Route path='/admin' element={<AdminDashboard />} />
 

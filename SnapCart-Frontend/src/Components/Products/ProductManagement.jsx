@@ -1,11 +1,15 @@
+/* eslint-disable no-unused-vars */
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useProductContext from "../../context/Product/useProductContext";
 import useSellerContext from "../../context/Seller/useSellerContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import SellerNavbar from "../Navigation/SellerNavBar";
+import SellerFooter from "../Footer/SellerFooter";
+import PropTypes from "prop-types";
 
-const ProductManagement = () => {
+const ProductManagement = ({ isDark, toggleDarkMode }) => {
   const [newProduct, setNewProduct] = useState({
     title: "",
     description: "",
@@ -14,18 +18,14 @@ const ProductManagement = () => {
   });
 
   const [editMode, setEditMode] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  // const [isLoading, setIsLoading] = useState(true);
-
-  // For page navigation
-  const navigate = useNavigate();
+  const [selectedProduct, setSelectedProduct] = useState(null)
 
   // Create a ref for the form
   const productFormRef = useRef(null);
 
   // Get product and seller context
   const { sellerProducts, addProduct, updateProduct, deleteProduct, fetchSellerProducts } = useProductContext();
-  const { seller, logoutSeller } = useSellerContext();
+  const { seller } = useSellerContext();
 
   // Fetch products when seller data is available
   useEffect(() => {
@@ -65,10 +65,10 @@ const ProductManagement = () => {
         toast.success("Product created successfully!");
         // Clear form or reset state as needed
         setNewProduct({
-          title: '',
-          description: '',
-          image: '',
-          price: ''
+          title: "",
+          description: "",
+          image: "",
+          price: "",
         });
       } else {
         toast.error(result.error || "Failed to create product");
@@ -131,32 +131,29 @@ const ProductManagement = () => {
     setNewProduct({ title: "", description: "", image: "", price: "" });
   };
 
-  // Handle logout functionality
-  const handleLogout = () => {
-    logoutSeller();
-    navigate("/become-seller");
-  };
-
-  // if (isLoading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-slate-800">
-  //       <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-  //     </div>
-  //   );
-  // }
-
   return (
     <>
-      <div className='min-h-screen pt-24 bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-slate-800 border dark:border-gray-600 shadow-lg rounded-lg'>
+      <SellerNavbar isDark={isDark} toggleDarkMode={toggleDarkMode} />
+      <div className='min-h-screen mt-16 pt-6 bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-slate-800'>
         <div className='container mx-auto p-6 md:p-8 max-w-7xl'>
-          {/* Header Section with Logout Button */}
+          {/* Header Section with Stats */}
           <div className='mb-12 flex flex-col md:flex-row items-center justify-between gap-6'>
-            <div className='text-center md:text-left'>
-              <h1 className='text-5xl font-extrabold mb-3 text-gradient1'>Product Management</h1>
+            <div className='flex flex-col gap-2 items-center md:items-start'>
+              <h1 className='text-5xl font-extrabold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400'>
+                Product Management
+              </h1>
               {seller && (
-                <p className='text-lg font-medium text-gray-600 dark:text-white/70'>
-                  Welcome back, <span className='text-blue-600 dark:text-blue-400 font-bold'>{seller.username}</span>
-                </p>
+                <div className='flex items-center gap-3'>
+                  <div className='w-12 h-12 rounded-full bg-gradient flex items-center justify-center text-white text-xl font-bold'>
+                    {seller.username?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className='text-lg font-medium text-gray-600 dark:text-white/70'>
+                      Welcome back, <span className='text-blue-600 dark:text-blue-400 font-bold'>{seller.username}</span>
+                    </p>
+                    <p className='text-sm text-gray-500 dark:text-gray-400'>Manage your products with ease</p>
+                  </div>
+                </div>
               )}
               <p className='text-gray-600 dark:text-white/70 max-w-2xl mt-4'>
                 Create, update, and manage your product inventory with ease. Add detailed descriptions and attractive images to showcase your offerings to potential customers.
@@ -167,31 +164,78 @@ const ProductManagement = () => {
                 <button
                   onClick={scrollToForm}
                   className='group bg-gradient text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center'>
-                  <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 mr-2' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                  <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 mr-2 transition-transform duration-300 group-hover:rotate-90' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
                     <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 6v6m0 0v6m0-6h6m-6 0H6' />
                   </svg>
                   Add New Product
                 </button>
               )}
-              <button
-                onClick={handleLogout}
-                className='group bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 flex items-center'>
-                <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 mr-2 transition-transform duration-300 group-hover:rotate-90' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1' />
-                </svg>
-                Logout Seller Account
-              </button>
+            </div>
+          </div>
+
+          {/* Quick Stats Section */}
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-12'>
+            <div className='bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border-l-4 border-blue-500 transform hover:-translate-y-1 transition-all duration-300'>
+              <div className='flex items-center justify-between'>
+                <div>
+                  <p className='text-gray-500 dark:text-gray-400 text-sm'>Total Products</p>
+                  <h3 className='text-3xl font-bold text-gray-900 dark:text-white mt-2'>{sellerProducts.length}</h3>
+                </div>
+                <div className='w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center'>
+                  <svg xmlns='http://www.w3.org/2000/svg' className='h-6 w-6 text-blue-600 dark:text-blue-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div className='bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border-l-4 border-green-500 transform hover:-translate-y-1 transition-all duration-300'>
+              <div className='flex items-center justify-between'>
+                <div>
+                  <p className='text-gray-500 dark:text-gray-400 text-sm'>Active Products</p>
+                  <h3 className='text-3xl font-bold text-gray-900 dark:text-white mt-2'>{sellerProducts.length}</h3>
+                </div>
+                <div className='w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center'>
+                  <svg xmlns='http://www.w3.org/2000/svg' className='h-6 w-6 text-green-600 dark:text-green-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div className='bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border-l-4 border-purple-500 transform hover:-translate-y-1 transition-all duration-300'>
+              <div className='flex items-center justify-between'>
+                <div>
+                  <p className='text-gray-500 dark:text-gray-400 text-sm'>Total Value</p>
+                  <h3 className='text-3xl font-bold text-gray-900 dark:text-white mt-2'>
+                    ${sellerProducts.reduce((sum, product) => sum + Number(product.price), 0).toFixed(2)}
+                  </h3>
+                </div>
+                <div className='w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center'>
+                  <svg xmlns='http://www.w3.org/2000/svg' className='h-6 w-6 text-purple-600 dark:text-purple-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Product List Section */}
           <div className='mb-8'>
-            <h2 className='flex items-center justify-center text-3xl font-bold mb-8 text-center text-black dark:text-white'>
-              Your Products
-              <span className='ml-2 inline-flex items-center justify-center px-1.5 py-1 text-xs font-bold leading-none text-blue-100 bg-blue-500 rounded-full'>
-                {Array.isArray(sellerProducts) ? sellerProducts.length : 0}
-              </span>
-            </h2>
+            <div className='flex items-center justify-between mb-8'>
+              <h2 className='text-3xl font-bold text-gray-900 dark:text-white flex items-center'>
+                Your Products
+                <span className='ml-3 inline-flex items-center justify-center px-3 py-1 text-sm font-bold leading-none text-blue-100 bg-blue-500 rounded-full'>
+                  {Array.isArray(sellerProducts) ? sellerProducts.length : 0}
+                </span>
+              </h2>
+              {sellerProducts.length > 0 && (
+                <div className='flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400'>
+                  <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                  </svg>
+                  <span>Click on a product to edit or delete</span>
+                </div>
+              )}
+            </div>
 
             {Array.isArray(sellerProducts) && sellerProducts.length > 0 ? (
               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'>
@@ -274,32 +318,39 @@ const ProductManagement = () => {
 
           {/* Create/Edit Product Form */}
           <div ref={productFormRef} className='bg-white dark:bg-slate-800 rounded-xl shadow-xl p-8 mb-12 transition-all duration-300 transform hover:shadow-2xl border-l-4 border-blue-500'>
-            <h2 className='text-2xl font-bold mb-6 pb-2 border-b border-gray-200 flex items-center text-gray-800 dark:text-white'>
-              {editMode ? (
-                <>
-                  <span className='text-blue-600 dark:text-blue-400'>
-                    <svg xmlns='http://www.w3.org/2000/svg' className='h-6 w-6 inline mr-2' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
-                      />
-                    </svg>
-                  </span>
-                  Edit Product: {selectedProduct?.title}
-                </>
-              ) : (
-                <>
-                  <span className='text-green-600 dark:text-green-400'>
-                    <svg xmlns='http://www.w3.org/2000/svg' className='h-6 w-6 inline mr-2' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 6v6m0 0v6m0-6h6m-6 0H6' />
-                    </svg>
-                  </span>
-                  Create New Product
-                </>
+            <div className='flex items-center justify-between mb-6 pb-2 border-b border-gray-200'>
+              <h2 className='text-2xl font-bold text-gray-800 dark:text-white flex items-center'>
+                {editMode ? (
+                  <>
+                    <span className='text-blue-600 dark:text-blue-400'>
+                      <svg xmlns='http://www.w3.org/2000/svg' className='h-6 w-6 inline mr-2' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' />
+                      </svg>
+                    </span>
+                    Edit Product: {selectedProduct?.title}
+                  </>
+                ) : (
+                  <>
+                    <span className='text-green-600 dark:text-green-400'>
+                      <svg xmlns='http://www.w3.org/2000/svg' className='h-6 w-6 inline mr-2' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 6v6m0 0v6m0-6h6m-6 0H6' />
+                      </svg>
+                    </span>
+                    Create New Product
+                  </>
+                )}
+              </h2>
+              {editMode && (
+                <button
+                  onClick={resetForm}
+                  className='text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors'
+                >
+                  <svg xmlns='http://www.w3.org/2000/svg' className='h-6 w-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                  </svg>
+                </button>
               )}
-            </h2>
+            </div>
 
             <form onSubmit={editMode ? handleUpdateProduct : handleCreateProduct}>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -409,8 +460,14 @@ const ProductManagement = () => {
           </div>
         </div>
       </div>
+      <SellerFooter />
     </>
   );
+};
+
+ProductManagement.propTypes = {
+  isDark: PropTypes.bool.isRequired,
+  toggleDarkMode: PropTypes.func.isRequired,
 };
 
 export default ProductManagement;
