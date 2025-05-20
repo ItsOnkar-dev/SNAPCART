@@ -13,49 +13,48 @@ const SellerContextProvider = ({ children }) => {
 
   const API_BASE_URL = "http://localhost:8000";
 
-  // Fetch seller profile
-  const fetchSellerProfile = async () => {
-    try {
-      setIsSellerLoading(true);
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        console.log("No token found, clearing seller state");
-        setSeller(null);
-        setIsSellerLoading(false);
-        setHasCheckedSellerStatus(true);
-        return;
-      }
-
-      console.log("Fetching seller data with token");
-      const response = await axios.get(`${API_BASE_URL}/sellers/current`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (response.data.status === "success" && response.data.data) {
-        console.log("Seller data fetched successfully:", response.data.data);
-        setSeller(response.data.data);
-      } else {
-        console.log("No seller data found in response");
-        setSeller(null);
-      }
-    } catch (error) {
-      console.error("Error fetching seller data:", error);
-      setSeller(null);
-      if (error.response && error.response.status !== 404) {
-        setErrors({ fetch: "Failed to fetch seller information" });
-      }
-    } finally {
-      setIsSellerLoading(false);
-      setHasCheckedSellerStatus(true);
-    }
-  };
-
   // Try to fetch current seller if user is logged in
   useEffect(() => {
-    fetchSellerProfile();
+    const fetchSellerData = async () => {
+      try {
+        setIsSellerLoading(true);
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          console.log("No token found, clearing seller state");
+          setSeller(null);
+          setIsSellerLoading(false);
+          setHasCheckedSellerStatus(true);
+          return;
+        }
+
+        console.log("Fetching seller data with token");
+        const response = await axios.get(`${API_BASE_URL}/sellers/current`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (response.data.status === "success" && response.data.data) {
+          console.log("Seller data fetched successfully:", response.data.data);
+          setSeller(response.data.data);
+        } else {
+          console.log("No seller data found in response");
+          setSeller(null);
+        }
+      } catch (error) {
+        console.error("Error fetching seller data:", error);
+        setSeller(null);
+        if (error.response && error.response.status !== 404) {
+          setErrors({ fetch: "Failed to fetch seller information" });
+        }
+      } finally {
+        setIsSellerLoading(false);
+        setHasCheckedSellerStatus(true);
+      }
+    };
+
+    fetchSellerData();
   }, []);
 
   // Create new seller
@@ -99,6 +98,7 @@ const SellerContextProvider = ({ children }) => {
     }
   };
 
+  // Helper to check if user is logged in as seller
   const isLoggedInAsSeller = Boolean(seller);
 
   // Update seller information
@@ -162,7 +162,6 @@ const SellerContextProvider = ({ children }) => {
       isLoggedInAsSeller,
       updateSeller,
       logoutSeller,
-      fetchSellerProfile,
     }}>
       {children}
     </SellerContext.Provider>
