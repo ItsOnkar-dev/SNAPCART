@@ -19,7 +19,7 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "JWTKJDGFSDFHDGSVFSDUFSDBFS
 // Rate limiting middleware
 const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 100, // 5 login attempts per window per IP
+  max: 1000, // 5 login attempts per window per IP
   message: "Too many login attempts, please try again later",
 });
 

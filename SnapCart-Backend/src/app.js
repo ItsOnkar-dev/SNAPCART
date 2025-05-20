@@ -39,7 +39,7 @@ app.use(helmet())
 //  global rate limiting for all endpoints.
 const globalLimiter = rateLimit({
   windowMs: 1 * 60 * 1000,
-  max: 100, // adjust as needed
+  max: 1000, // adjust as needed
 })
 app.use(globalLimiter)
 
