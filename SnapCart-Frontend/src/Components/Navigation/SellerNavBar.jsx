@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 import { useCallback, useEffect } from 'react';
 import SnapCartLogo from '../../assets/SnapCart.png';
@@ -97,7 +98,7 @@ const SellerNavBar = ({ isDark, toggleDarkMode, openLoginModal, openRegisterModa
               </button>
             </div>
           ) : (
-            <div>
+            <div className='flex items-center gap-4'>
               {/* Login button */}
               <button
                 onClick={openLoginModal}
@@ -109,7 +110,7 @@ const SellerNavBar = ({ isDark, toggleDarkMode, openLoginModal, openRegisterModa
               {/* Start Selling button */}
               <button
                 onClick={openRegisterModal}
-                className="px-4 py-2 bg-gradient text-white rounded-md transition-colors duration-300"
+                className="px-4 py-1.5 bg-gradient text-white rounded-md transition-colors duration-300"
               >
                 Start Selling Today
               </button>

@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import SellerLoginModal from '../Components/Seller/SellerLoginModal';
 import SellerRegisterModal from '../Components/Seller/SellerRegisterModal';
 import SellerNavbar from '../Components/Navigation/SellerNavBar';
+import SellerFooter from '../Components/Footer/SellerFooter'
 import useUserContext from '../context/User/useUserContext';
 import useSellerContext from '../context/Seller/useSellerContext';
 import { toast } from 'react-toastify';
@@ -159,7 +160,8 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
   ];
 
   return (
-    <div className="min-h-screen pt-16 pb-20 bg-gray-50 dark:bg-slate-900">
+    <>
+     <div className="min-h-screen pt-16 pb-20 bg-gray-50 dark:bg-slate-900">
       {/* Custom Navbar for Seller Page */}
       <SellerNavbar
         isDark={isDark}
@@ -295,6 +297,8 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
         switchToLogin={switchToLogin}
       />
     </div>
+    <SellerFooter />
+    </>
   );
 };
 
