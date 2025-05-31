@@ -1,20 +1,20 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { BadgeIndianRupee, ChevronDown, Heart, Moon, Sun, UserRound } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MdMenu, MdOutlineShoppingBasket } from "react-icons/md";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import SnapCartLogo from "../../assets/SnapCart.png";
 import SnapCartLogo1 from "../../assets/SnapCart1.png";
 import SnapCartLogo2 from "../../assets/SnapCartLog01.png";
 import SnapCartLogo3 from "../../assets/SnapCartLogo2.png";
-import SearchBar from "../SearchBar";
-import { MdOutlineShoppingBasket, MdMenu } from "react-icons/md";
-import { ChevronDown, BadgeIndianRupee, Heart, UserRound, Sun, Moon } from "lucide-react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import useCartContext from "../../context/Cart/useCartContext";
-import useUserContext from "../../context/User/useUserContext";
 import UserProfile from "../../Components/UserProfile";
-import Sidebar from "./Sidebar";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import useCartContext from "../../context/Cart/useCartContext";
 import useSellerContext from "../../context/Seller/useSellerContext";
+import useUserContext from "../../context/User/useUserContext";
+import SearchBar from "../SearchBar";
+import Sidebar from "./Sidebar";
 
 const NavBar = ({ isDark, toggleDarkMode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -142,13 +142,13 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             <SearchBar />
 
             {/* Become a Seller */}
-            <div className={`${isLoggedIn ? "max-sm:hidden sm-block" : "hidden"}`} onClick={handleIsLoggedIn}>
+            <div className={`${isLoggedIn ? "max-sm:hidden sm-block" : "hidden"} text-sm md:text-base`} onClick={handleIsLoggedIn}>
               <NavLink
                 to='/become-seller'
                 className={({ isActive }) => (isActive ? "text-pink-600" : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-center gap-2")}>
                 <div className='flex items-center gap-2'>
                   <BadgeIndianRupee />
-                  <span className=''>Become a Seller</span>
+                  <span>Become a Seller</span>
                 </div>
               </NavLink>
             </div>
