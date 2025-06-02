@@ -1,12 +1,12 @@
 import express from 'express'
-import Product from '../Models/Product.js'
-import catchAsync from '../Core/catchAsync.js'
-import {BadRequestError, InternalServerError, NotFoundError, AuthorizationError, AuthenticationError} from '../Core/ApiError.js'
-import Logger from '../Config/Logger.js'
-import { createProductValidator, updateProductValidator } from '../Validators/productValidator.js'
 import { validationResult } from 'express-validator'
-import { isLoggedIn, restrictTo } from '../Middlewares/Auth.js'
+import Logger from '../Config/Logger.js'
+import { AuthenticationError, AuthorizationError, BadRequestError, InternalServerError, NotFoundError } from '../Core/ApiError.js'
+import catchAsync from '../Core/catchAsync.js'
+import { isLoggedIn } from '../Middlewares/Auth.js'
+import Product from '../Models/Product.js'
 import Seller from '../Models/Seller.js'
+import { createProductValidator, updateProductValidator } from '../Validators/productValidator.js'
 
 const router = express.Router(); // Creates a new instance of an Express Router. The Router in Express is like a mini Express application that you can use to handle routes separately instead of defining all routes in server.js.
 
