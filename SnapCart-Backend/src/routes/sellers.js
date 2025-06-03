@@ -1,12 +1,12 @@
 import express from 'express';
+import { validationResult } from 'express-validator';
+import Logger from '../Config/Logger.js';
+import { AuthenticationError, BadRequestError, InternalServerError, NotFoundError } from '../Core/ApiError.js';
+import catchAsync from '../Core/catchAsync.js';
+import { isLoggedIn } from '../Middlewares/Auth.js';
 import Seller from '../Models/Seller.js';
 import User from '../Models/User.js';
-import catchAsync from '../Core/catchAsync.js';
-import { BadRequestError, AuthenticationError, NotFoundError, InternalServerError } from '../Core/ApiError.js';
-import Logger from '../Config/Logger.js';
-import { isLoggedIn } from '../Middlewares/Auth.js';
 import { createSellerValidator } from '../Validators/sellerValidator.js';
-import { validationResult } from 'express-validator';
 
 const router = express.Router();
 
