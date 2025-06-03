@@ -1,14 +1,14 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import SellerLoginModal from "../Components/Seller/SellerLoginModal";
-import SellerRegisterModal from "../Components/Seller/SellerRegisterModal";
-import SellerNavbar from "../Components/Navigation/SellerNavBar";
-import SellerFooter from "../Components/Footer/SellerFooter";
-import useUserContext from "../context/User/useUserContext";
-import useSellerContext from "../context/Seller/useSellerContext";
+import { useEffect, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import SellerFooter from "../Components/Footer/SellerFooter";
+import SellerLoginModal from "../Components/Modals/Seller/SellerLoginModal";
+import SellerRegisterModal from "../Components/Modals/Seller/SellerRegisterModal";
+import SellerNavbar from "../Components/Navigation/SellerNavBar";
+import useSellerContext from "../context/Seller/useSellerContext";
+import useUserContext from "../context/User/useUserContext";
 
 const BecomeSeller = ({ isDark, toggleDarkMode }) => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);

@@ -1,13 +1,13 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react';
-import { X } from 'lucide-react';
-import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
-import useSellerContext from '../../context/Seller/useSellerContext'; // Adjust path if needed
+import { X } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import useSellerContext from "../../../context/Seller/useSellerContext"; // Adjust path if needed
 
 const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
@@ -16,14 +16,14 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
 
   const validateForm = () => {
     if (!email.trim()) {
-      setError('Email is required');
+      setError("Email is required");
       return false;
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setError('Email is invalid');
+      setError("Email is invalid");
       return false;
     }
 
-    setError('');
+    setError("");
     return true;
   };
 
@@ -36,10 +36,14 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
 
     try {
       // Check if user is logged in first
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        setError('You must be logged in as a user first before accessing your seller account');
-        toast.error('You must be logged in as a user first before accessing your seller account');
+        setError(
+          "You must be logged in as a user first before accessing your seller account"
+        );
+        toast.error(
+          "You must be logged in as a user first before accessing your seller account"
+        );
         setIsSubmitting(false);
         return;
       }
@@ -48,11 +52,11 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
       await loginSeller({ email });
 
       // If successful, navigate and close modal
-      toast.success('Login successful!');
-      navigate('/seller/product-management');
+      toast.success("Login successful!");
+      navigate("/seller/product-management");
       onClose();
     } catch (error) {
-      console.error('Error logging in:', error);
+      console.error("Error logging in:", error);
 
       // Extract the most useful error message
       let errorMessage;
@@ -61,7 +65,8 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
       } else if (contextErrors?.login) {
         errorMessage = contextErrors.login;
       } else {
-        errorMessage = error.message || 'No seller account found with this email';
+        errorMessage =
+          error.message || "No seller account found with this email";
       }
 
       setError(errorMessage);
@@ -77,7 +82,9 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md px-10 py-16">
         {/* Header */}
         <div className="flex justify-between items-center border-b dark:border-gray-700 mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white ">Seller Login</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white ">
+            Seller Login
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
@@ -98,7 +105,10 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
 
             {/* Email field */}
             <div>
-              <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
+              <label
+                htmlFor="login-email"
+                className="block text-sm font-medium text-gray-700 dark:text-white mb-2"
+              >
                 Email
               </label>
               <input
@@ -106,13 +116,12 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
                 id="login-email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`w-full px-4 py-2 border rounded-md dark:bg-slate-700 dark:text-white dark:border-gray-600 ${error ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                className={`w-full px-4 py-2 border rounded-md dark:bg-slate-700 dark:text-white dark:border-gray-600 ${
+                  error ? "border-red-500" : "border-gray-300"
+                }`}
                 placeholder="Enter your email"
               />
-              {error && (
-                <p className="mt-1 text-sm text-red-500">{error}</p>
-              )}
+              {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
             </div>
           </div>
 
@@ -124,13 +133,13 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
             disabled={isSubmitting}
             className="w-full mt-6 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? 'Logging in...' : 'Login'}
+            {isSubmitting ? "Logging in..." : "Login"}
           </button>
 
           {/* Register link */}
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Don&apos;t have a seller account?{' '}
+              Don&apos;t have a seller account?{" "}
               <button
                 type="button"
                 onClick={switchToRegister}
