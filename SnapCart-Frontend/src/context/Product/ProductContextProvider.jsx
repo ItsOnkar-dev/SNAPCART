@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
 import axios from "axios";
-import ProductContext from "./ProductContext";
 import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
+import ProductContext from "./ProductContext";
 
 const ProductContextProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
@@ -22,7 +22,10 @@ const ProductContextProvider = ({ children }) => {
         setError(res.data?.message || "Unexpected response format");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to load products. Please try again.");
+      setError(
+        err.response?.data?.message ||
+          "Failed to load products. Please try again."
+      );
       setProducts([]);
     } finally {
       setLoading(false);
@@ -56,13 +59,22 @@ const ProductContextProvider = ({ children }) => {
         console.error("Unexpected response format:", res.data);
         setSellerProducts([]);
         setError(res.data?.message || "Unexpected response format");
-        return { success: false, error: res.data?.message || "Unexpected response format" };
+        return {
+          success: false,
+          error: res.data?.message || "Unexpected response format",
+        };
       }
     } catch (err) {
       console.error("Error fetching seller products:", err);
-      setError(err.response?.data?.message || "Failed to load your products. Please try again.");
+      setError(
+        err.response?.data?.message ||
+          "Failed to load your products. Please try again."
+      );
       setSellerProducts([]);
-      return { success: false, error: err.response?.data?.message || "Failed to load products" };
+      return {
+        success: false,
+        error: err.response?.data?.message || "Failed to load products",
+      };
     } finally {
       setLoading(false);
     }
@@ -84,23 +96,33 @@ const ProductContextProvider = ({ children }) => {
 
     try {
       console.log("Adding product with data:", productData);
-      const response = await axios.post("http://localhost:8000/api/products", productData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.post(
+        "http://localhost:8000/api/products",
+        productData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       console.log("Add product response:", response.data);
 
       if (response.data && response.data.data) {
-        // Re-fetch seller products to ensure state is in sync with backend
-        await fetchSellerProducts();
+        // Re-fetch both seller products and public products to ensure state is in sync with backend
+        await Promise.all([fetchSellerProducts(), fetchProducts()]);
         return { success: true, data: response.data.data };
       } else {
         console.error("Unexpected response format:", response.data);
-        return { success: false, error: response.data?.message || "Failed to add product" };
+        return {
+          success: false,
+          error: response.data?.message || "Failed to add product",
+        };
       }
     } catch (err) {
       console.error("Error adding product:", err);
-      return { success: false, error: err.response?.data?.message || "Failed to add product" };
+      return {
+        success: false,
+        error: err.response?.data?.message || "Failed to add product",
+      };
     }
   };
 
@@ -119,23 +141,33 @@ const ProductContextProvider = ({ children }) => {
 
     try {
       console.log(`Updating product ${productId} with data:`, productData);
-      const response = await axios.patch(`http://localhost:8000/api/products/${productId}`, {
-        ...productData,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.patch(
+        `http://localhost:8000/api/products/${productId}`,
+        {
+          ...productData,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       console.log("Update product response:", response.data);
 
       if (response.data && response.data.data) {
-        // Re-fetch seller products to ensure state is in sync with backend
-        await fetchSellerProducts();
+        // Re-fetch both seller products and public products to ensure state is in sync with backend
+        await Promise.all([fetchSellerProducts(), fetchProducts()]);
         return { success: true, data: response.data.data };
       } else {
-        return { success: false, error: response.data?.message || "Failed to update product" };
+        return {
+          success: false,
+          error: response.data?.message || "Failed to update product",
+        };
       }
     } catch (err) {
-      return { success: false, error: err.response?.data?.message || "Failed to update product" };
+      return {
+        success: false,
+        error: err.response?.data?.message || "Failed to update product",
+      };
     }
   };
 
@@ -148,25 +180,36 @@ const ProductContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.delete(`http://localhost:8000/api/products/${productId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.delete(
+        `http://localhost:8000/api/products/${productId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (response.data && response.data.status === "success") {
-        // Re-fetch seller products to ensure state is in sync with backend
-        await fetchSellerProducts();
+        // Re-fetch both seller products and public products to ensure state is in sync with backend
+        await Promise.all([fetchSellerProducts(), fetchProducts()]);
         return { success: true };
       } else {
-        return { success: false, error: response.data?.message || "Failed to delete product" };
+        return {
+          success: false,
+          error: response.data?.message || "Failed to delete product",
+        };
       }
     } catch (err) {
-      return { success: false, error: err.response?.data?.message || "Failed to delete product" };
+      return {
+        success: false,
+        error: err.response?.data?.message || "Failed to delete product",
+      };
     }
   };
 
   // Get related products (excluding the current product)
   const getRelatedProducts = (currentProductId, limit = 4) => {
-    return products.filter((product) => product._id !== currentProductId).slice(0, limit);
+    return products
+      .filter((product) => product._id !== currentProductId)
+      .slice(0, limit);
   };
 
   // Load all products on mount
@@ -190,7 +233,9 @@ const ProductContextProvider = ({ children }) => {
     getRelatedProducts,
   };
 
-  return <ProductContext.Provider value={value}>{children}</ProductContext.Provider>;
+  return (
+    <ProductContext.Provider value={value}>{children}</ProductContext.Provider>
+  );
 };
 
 ProductContextProvider.propTypes = {

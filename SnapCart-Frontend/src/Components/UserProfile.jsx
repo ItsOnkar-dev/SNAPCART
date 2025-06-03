@@ -1,9 +1,19 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
+import {
+  CreditCard,
+  Heart,
+  LogOut,
+  Moon,
+  Package,
+  Settings,
+  Sun,
+  User,
+  X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import LogOutModal from "../Components/Modals/LogOutModal";
 import useUserContext from "../context/User/useUserContext";
-import { useNavigate, useLocation } from "react-router-dom";
-import { User, Package, Heart, CreditCard, Settings, LogOut, X, Sun, Moon } from "lucide-react";
-import LogOutModal from "./LogOutModal";
 
 const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
   const { isLoggedIn, user } = useUserContext();
@@ -25,7 +35,13 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
       onClick: handleThemeToggle,
       path: null,
     },
-    { id: 7, label: "Log Out", icon: LogOut, onClick: () => setShowLogoutConfirmation(true), path: null },
+    {
+      id: 7,
+      label: "Log Out",
+      icon: LogOut,
+      onClick: () => setShowLogoutConfirmation(true),
+      path: null,
+    },
   ];
 
   const [activeTab, setActiveTab] = useState(location.pathname);
@@ -91,17 +107,26 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
   const modalClasses = `
     fixed z-50 right-0 
     transition-all duration-500 ease-in-out
-    ${isVisible && !showLogoutConfirmation ? "opacity-100 transform translate-y-4" : "opacity-0 transform -translate-y-6 pointer-events-none"}
+    ${
+      isVisible && !showLogoutConfirmation
+        ? "opacity-100 transform translate-y-4"
+        : "opacity-0 transform -translate-y-6 pointer-events-none"
+    }
   `;
 
   // If user is not logged in, show login prompt
   if (!isLoggedIn || !user) {
     return (
       <div className={modalClasses}>
-        <div className='bg-white dark:bg-gray-800 rounded-lg shadow-xl p-10 max-w-md w-full'>
-          <h2 className='text-xl font-bold mb-4 text-center'>Please login to view your profile</h2>
-          <div className='flex justify-center'>
-            <button onClick={handleLogin} className='bg-cyan-600 text-white text-sm font-semibold rounded-md px-10 py-2 hover:bg-cyan-700 transition-colors duration-200'>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-10 max-w-md w-full">
+          <h2 className="text-xl font-bold mb-4 text-center">
+            Please login to view your profile
+          </h2>
+          <div className="flex justify-center">
+            <button
+              onClick={handleLogin}
+              className="bg-cyan-600 text-white text-sm font-semibold rounded-md px-10 py-2 hover:bg-cyan-700 transition-colors duration-200"
+            >
               Login
             </button>
           </div>
@@ -119,53 +144,71 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
     <>
       {/* Main Profile Modal */}
       <div className={modalClasses}>
-        <div className='bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-md w-full px-6 py-10 transform transition-transform duration-300 ease-in-out'>
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-md w-full px-6 py-10 transform transition-transform duration-300 ease-in-out">
           {/* Modal Header */}
-          <div className='flex items-center justify-between mb-6'>
-            <h2 className='text-xl font-bold text-gray-800 dark:text-white'>Your Profile</h2>
-            <button onClick={handleClose} className='text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white transition-colors duration-200'>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+              Your Profile
+            </h2>
+            <button
+              onClick={handleClose}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white transition-colors duration-200"
+            >
               <X size={24} />
             </button>
           </div>
 
           {/* User Info */}
-          <div className='flex items-center mb-6'>
-            <div className='w-16 h-16 bg-gray-300 rounded-full overflow-hidden mr-4'>
+          <div className="flex items-center mb-6">
+            <div className="w-16 h-16 bg-gray-300 rounded-full overflow-hidden mr-4">
               {userData.avatar ? (
                 <img
                   src={userData.avatar}
-                  alt='Profile'
-                  className='w-full h-full object-cover'
+                  alt="Profile"
+                  className="w-full h-full object-cover"
                   onError={(e) => {
                     console.log("Avatar failed to load:", userData.avatar);
                     e.target.onerror = null;
                     e.target.style.display = "none";
-                    e.target.parentNode.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold">${userData.name?.charAt(0).toUpperCase() || userData.username?.charAt(0).toUpperCase() || "?"
-                      }</div>`;
+                    e.target.parentNode.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold">${
+                      userData.name?.charAt(0).toUpperCase() ||
+                      userData.username?.charAt(0).toUpperCase() ||
+                      "?"
+                    }</div>`;
                   }}
                 />
               ) : (
-                <div className='w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold'>
-                  {userData.name?.charAt(0).toUpperCase() || userData.username?.charAt(0).toUpperCase() || "?"}
+                <div className="w-full h-full flex items-center justify-center bg-cyan-500 text-white text-2xl font-bold">
+                  {userData.name?.charAt(0).toUpperCase() ||
+                    userData.username?.charAt(0).toUpperCase() ||
+                    "?"}
                 </div>
               )}
             </div>
             <div>
-              <h3 className='text-lg font-bold text-gray-800 dark:text-white'>{userData.name || userData.username || "User"}</h3>
-              <p className='text-gray-600 dark:text-gray-300 text-sm'>{userData.email || "No email provided"}</p>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white">
+                {userData.name || userData.username || "User"}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
+                {userData.email || "No email provided"}
+              </p>
             </div>
           </div>
 
-          <div className='border-b-2 border-gray-200 dark:border-gray-700'></div>
+          <div className="border-b-2 border-gray-200 dark:border-gray-700"></div>
 
           {/* Navigation Tabs */}
-          <div className='space-y-2 pt-4'>
+          <div className="space-y-2 pt-4">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => handleTabClick(tab)}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md transition-all duration-500 transform hover:translate-x-1 ${tab.path && activeTab === tab.path ? "bg-gray-100 dark:bg-gray-700" : ""
-                  }`}>
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md transition-all duration-500 transform hover:translate-x-1 ${
+                  tab.path && activeTab === tab.path
+                    ? "bg-gray-100 dark:bg-gray-700"
+                    : ""
+                }`}
+              >
                 <tab.icon size={18} />
                 <span>{tab.label}</span>
               </button>

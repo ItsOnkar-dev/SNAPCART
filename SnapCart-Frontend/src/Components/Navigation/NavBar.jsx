@@ -167,7 +167,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             <div
               className={`${
                 isLoggedIn ? "max-sm:hidden sm-block" : "hidden"
-              } text-sm md:text-base`}
+              } text-sm lg:text-base`}
               onClick={handleIsLoggedIn}
             >
               <NavLink
@@ -268,7 +268,9 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                       {getInitial()}
                     </div>
                   )}
-                  <h3 className="hidden md:block">{displayName}</h3>
+                  <h3 className="hidden lg:block text-sm lg:text-base">
+                    {displayName}
+                  </h3>
                   <span
                     className={`transition-transform duration-500 ease-in-out ${
                       isProfileModalOpen

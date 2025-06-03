@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import useProductContext from "../../context/Product/useProductContext";
 import useSellerContext from "../../context/Seller/useSellerContext";
 import SellerFooter from "../Footer/SellerFooter";
+import DeleteModal from "../Modals/DeleteModal";
 import SellerNavbar from "../Navigation/SellerNavBar";
 
 const ProductManagement = ({ isDark, toggleDarkMode }) => {
@@ -17,6 +18,8 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
 
   const [editMode, setEditMode] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
   const productFormRef = useRef(null);
 
   // Get product and seller context
@@ -74,6 +77,8 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
           image: "",
           price: "",
         });
+        // Refetch products after successful creation
+        await fetchSellerProducts();
       } else {
         toast.error(result.error || "Failed to create product");
       }
@@ -112,21 +117,36 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
       setEditMode(false);
       setSelectedProduct(null);
       toast.success("Product updated successfully!");
+      // Refetch products after successful update
+      await fetchSellerProducts();
     } else {
       toast.error(result.error || "Failed to update product");
     }
   };
 
   const handleDeleteProduct = async (productId) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      const result = await deleteProduct(productId);
+    setProductToDelete(productId);
+    setIsDeleteModalOpen(true);
+  };
 
+  const handleConfirmDelete = async () => {
+    if (productToDelete) {
+      const result = await deleteProduct(productToDelete);
       if (result.success) {
         toast.success("Product deleted successfully!");
+        // Refetch products after successful deletion
+        await fetchSellerProducts();
       } else {
         toast.error(result.error || "Failed to delete product");
       }
     }
+    setIsDeleteModalOpen(false);
+    setProductToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setProductToDelete(null);
   };
 
   const resetForm = () => {
@@ -261,7 +281,7 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
                     Total Value
                   </p>
                   <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                    $
+                    ₹
                     {sellerProducts
                       .reduce((sum, product) => sum + Number(product.price), 0)
                       .toFixed(2)}
@@ -336,7 +356,7 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
                       />
                       <div className="absolute top-0 right-0 mt-4 mr-4">
                         <span className="bg-gradient-to-r from-green-400 to-green-500 text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-md">
-                          ${product.price}
+                          ₹{product.price}
                         </span>
                       </div>
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300"></div>
@@ -353,7 +373,7 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
                       <div className="flex gap-3">
                         <button
                           onClick={() => handleEditClick(product)}
-                          className="flex-1 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-300 flex items-center justify-center transform hover:-translate-y-1"
+                          className="flex-1 bg-gradient-to-r from-indigo-400 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-300 flex items-center justify-center transform hover:-translate-y-1"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -680,6 +700,13 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
         </div>
       </div>
       <SellerFooter />
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="Delete Product"
+        message="Are you sure you want to delete this product?"
+      />
     </>
   );
 };
