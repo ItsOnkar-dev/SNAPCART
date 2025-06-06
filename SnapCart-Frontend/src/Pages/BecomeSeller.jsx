@@ -12,8 +12,12 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const { isLoggedIn } = useUserContext();
-  const { seller, isSellerLoading, hasCheckedSellerStatus } =
-    useSellerContext();
+  const {
+    seller,
+    isSellerLoading,
+    hasCheckedSellerStatus,
+    isLoggedInAsSeller,
+  } = useSellerContext();
   const navigate = useNavigate();
 
   // Check if user is already a seller and redirect if needed
@@ -25,29 +29,28 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
       }
 
       if (isLoggedIn && hasCheckedSellerStatus && !isSellerLoading) {
-        if (seller) {
+        // Only redirect if seller exists AND is logged in as seller
+        if (seller && isLoggedInAsSeller) {
           console.log(
-            "User is already a seller, redirecting to product management"
+            "User is already a seller and logged in, redirecting to product management"
           );
+          // Add a small delay to ensure state is stable
+          await new Promise((resolve) => setTimeout(resolve, 100));
           toast.info("You are already registered as a seller!");
-          navigate("/seller/dashboard");
+          navigate("/seller/dashboard", { replace: true });
         }
       }
     };
 
     checkSellerStatus();
-  }, [isLoggedIn, hasCheckedSellerStatus, isSellerLoading, seller, navigate]);
-
-  // Add a separate effect to handle initial load
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token && seller) {
-      console.log(
-        "Initial load: User is a seller, redirecting to product management"
-      );
-      navigate("/seller/dashboard");
-    }
-  }, [seller, navigate]);
+  }, [
+    isLoggedIn,
+    hasCheckedSellerStatus,
+    isSellerLoading,
+    seller,
+    isLoggedInAsSeller,
+    navigate,
+  ]);
 
   const openLoginModal = () => {
     setIsLoginModalOpen(true);

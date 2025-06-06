@@ -19,7 +19,7 @@ const SellerRegisterModal = ({ isOpen, onClose, switchToLogin }) => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { isLoggedIn } = useUserContext();
-  const { createSeller } = useSellerContext();
+  const { createSeller, refreshSellerData } = useSellerContext();
 
   const navigate = useNavigate();
 
@@ -88,9 +88,15 @@ const SellerRegisterModal = ({ isOpen, onClose, switchToLogin }) => {
       });
 
       if (sellerData) {
+        // Wait for a short delay to ensure state is updated
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Refresh seller data to ensure state is synchronized
+        await refreshSellerData();
+        
         toast.success("Seller account created successfully!");
-        navigate("/seller/dashboard");
         onClose();
+        navigate("/seller/dashboard");
       }
     } catch (error) {
       console.error("Error creating seller account:", error);

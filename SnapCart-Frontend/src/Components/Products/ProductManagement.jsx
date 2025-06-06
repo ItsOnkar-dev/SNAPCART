@@ -1,10 +1,12 @@
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useProductContext from "../../context/Product/useProductContext";
 import useSellerContext from "../../context/Seller/useSellerContext";
 import DeleteModal from "../Modals/DeleteModal";
+import DeleteSellerModal from "../Modals/Seller/DeleteSellerModal";
 import SellerNavbar from "../Navigation/SellerNavBar";
 
 const ProductManagement = ({ isDark, toggleDarkMode }) => {
@@ -19,7 +21,10 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [isDeleteSellerModalOpen, setIsDeleteSellerModalOpen] = useState(false);
   const productFormRef = useRef(null);
+
+  const navigate = useNavigate();
 
   // Get product and seller context
   const {
@@ -29,7 +34,7 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
     deleteProduct,
     fetchSellerProducts,
   } = useProductContext();
-  const { seller } = useSellerContext();
+  const { seller, logoutSeller } = useSellerContext();
 
   // Fetch products when seller data is available
   useEffect(() => {
@@ -154,6 +159,11 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
     setNewProduct({ title: "", description: "", image: "", price: "" });
   };
 
+  const handleLogout = () => {
+    logoutSeller();
+    navigate("/become-seller");
+  };
+
   return (
     <>
       <SellerNavbar isDark={isDark} toggleDarkMode={toggleDarkMode} />
@@ -166,20 +176,38 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
                 Product Management
               </h1>
               {seller && (
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient flex items-center justify-center text-white text-xl font-bold">
-                    {seller.username?.charAt(0).toUpperCase()}
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient flex items-center justify-center text-white text-xl font-bold">
+                      {seller.username?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-lg font-medium text-gray-600 dark:text-white/70">
+                        Welcome back,{" "}
+                        <span className="text-blue-600 dark:text-blue-400 font-bold">
+                          {seller.username}
+                        </span>
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Manage your products with ease
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-lg font-medium text-gray-600 dark:text-white/70">
-                      Welcome back,{" "}
-                      <span className="text-blue-600 dark:text-blue-400 font-bold">
-                        {seller.username}
-                      </span>
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Manage your products with ease
-                    </p>
+                  {/* Mobile-only buttons */}
+                  <div className="flex sm:hidden items-center justify-center gap-4 mt-4">
+                    <button
+                      onClick={handleLogout}
+                      className="px-4 py-1.5 text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 border border-gray-600 dark:border-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded-md transition-colors"
+                    >
+                      Logout
+                    </button>
+
+                    <button
+                      onClick={() => setIsDeleteSellerModalOpen(true)}
+                      className="px-4 py-1.5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 border border-red-600 dark:border-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                    >
+                      Delete Account
+                    </button>
                   </div>
                 </div>
               )}
@@ -703,7 +731,11 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
         onClose={handleCancelDelete}
         onConfirm={handleConfirmDelete}
         title="Delete Product"
-        message="Are you sure you want to delete this product?"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+      />
+      <DeleteSellerModal
+        isOpen={isDeleteSellerModalOpen}
+        onClose={() => setIsDeleteSellerModalOpen(false)}
       />
     </>
   );

@@ -15,10 +15,12 @@ import {
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import LogOutModal from "../Components/Modals/LogOutModal";
+import useSellerContext from "../context/Seller/useSellerContext";
 import useUserContext from "../context/User/useUserContext";
 
 const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
   const { isLoggedIn, user } = useUserContext();
+  const { isLoggedInAsSeller } = useSellerContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
@@ -56,12 +58,23 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
         path: "/admin/dashboard",
       });
     } else if (user?.role === "Seller") {
-      baseTabs.splice(1, 0, {
-        id: 8,
-        label: "Seller Dashboard",
-        icon: Store,
-        path: "/seller/dashboard",
-      });
+      // Only show Seller Dashboard if user is logged in as seller
+      if (isLoggedInAsSeller) {
+        baseTabs.splice(1, 0, {
+          id: 8,
+          label: "Seller Dashboard",
+          icon: Store,
+          path: "/seller/dashboard",
+        });
+      } else {
+        // If user has seller role but not logged in as seller, show Become Seller option
+        baseTabs.splice(1, 0, {
+          id: 8,
+          label: "Become a Seller",
+          icon: Store,
+          path: "/become-seller",
+        });
+      }
     }
 
     return baseTabs;

@@ -10,6 +10,10 @@ const SellerContextProvider = ({ children }) => {
   const [isSellerLoading, setIsSellerLoading] = useState(true);
   const [errors, setErrors] = useState({});
   const [hasCheckedSellerStatus, setHasCheckedSellerStatus] = useState(false);
+  const [isSellerLoggedOut, setIsSellerLoggedOut] = useState(() => {
+    // Initialize from localStorage
+    return localStorage.getItem("isSellerLoggedOut") === "true";
+  });
 
   const API_BASE_URL = "http://localhost:8000";
 
@@ -21,6 +25,15 @@ const SellerContextProvider = ({ children }) => {
 
       if (!token) {
         console.log("No token found, clearing seller state");
+        setSeller(null);
+        setIsSellerLoading(false);
+        setHasCheckedSellerStatus(true);
+        return;
+      }
+
+      // If seller was explicitly logged out, don't fetch data
+      if (isSellerLoggedOut) {
+        console.log("Seller was logged out, not fetching data");
         setSeller(null);
         setIsSellerLoading(false);
         setHasCheckedSellerStatus(true);
@@ -85,6 +98,8 @@ const SellerContextProvider = ({ children }) => {
       if (response.data && response.data.data) {
         // Update seller state immediately
         setSeller(response.data.data);
+        setIsSellerLoggedOut(false);
+        localStorage.removeItem("isSellerLoggedOut"); // Clear the logout flag
         toast.success(response.data.message || "Logged in successfully!");
         return response.data.data;
       } else {
@@ -151,7 +166,7 @@ const SellerContextProvider = ({ children }) => {
   };
 
   // Helper to check if user is logged in as seller
-  const isLoggedInAsSeller = Boolean(seller);
+  const isLoggedInAsSeller = Boolean(seller) && !isSellerLoggedOut;
 
   // Update seller information
   const updateSeller = async (sellerId, sellerData) => {
@@ -200,6 +215,8 @@ const SellerContextProvider = ({ children }) => {
   // Logout from seller account (but maintain user login)
   const logoutSeller = () => {
     setSeller(null);
+    setIsSellerLoggedOut(true);
+    localStorage.setItem("isSellerLoggedOut", "true"); // Persist the logout state
     toast.success("Successfully logged out from seller account!");
     return true;
   };

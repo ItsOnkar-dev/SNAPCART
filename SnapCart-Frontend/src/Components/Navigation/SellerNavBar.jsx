@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 import { Moon, Sun } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useLocation, useNavigate, NavLink } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import SnapCartLogo2 from "../../assets/SnapCartLog01.png";
 import SnapCartLogo3 from "../../assets/SnapCartLogo2.png";
 import useSellerContext from "../../context/Seller/useSellerContext";
@@ -83,25 +83,27 @@ const SellerNavBar = ({
                   <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient text-white text-lg font-bold">
                     {seller?.username?.charAt(0).toUpperCase() || "?"}
                   </div>
-                  <span className="hidden sm:inline">{seller?.username}</span>
+                  <span>{seller?.username}</span>
                 </div>
 
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-1.5 text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 border border-gray-600 dark:border-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded-md transition-colors"
-                >
-                  Logout
-                </button>
+                <div className="hidden sm:flex items-center gap-4">
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-1.5 text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 border border-gray-600 dark:border-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded-md transition-colors"
+                  >
+                    Logout
+                  </button>
 
-                <button
-                  onClick={() => setIsDeleteModalOpen(true)}
-                  className="px-4 py-1.5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 border border-red-600 dark:border-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
-                >
-                  Delete Account
-                </button>
+                  <button
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="px-4 py-1.5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 border border-red-600 dark:border-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                  >
+                    Delete Account
+                  </button>
+                </div>
               </div>
             ) : (
-              <div className="flex items-center gap-4">
+              <div className="hidden sm:flex items-center gap-4">
                 {/* Login button */}
                 <button
                   onClick={openLoginModal}

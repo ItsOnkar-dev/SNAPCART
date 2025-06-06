@@ -87,8 +87,8 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="container mx-auto p-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="block mx-auto px-6 md:px-10 py-24">
+      <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <button
           onClick={fetchDashboardData}
