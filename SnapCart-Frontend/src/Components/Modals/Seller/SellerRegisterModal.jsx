@@ -89,7 +89,7 @@ const SellerRegisterModal = ({ isOpen, onClose, switchToLogin }) => {
 
       if (sellerData) {
         toast.success("Seller account created successfully!");
-        navigate("/seller/product-management");
+        navigate("/seller/dashboard");
         onClose();
       }
     } catch (error) {

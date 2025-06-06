@@ -88,7 +88,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
   const handleIsLoggedIn = () => {
     if (isLoggedIn && seller) {
-      navigate("/seller/product-management");
+      navigate("/seller/dashboard");
       toast.success("You are already logged in as a seller!");
     }
   };

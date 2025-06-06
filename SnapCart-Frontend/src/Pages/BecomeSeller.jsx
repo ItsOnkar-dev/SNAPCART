@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import SellerFooter from "../Components/Footer/SellerFooter";
 import SellerLoginModal from "../Components/Modals/Seller/SellerLoginModal";
 import SellerRegisterModal from "../Components/Modals/Seller/SellerRegisterModal";
 import SellerNavbar from "../Components/Navigation/SellerNavBar";
@@ -31,7 +30,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
             "User is already a seller, redirecting to product management"
           );
           toast.info("You are already registered as a seller!");
-          navigate("/seller/product-management");
+          navigate("/seller/dashboard");
         }
       }
     };
@@ -46,7 +45,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
       console.log(
         "Initial load: User is a seller, redirecting to product management"
       );
-      navigate("/seller/product-management");
+      navigate("/seller/dashboard");
     }
   }, [seller, navigate]);
 
@@ -365,7 +364,6 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
           switchToLogin={switchToLogin}
         />
       </div>
-      <SellerFooter />
     </>
   );
 };

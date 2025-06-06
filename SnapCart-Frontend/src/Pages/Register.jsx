@@ -1,60 +1,74 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Mail, Lock, User, Eye, EyeOff, Loader2, X } from "lucide-react";
-import { FaGoogle, FaApple, FaShoppingBag } from "react-icons/fa";
-import { FaSackDollar } from "react-icons/fa6";
 import axios from "axios";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  Mail,
+  User,
+  X,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { FaApple, FaGoogle } from "react-icons/fa";
 import { toast } from "react-toastify";
 import useUserContext from "../context/User/useUserContext";
 
 // Framer Motion variants
 const overlayVariants = {
   hidden: { opacity: 0 },
-  visible: { 
+  visible: {
     opacity: 1,
-    transition: { duration: 0.3 }
+    transition: { duration: 0.3 },
   },
-  exit: { 
+  exit: {
     opacity: 0,
-    transition: { duration: 0.3 }
-  }
+    transition: { duration: 0.3 },
+  },
 };
 
 const modalVariants = {
   hidden: { opacity: 0, scale: 0.8, y: 20 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     scale: 1,
     y: 0,
-    transition: { 
+    transition: {
       type: "spring",
       stiffness: 300,
-      damping: 25
-    }
+      damping: 25,
+    },
   },
-  exit: { 
-    opacity: 0, 
-    scale: 0.8, 
+  exit: {
+    opacity: 0,
+    scale: 0.8,
     y: 20,
-    transition: { duration: 0.3 }
-  }
+    transition: { duration: 0.3 },
+  },
 };
 
 // Form styles
 const styles = {
   inputContainer: "flex items-center relative",
-  inputField: "pl-10 w-full px-3 py-2 bg-gray-100 dark:bg-slate-900 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none",
+  inputField:
+    "pl-10 w-full px-3 py-2 bg-gray-100 dark:bg-slate-900 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none",
   inputIcon: "absolute left-3 text-gray-400",
   labelText: "text-sm font-medium text-gray-700 dark:text-white block",
   formGroup: "space-y-2",
-  radioButtons: "cursor-pointer relative px-4 py-1 rounded-lg border-2 text-center transition-all duration-300 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-600 dark:hover:border-gray-200 hover:border-gray-600",
-  gradientButton: "w-full bg-gradient text-white py-2 rounded-lg shadow-md hover:from-indigo-500 hover:to-purple-500 transition-colors flex items-center justify-center",
-  socialButton: "flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500",
+  radioButtons:
+    "cursor-pointer relative px-4 py-1 rounded-lg border-2 text-center transition-all duration-300 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-600 dark:hover:border-gray-200 hover:border-gray-600",
+  gradientButton:
+    "w-full bg-gradient text-white py-2 rounded-lg shadow-md hover:from-indigo-500 hover:to-purple-500 transition-colors flex items-center justify-center",
+  socialButton:
+    "flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500",
   socialButtonInner: "flex items-center justify-center gap-2",
   toggleLink: "dark:text-indigo-300 text-indigo-500 dark:hover:text-indigo-400",
   headerGradient: "relative bg-gradient p-6 text-white",
-  cardContainer: "rounded-xl shadow-xl overflow-hidden border border-gray-300 dark:border-slate-600",
+  cardContainer:
+    "rounded-xl shadow-xl overflow-hidden border border-gray-300 dark:border-slate-600",
   formContainer: "p-6 space-y-4 bg-white dark:bg-slate-900 dark:text-white",
 };
 
@@ -83,7 +97,7 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
 
   const handleGoogleSignIn = () => {
     // Redirect to backend Google OAuth endpoint
-    window.location.href = 'http://localhost:8000/auth/google';
+    window.location.href = "http://localhost:8000/auth/google";
   };
 
   const validateForm = () => {
@@ -113,28 +127,37 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
         userData = {
           username: name,
           password: password,
-          role: "Buyer" // Default to buyer for login
         };
         // Use context login function
-        await login(userData);
-        toast.success("Logged in successfully!");
+        const loginSuccess = await login(userData);
+        if (loginSuccess) {
         closeModal();
+        }
       } else {
         userData = {
           username: name,
           email: email,
           password: password,
-          role: "Buyer" // Default to buyer for registration
+          role: "Buyer", // Only set role for new registrations
         };
 
-        const response = await axios.post(`http://localhost:8000/auth/register`, userData);
+        const response = await axios.post(
+          `http://localhost:8000/auth/register`,
+          userData
+        );
         if (response.data.status === "success") {
-          toast.success(response.data.message || "Account Created Successfully");
+          toast.success(
+            response.data.message || "Account Created Successfully"
+          );
           closeModal();
         }
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.errors?.[0]?.msg || error.response?.data || "An error occurred. Please try again.";
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.errors?.[0]?.msg ||
+        error.response?.data ||
+        "An error occurred. Please try again.";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -144,7 +167,7 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
   return (
     <AnimatePresence>
       {isModalOpen && (
-        <motion.div 
+        <motion.div
           className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4 md:mt-24"
           initial="hidden"
           animate="visible"
@@ -152,7 +175,7 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
           variants={overlayVariants}
           onClick={closeModal}
         >
-          <motion.div 
+          <motion.div
             ref={modalRef}
             className="w-full max-w-lg"
             variants={modalVariants}
@@ -161,15 +184,27 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
             <div className={styles.cardContainer}>
               {/* Header */}
               <div className={styles.headerGradient}>
-                <button className="inline-flex items-center gap-1 text-sm mb-4" onClick={closeModal}>
+                <button
+                  className="inline-flex items-center gap-1 text-sm mb-4"
+                  onClick={closeModal}
+                >
                   <ArrowLeft className="h-4 w-4" />
                   Back
                 </button>
-                <h2 className="text-2xl font-bold">{isLogin ? "Welcome Back" : "Create Account"}</h2>
-                <p className="text-purple-100">{isLogin ? "Sign in to access your account" : "Sign up to get started with our service"}</p>
+                <h2 className="text-2xl font-bold">
+                  {isLogin ? "Welcome Back" : "Create Account"}
+                </h2>
+                <p className="text-purple-100">
+                  {isLogin
+                    ? "Sign in to access your account"
+                    : "Sign up to get started with our service"}
+                </p>
 
-                <div className="cursor-pointer absolute top-6 right-5" onClick={closeModal}>
-                  <X/>
+                <div
+                  className="cursor-pointer absolute top-6 right-5"
+                  onClick={closeModal}
+                >
+                  <X />
                 </div>
               </div>
 
@@ -183,7 +218,8 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}>
+                      transition={{ duration: 0.3 }}
+                    >
                       <label htmlFor="name" className={styles.labelText}>
                         Username
                       </label>
@@ -191,7 +227,16 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
                         <div className={styles.inputIcon}>
                           <User size={18} />
                         </div>
-                        <input id="name" type="text" name="username" value={name} placeholder="John Doe" required={!isLogin} onChange={(e) => setName(e.target.value)} className={styles.inputField} />
+                        <input
+                          id="name"
+                          type="text"
+                          name="username"
+                          value={name}
+                          placeholder="John Doe"
+                          required={!isLogin}
+                          onChange={(e) => setName(e.target.value)}
+                          className={styles.inputField}
+                        />
                       </div>
                     </motion.div>
                   )}
@@ -213,7 +258,16 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
                       </div>
                     )}
                     {isLogin ? (
-                      <input id="name" type="text" name="username" value={name} placeholder="John Doe" required onChange={(e) => setName(e.target.value)} className={styles.inputField} />
+                      <input
+                        id="name"
+                        type="text"
+                        name="username"
+                        value={name}
+                        placeholder="John Doe"
+                        required
+                        onChange={(e) => setName(e.target.value)}
+                        className={styles.inputField}
+                      />
                     ) : (
                       <input
                         id="email"
@@ -252,7 +306,10 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                      aria-label={showPassword ? "Hide password" : "Show password"}>
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                    >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
@@ -262,19 +319,33 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
                 {isLogin && (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="remember" className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                      <label htmlFor="remember" className="text-sm font-normal text-gray-700 dark:text-slate-400">
+                      <input
+                        type="checkbox"
+                        id="remember"
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <label
+                        htmlFor="remember"
+                        className="text-sm font-normal text-gray-700 dark:text-slate-400"
+                      >
                         Remember me
                       </label>
                     </div>
-                    <a href="#" className="text-sm text-indigo-500 dark:text-indigo-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                    <a
+                      href="#"
+                      className="text-sm text-indigo-500 dark:text-indigo-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    >
                       Forgot your password?
                     </a>
                   </div>
                 )}
 
                 {/* Submit button */}
-                <button type="submit" className={styles.gradientButton} disabled={isLoading}>
+                <button
+                  type="submit"
+                  className={styles.gradientButton}
+                  disabled={isLoading}
+                >
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -291,8 +362,14 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
                 {/* Toggle between login/signup */}
                 <div className="text-center mt-6">
                   <div className="text-gray-600 dark:text-gray-400 text-sm">
-                    {isLogin ? "Don't have an account? " : "Already have an account? "}
-                    <button type="button" onClick={toggleForm} className={styles.toggleLink}>
+                    {isLogin
+                      ? "Don't have an account? "
+                      : "Already have an account? "}
+                    <button
+                      type="button"
+                      onClick={toggleForm}
+                      className={styles.toggleLink}
+                    >
                       {isLogin ? "Sign Up" : "Sign In"}
                     </button>
                   </div>
@@ -300,20 +377,21 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
 
                 {/* Social login options */}
                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                  <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">Or continue with</div>
+                  <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Or continue with
+                  </div>
                   <div className="flex items-center justify-center space-x-2">
                     <button
                       type="button"
                       className={styles.socialButton}
-                      onClick={handleGoogleSignIn}>
+                      onClick={handleGoogleSignIn}
+                    >
                       <div className={styles.socialButtonInner}>
                         <FaGoogle />
                         Sign In With Google
                       </div>
                     </button>
-                    <button
-                      type="button"
-                      className={styles.socialButton}>
+                    <button type="button" className={styles.socialButton}>
                       <div className={styles.socialButtonInner}>
                         <FaApple />
                         Sign In With Apple

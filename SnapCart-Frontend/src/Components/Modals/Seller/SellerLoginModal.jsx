@@ -8,7 +8,7 @@ import useSellerContext from "../../../context/Seller/useSellerContext"; // Adju
 const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,9 +37,9 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -69,7 +69,7 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
 
       // If successful, navigate and close modal
       toast.success("Login successful!");
-      navigate("/seller/product-management");
+      navigate("/seller/dashboard");
       onClose();
     } catch (error) {
       console.error("Error logging in:", error);
@@ -144,9 +144,7 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
             />
           </div>
 
-          {error && (
-            <p className="text-sm text-red-500 mt-2">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
 
           <button
             type="submit"

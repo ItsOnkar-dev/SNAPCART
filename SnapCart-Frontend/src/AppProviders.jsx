@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import AdminContextProvider from "./context/Admin/AdminContextProvider";
 import CartContextProvider from "./context/Cart/CartContextProvider";
 import ProductContextProvider from "./context/Product/ProductContextProvider";
 import SellerContextProvider from "./context/Seller/SellerContextProvider";
@@ -10,7 +11,9 @@ const AppProviders = ({ children }) => {
     <UserContextProvider>
       <CartContextProvider>
         <SellerContextProvider>
-          <ProductContextProvider>{children}</ProductContextProvider>
+          <ProductContextProvider>
+            <AdminContextProvider>{children}</AdminContextProvider>
+          </ProductContextProvider>
         </SellerContextProvider>
       </CartContextProvider>
     </UserContextProvider>

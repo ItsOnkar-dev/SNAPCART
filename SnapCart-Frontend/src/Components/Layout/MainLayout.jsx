@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import MainFooter from "../Footer/MainFooter";
+import SellerFooter from "../Footer/SellerFooter";
 
 const MainLayout = ({ children }) => {
   const location = useLocation();
@@ -13,19 +14,22 @@ const MainLayout = ({ children }) => {
     });
   }, [location.pathname]); // This will run whenever the pathname changes
 
-  // Routes where we don't want to show the main footer
-  const excludedRoutes = [
-    "/become-seller",
-    "/seller/product-management",
-    "/admin",
-  ];
+  // Routes where we don't want to show any footer
+  const excludedRoutes = ["/admin"];
 
-  const shouldShowMainFooter = !excludedRoutes.includes(location.pathname);
+  // Routes where we want to show the seller footer
+  const sellerRoutes = ["/become-seller", "/seller/dashboard"];
+
+  const shouldShowMainFooter =
+    !excludedRoutes.includes(location.pathname) &&
+    !sellerRoutes.includes(location.pathname);
+  const shouldShowSellerFooter = sellerRoutes.includes(location.pathname);
 
   return (
     <>
       {children}
       {shouldShowMainFooter && <MainFooter />}
+      {shouldShowSellerFooter && <SellerFooter />}
     </>
   );
 };

@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useProductContext from "../../context/Product/useProductContext";
 import useSellerContext from "../../context/Seller/useSellerContext";
-import SellerFooter from "../Footer/SellerFooter";
 import DeleteModal from "../Modals/DeleteModal";
 import SellerNavbar from "../Navigation/SellerNavBar";
 
@@ -699,7 +698,6 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
           </div>
         </div>
       </div>
-      <SellerFooter />
       <DeleteModal
         isOpen={isDeleteModalOpen}
         onClose={handleCancelDelete}

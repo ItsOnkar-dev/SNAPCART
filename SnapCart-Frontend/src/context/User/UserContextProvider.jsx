@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
 import axios from "axios";
-import UserContext from "./UserContext";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import UserContext from "./UserContext";
 
 const UserContextProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -12,27 +12,43 @@ const UserContextProvider = ({ children }) => {
 
   const fetchUserProfile = async () => {
     const token = window.localStorage.getItem("token");
+    console.log("[UserContext] Fetching user profile, token exists:", !!token);
+
     if (!token) {
+      console.log("[UserContext] No token found, setting isLoggedIn to false");
       setIsLoggedIn(false);
       setIsLoading(false);
       return;
     }
 
     try {
+      console.log("[UserContext] Making API call to fetch user profile");
       const response = await axios.get("http://localhost:8000/user/profile", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
       setIsLoggedIn(true);
-      const userObj = response.data?.data?.user || response.data?.data || response.data?.user || response.data;
+      const userObj =
+        response.data?.data?.user ||
+        response.data?.data ||
+        response.data?.user ||
+        response.data;
+      console.log("[UserContext] User profile fetched successfully:", userObj);
       setUser(userObj);
-      console.log("[UserContext] User profile fetched:", userObj);
     } catch (error) {
-      if (error.response && (error.response.status === 401 || error.response.status === 500)) {
+      console.error("[UserContext] Error fetching user profile:", error);
+      if (
+        error.response &&
+        (error.response.status === 401 || error.response.status === 500)
+      ) {
         window.localStorage.removeItem("token");
         setIsLoggedIn(false);
-        console.warn("[UserContext] Token invalid or expired. isLoggedIn set to false.");
+        setUser(null);
+        console.warn(
+          "[UserContext] Token invalid or expired. isLoggedIn set to false."
+        );
       }
     } finally {
       setIsLoading(false);
@@ -40,30 +56,76 @@ const UserContextProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    console.log("[UserContext] Initial mount, fetching user profile");
     fetchUserProfile();
   }, []);
 
   useEffect(() => {
-    console.log("[UserContext] isLoggedIn:", isLoggedIn);
-  }, [isLoggedIn]);
+    console.log("[UserContext] User state updated:", {
+      isLoggedIn,
+      user,
+      isLoading,
+      userRole: user?.role,
+    });
+  }, [isLoggedIn, user, isLoading]);
 
   // Standard login
   const login = async (userCredentials) => {
     try {
-      const response = await axios.post("http://localhost:8000/auth/login", userCredentials);
+      console.log("[UserContext] Attempting login with credentials:", {
+        username: userCredentials.username,
+      });
+      const response = await axios.post(
+        "http://localhost:8000/auth/login",
+        userCredentials
+      );
+
+      console.log("[UserContext] Login response:", response.data);
+
+      if (response.data.status === "error") {
+        toast.error(response.data.message || "Login failed. Please try again.");
+        return false;
+      }
+
       const token = response.data?.data?.token || response.data?.token;
+      if (!token) {
+        console.error("[UserContext] No token in response:", response.data);
+        toast.error("Invalid response from server. Please try again.");
+        return false;
+      }
+
       window.localStorage.setItem("token", token);
       setIsLoggedIn(true);
-      const userObj = response.data?.data?.user || response.data?.data || response.data?.user || response.data;
-      setUser(userObj);
+      const userObj =
+        response.data?.data?.user ||
+        response.data?.data ||
+        response.data?.user ||
+        response.data;
       console.log("[UserContext] User logged in:", userObj);
+      setUser(userObj);
 
       // Dispatch custom login event
-      window.dispatchEvent(new Event('userLogin'));
+      window.dispatchEvent(new Event("userLogin"));
+      toast.success("Logged in successfully!");
+
+      // Navigate based on user role
+      if (userObj.role === "PlatformAdmin") {
+        window.location.href = "/";
+      } else if (userObj.role === "Seller") {
+        window.location.href = "/seller/dashboard";
+      } else {
+        window.location.href = "/";
+      }
 
       return true;
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed. Please try again.");
+      console.error(
+        "[UserContext] Login error:",
+        error.response?.data || error
+      );
+      toast.error(
+        error.response?.data?.message || "Login failed. Please try again."
+      );
       return false;
     }
   };
@@ -104,7 +166,9 @@ const UserContextProvider = ({ children }) => {
       toast.success(response.data?.message || "Password updated successfully");
       return response.data;
     } catch (error) {
-      const errorMsg = error.response?.data?.message || "Failed to update password. Please try again.";
+      const errorMsg =
+        error.response?.data?.message ||
+        "Failed to update password. Please try again.";
       throw new Error(errorMsg);
     }
   };
@@ -128,22 +192,32 @@ const UserContextProvider = ({ children }) => {
       return;
     }
 
-    if (!window.confirm("Are you sure you want to delete your account? This action is irreversible!")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete your account? This action is irreversible!"
+      )
+    ) {
       return;
     }
 
     try {
-      const response = await axios.delete("http://localhost:8000/user/delete-account", {
+      const response = await axios.delete(
+        "http://localhost:8000/user/delete-account",
+        {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
+        }
+      );
       window.localStorage.removeItem("token");
       setIsLoggedIn(false);
       setUser(null);
       toast.success(response.data?.message || "Account deleted successfully");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete account. Please try again.");
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to delete account. Please try again."
+      );
     }
   };
 
@@ -155,23 +229,31 @@ const UserContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.get("http://localhost:8000/user/download-data", {
+      const response = await axios.get(
+        "http://localhost:8000/user/download-data",
+        {
         headers: {
           Authorization: `Bearer ${token}`,
         },
         responseType: "blob",
-      });
+        }
+      );
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `user_data_${new Date().toISOString().split("T")[0]}.json`);
+      link.setAttribute(
+        "download",
+        `user_data_${new Date().toISOString().split("T")[0]}.json`
+      );
       document.body.appendChild(link);
       link.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(link);
       toast.success("User data downloaded successfully");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to download user data");
+      toast.error(
+        error.response?.data?.message || "Failed to download user data"
+      );
     }
   };
 
@@ -184,10 +266,12 @@ const UserContextProvider = ({ children }) => {
     updatePassword,
     deletedAccount,
     downloadUserData,
-    handleOAuthSuccess
+    handleOAuthSuccess,
   };
 
-  return <UserContext.Provider value={context}>{children}</UserContext.Provider>;
+  return (
+    <UserContext.Provider value={context}>{children}</UserContext.Provider>
+  );
 };
 
 export default UserContextProvider;

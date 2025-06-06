@@ -2,10 +2,12 @@
 import {
   CreditCard,
   Heart,
+  LayoutDashboard,
   LogOut,
   Moon,
   Package,
   Settings,
+  Store,
   Sun,
   User,
   X,
@@ -22,27 +24,50 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
-  const tabs = [
-    { id: 1, label: "My Profile", icon: User, path: "/profile" },
-    { id: 2, label: "Orders", icon: Package, path: "/orders" },
-    { id: 3, label: "Wishlist", icon: Heart, path: "/wishlist" },
-    { id: 4, label: "Payment", icon: CreditCard, path: "/payment" },
-    { id: 5, label: "Settings", icon: Settings, path: "/settings" },
-    {
-      id: 6,
-      label: isDark ? "Light Mode" : "Dark Mode",
-      icon: isDark ? Sun : Moon,
-      onClick: handleThemeToggle,
-      path: null,
-    },
-    {
-      id: 7,
-      label: "Log Out",
-      icon: LogOut,
-      onClick: () => setShowLogoutConfirmation(true),
-      path: null,
-    },
-  ];
+  const getTabs = () => {
+    const baseTabs = [
+      { id: 1, label: "My Profile", icon: User, path: "/profile" },
+      { id: 2, label: "Orders", icon: Package, path: "/orders" },
+      { id: 3, label: "Wishlist", icon: Heart, path: "/wishlist" },
+      { id: 4, label: "Payment", icon: CreditCard, path: "/payment" },
+      { id: 5, label: "Settings", icon: Settings, path: "/settings" },
+      {
+        id: 6,
+        label: isDark ? "Light Mode" : "Dark Mode",
+        icon: isDark ? Sun : Moon,
+        onClick: handleThemeToggle,
+        path: null,
+      },
+      {
+        id: 7,
+        label: "Log Out",
+        icon: LogOut,
+        onClick: () => setShowLogoutConfirmation(true),
+        path: null,
+      },
+    ];
+
+    // Add role-specific tabs
+    if (user?.role === "PlatformAdmin") {
+      baseTabs.splice(1, 0, {
+        id: 8,
+        label: "Admin Dashboard",
+        icon: LayoutDashboard,
+        path: "/admin/dashboard",
+      });
+    } else if (user?.role === "Seller") {
+      baseTabs.splice(1, 0, {
+        id: 8,
+        label: "Seller Dashboard",
+        icon: Store,
+        path: "/seller/dashboard",
+      });
+    }
+
+    return baseTabs;
+  };
+
+  const tabs = getTabs();
 
   const [activeTab, setActiveTab] = useState(location.pathname);
 
@@ -160,7 +185,7 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
 
           {/* User Info */}
           <div className="flex items-center mb-6">
-            <div className="w-16 h-16 bg-gray-300 rounded-full overflow-hidden mr-4">
+            <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
               {userData.avatar ? (
                 <img
                   src={userData.avatar}
@@ -191,6 +216,13 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
               </h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
                 {userData.email || "No email provided"}
+              </p>
+              <p className="text-sm font-medium text-cyan-600 dark:text-cyan-400 mt-1">
+                {userData.role === "PlatformAdmin"
+                  ? "Platform Admin"
+                  : userData.role === "Seller"
+                  ? "Seller"
+                  : "Customer"}
               </p>
             </div>
           </div>

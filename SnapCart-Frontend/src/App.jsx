@@ -7,6 +7,7 @@ import NavBar from "./Components/Navigation/NavBar";
 import OAuthSuccess from "./Components/OAuthSuccess";
 import PrivateRoute from "./Components/PrivateRoute";
 import ProductManagement from "./Components/Products/ProductManagement";
+import ProtectedRoute from "./Components/ProtectedRoute";
 import Registration from "./Components/Registration";
 import About from "./Pages/About";
 import AdminDashboard from "./Pages/AdminDashboard";
@@ -71,14 +72,12 @@ const App = () => {
             <Route path="/oauth-success" element={<OAuthSuccess />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/profile" element={<Profile />} />
             <Route
-              path="/seller/product-management"
+              path="/profile"
               element={
-                <ProductManagement
-                  isDark={isDark}
-                  toggleDarkMode={toggleDarkMode}
-                />
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
               }
             />
             <Route
@@ -87,7 +86,27 @@ const App = () => {
                 <BecomeSeller isDark={isDark} toggleDarkMode={toggleDarkMode} />
               }
             />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["PlatformAdmin"]}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Seller Dashboard Route */}
+            <Route
+              path="/seller/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["Seller"]}>
+                  <ProductManagement
+                    isDark={isDark}
+                    toggleDarkMode={toggleDarkMode}
+                  />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Private routes starts here! */}
             <Route element={<PrivateRoute isAuthenticated={isLoggedIn} />}>
