@@ -18,6 +18,11 @@ const sellerSchema = new mongoose.Schema({
     required: [true, 'Phone number is required'],
     trim: true
   },
+  password: {
+    type: String,
+    required: [true, 'Password is required'],
+    minlength: [8, 'Password must be at least 8 characters long']
+  },
   isVerified: {
     type: Boolean,
     default: false

@@ -36,7 +36,8 @@ router.get('/my-products', isLoggedIn, catchAsync(async(req, res) => {
     throw AuthenticationError("You need to create a seller profile first");
   }
 
-  const products = await Product.find({ sellerId: req.userId }).lean();
+  // Use seller._id instead of req.userId to find products
+  const products = await Product.find({ sellerId: seller._id }).lean();
   return sendResponse(res, { message: 'Fetched your products successfully', data: products });
 }));
 
@@ -55,13 +56,19 @@ router.post('/products', isLoggedIn, createProductValidator, (req, res, next) =>
     throw BadRequestError('All fields are required');
   }
 
+  // Get the seller profile first
+  const seller = await Seller.findOne({ userId: req.userId });
+  if (!seller) {
+    throw AuthenticationError("You need to create a seller profile first");
+  }
+
   const newProduct = await Product.create(
     { 
       title, 
       description, 
       image, 
       price: parseFloat(price),
-      sellerId: req.userId
+      sellerId: seller._id // Use seller._id instead of req.userId
     }
   );
 
@@ -93,12 +100,18 @@ router.route('/products/:productId')
   const { productId } = req.params;
   const { title, description, image, price } = req.body;
   
-  // First check if product exists
+  // Get the seller profile first
+  const seller = await Seller.findOne({ userId: req.userId });
+  if (!seller) {
+    throw AuthenticationError("You need to create a seller profile first");
+  }
+  
+  // First check if product exists 
   const productExists = await Product.findById(productId);
   if (!productExists) throw NotFoundError('Failed to update product');
 
-  // Then check if user owns the product
-  if (productExists.sellerId.toString() !== req.userId.toString()) {
+  // Then check if user owns the product using seller._id
+  if (productExists.sellerId.toString() !== seller._id.toString()) {
     throw AuthorizationError('You do not have permission to update this product');
   }
 
@@ -120,23 +133,29 @@ router.route('/products/:productId')
   Logger.info("Delete the product request received")
   const { productId } = req.params;
   
+  // Get the seller profile first
+  const seller = await Seller.findOne({ userId: req.userId });
+  if (!seller) {
+    throw AuthenticationError("You need to create a seller profile first");
+  }
+
   // First check if product exists
   const productExists = await Product.findById(productId);
   if (!productExists) {
     throw NotFoundError('Product not found');
   }
 
-  // Then check if user owns the product
-  if (productExists.sellerId.toString() !== req.userId.toString()) {
+  // Then check if user owns the product using seller._id
+  if (productExists.sellerId.toString() !== seller._id.toString()) {
     throw AuthorizationError('You do not have permission to delete this product');
   }
 
   // Now delete the product
-    const deleteResult = await Product.findByIdAndDelete(productId);
+  const deleteResult = await Product.findByIdAndDelete(productId);
     
-    if (!deleteResult) {
-      throw InternalServerError('Failed to delete product');
-    }
+  if (!deleteResult) {
+    throw InternalServerError('Failed to delete product');
+  }
 
   return sendResponse(res, { message: 'Product deleted successfully' });
 }));

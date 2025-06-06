@@ -14,14 +14,23 @@ export const createSellerValidator = [
   check('phone')
     .trim()
     .notEmpty().withMessage('Phone number is required')
-    .isLength({ min: 10, max: 15 }).withMessage('Please provide a valid phone number')
+    .isLength({ min: 10, max: 15 }).withMessage('Please provide a valid phone number'),
+
+  check('password')
+    .trim()
+    .notEmpty().withMessage('Password is required')
+    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
 ]
 
 export const sellerLoginValidator = [
   check('email')
     .trim()
     .notEmpty().withMessage('Email is required')
-    .isEmail().withMessage('Please provide a valid email address')
+    .isEmail().withMessage('Please provide a valid email address'),
+    
+  check('password')
+    .trim()
+    .notEmpty().withMessage('Password is required')
 ]
 
 // export const updateSellerValidator = [
