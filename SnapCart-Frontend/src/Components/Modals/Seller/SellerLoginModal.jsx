@@ -6,7 +6,10 @@ import { toast } from "react-toastify";
 import useSellerContext from "../../../context/Seller/useSellerContext"; // Adjust path if needed
 
 const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
-  const [email, setEmail] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -15,16 +18,29 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
   const { loginSeller, errors: contextErrors } = useSellerContext();
 
   const validateForm = () => {
-    if (!email.trim()) {
+    if (!formData.email.trim()) {
       setError("Email is required");
       return false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       setError("Email is invalid");
+      return false;
+    }
+
+    if (!formData.password) {
+      setError("Password is required");
       return false;
     }
 
     setError("");
     return true;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -49,7 +65,7 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
       }
 
       // Use the loginSeller function from context
-      await loginSeller({ email });
+      const sellerData = await loginSeller(formData);
 
       // If successful, navigate and close modal
       toast.success("Login successful!");
@@ -78,74 +94,78 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md px-10 py-16">
-        {/* Header */}
-        <div className="flex justify-between items-center border-b dark:border-gray-700 mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white ">
-            Seller Login
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
-          >
-            <X size={24} />
-          </button>
-        </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        >
+          <X className="w-6 h-6" />
+        </button>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            {/* Display context errors if any */}
-            {contextErrors?.login && (
-              <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md">
-                {contextErrors.login}
-              </div>
-            )}
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          Login as a Seller
+        </h2>
 
-            {/* Email field */}
-            <div>
-              <label
-                htmlFor="login-email"
-                className="block text-sm font-medium text-gray-700 dark:text-white mb-2"
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                id="login-email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`w-full px-4 py-2 border rounded-md dark:bg-slate-700 dark:text-white dark:border-gray-600 ${
-                  error ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder="Enter your email"
-              />
-              {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="Enter your email"
+            />
           </div>
 
-          {/* For a real application, add password field here */}
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="Enter your password"
+            />
+          </div>
 
-          {/* Submit button */}
+          {error && (
+            <p className="text-sm text-red-500 mt-2">{error}</p>
+          )}
+
           <button
             type="submit"
             disabled={isSubmitting}
             className="w-full mt-6 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? "Logging in..." : "Login"}
+            {isSubmitting ? "Logging in..." : "Login as Seller"}
           </button>
 
           {/* Register link */}
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Don&apos;t have a seller account?{" "}
+              Don't have a seller account?{" "}
               <button
                 type="button"
                 onClick={switchToRegister}
                 className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium"
               >
-                Register now
+                Register
               </button>
             </p>
           </div>

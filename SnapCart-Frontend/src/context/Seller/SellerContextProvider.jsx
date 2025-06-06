@@ -1,9 +1,9 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
-import SellerContext from "./SellerContext";
 import axios from "axios";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import SellerContext from "./SellerContext";
 
 const SellerContextProvider = ({ children }) => {
   const [seller, setSeller] = useState(null);
@@ -30,8 +30,8 @@ const SellerContextProvider = ({ children }) => {
       console.log("Fetching seller data with token");
       const response = await axios.get(`${API_BASE_URL}/sellers/current`, {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.data.status === "success" && response.data.data) {
@@ -72,11 +72,15 @@ const SellerContextProvider = ({ children }) => {
       }
 
       // Include the token in the request header
-      const response = await axios.post(`${API_BASE_URL}/sellers/login`, credentials, {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const response = await axios.post(
+        `${API_BASE_URL}/sellers/login`,
+        credentials,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       if (response.data && response.data.data) {
         // Update seller state immediately
@@ -87,7 +91,8 @@ const SellerContextProvider = ({ children }) => {
         throw new Error(response.data?.message || "Failed to login");
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message || "Failed to login";
+      const errorMsg =
+        error.response?.data?.message || error.message || "Failed to login";
       toast.error(errorMsg);
       setErrors({ login: errorMsg });
       throw error;
@@ -105,20 +110,27 @@ const SellerContextProvider = ({ children }) => {
 
       const response = await axios.post(`${API_BASE_URL}/sellers`, sellerData, {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.data && response.data.data) {
         // Update seller state immediately
         setSeller(response.data.data);
-        toast.success(response.data.message || "Seller account created successfully!");
+        toast.success(
+          response.data.message || "Seller account created successfully!"
+        );
         return response.data.data;
       } else {
-        throw new Error(response.data?.message || "Failed to create seller account");
+        throw new Error(
+          response.data?.message || "Failed to create seller account"
+        );
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message || "Failed to create seller account";
+      const errorMsg =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to create seller account";
       toast.error(errorMsg);
       setErrors({ submit: errorMsg });
       throw error;
@@ -128,7 +140,9 @@ const SellerContextProvider = ({ children }) => {
   // Check if email has a seller account
   const checkSellerEmail = async (email) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/sellers/check-email?email=${email}`);
+      const response = await axios.get(
+        `${API_BASE_URL}/sellers/check-email?email=${email}`
+      );
       return response.data.data.exists;
     } catch (error) {
       console.error("Error checking seller email:", error);
@@ -151,21 +165,32 @@ const SellerContextProvider = ({ children }) => {
         throw new Error("You must be logged in to update seller information");
       }
 
-      const response = await axios.patch(`${API_BASE_URL}/sellers/${sellerId}`, sellerData, {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const response = await axios.patch(
+        `${API_BASE_URL}/sellers/${sellerId}`,
+        sellerData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       if (response.data && response.data.data) {
         setSeller(response.data.data);
-        toast.success(response.data.message || "Seller information updated successfully!");
+        toast.success(
+          response.data.message || "Seller information updated successfully!"
+        );
         return response.data.data;
       } else {
-        throw new Error(response.data?.message || "Failed to update seller information");
+        throw new Error(
+          response.data?.message || "Failed to update seller information"
+        );
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message || "Failed to update seller information";
+      const errorMsg =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to update seller information";
       toast.error(errorMsg);
       setErrors({ submit: errorMsg });
       throw error;
@@ -184,20 +209,68 @@ const SellerContextProvider = ({ children }) => {
     return fetchSellerData();
   };
 
+  // Delete seller account
+  const deleteSeller = async () => {
+    setErrors(null);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("You must be logged in to delete your seller account");
+      }
+
+      const response = await axios.delete(`${API_BASE_URL}/sellers/current`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data && response.data.status === "success") {
+        // Clear seller state
+        setSeller(null);
+        // Clear any cached product data
+        localStorage.removeItem("sellerProducts");
+        sessionStorage.removeItem("sellerProducts");
+
+        // Force a refresh of the public products list
+        window.dispatchEvent(new CustomEvent("sellerDeleted"));
+
+        toast.success(
+          response.data.message || "Seller account deleted successfully!"
+        );
+        return true;
+      } else {
+        throw new Error(
+          response.data?.message || "Failed to delete seller account"
+        );
+      }
+    } catch (error) {
+      const errorMsg =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to delete seller account";
+      toast.error(errorMsg);
+      setErrors({ delete: errorMsg });
+      throw error;
+    }
+  };
+
   return (
-    <SellerContext.Provider value={{
-      seller,
-      isSellerLoading,
-      errors,
-      loginSeller,
-      createSeller,
-      checkSellerEmail,
-      hasCheckedSellerStatus,
-      isLoggedInAsSeller,
-      updateSeller,
-      logoutSeller,
-      refreshSellerData,
-    }}>
+    <SellerContext.Provider
+      value={{
+        seller,
+        isSellerLoading,
+        errors,
+        loginSeller,
+        createSeller,
+        checkSellerEmail,
+        hasCheckedSellerStatus,
+        isLoggedInAsSeller,
+        updateSeller,
+        logoutSeller,
+        refreshSellerData,
+        deleteSeller,
+      }}
+    >
       {children}
     </SellerContext.Provider>
   );

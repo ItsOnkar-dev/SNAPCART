@@ -107,8 +107,13 @@ const ProductContextProvider = ({ children }) => {
       console.log("Add product response:", response.data);
 
       if (response.data && response.data.data) {
-        // Re-fetch both seller products and public products to ensure state is in sync with backend
-        await Promise.all([fetchSellerProducts(), fetchProducts()]);
+        // Update the sellerProducts state immediately with the new product
+        setSellerProducts((prevProducts) => [
+          ...prevProducts,
+          response.data.data,
+        ]);
+        // Also update the public products list
+        setProducts((prevProducts) => [...prevProducts, response.data.data]);
         return { success: true, data: response.data.data };
       } else {
         console.error("Unexpected response format:", response.data);
@@ -216,6 +221,20 @@ const ProductContextProvider = ({ children }) => {
   useEffect(() => {
     fetchProducts();
     // We'll load seller products in the ProductManagement component when needed
+  }, []);
+
+  // Listen for seller deletion event
+  useEffect(() => {
+    const handleSellerDeleted = () => {
+      console.log("Seller deleted, refreshing products");
+      fetchProducts();
+    };
+
+    window.addEventListener("sellerDeleted", handleSellerDeleted);
+
+    return () => {
+      window.removeEventListener("sellerDeleted", handleSellerDeleted);
+    };
   }, []);
 
   // Context value

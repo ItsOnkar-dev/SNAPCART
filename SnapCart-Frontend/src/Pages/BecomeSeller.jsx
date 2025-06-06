@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
-import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import SellerFooter from "../Components/Footer/SellerFooter";
 import SellerLoginModal from "../Components/Modals/Seller/SellerLoginModal";
@@ -172,7 +171,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
 
   return (
     <>
-      <div className="min-h-screen pt-16 pb-20 bg-gray-50 dark:bg-slate-900">
+      <div className="min-h-screen py-24 bg-gray-50 dark:bg-slate-900">
         {/* Custom Navbar for Seller Page */}
         <SellerNavbar
           isDark={isDark}
@@ -183,13 +182,6 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
           {/* Hero Section */}
           <div className="text-center mb-16">
-            <NavLink
-              to="/"
-              className="flex items-center gap-1 max-w-fit text-white/70 hover:text-white"
-            >
-              <ArrowLeft size={16} />
-              <h2>Back to Home</h2>
-            </NavLink>
             <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
               <span className="block">Grow Your Business </span>
               <span className="block text-gradient1">Sell with SnapCart</span>

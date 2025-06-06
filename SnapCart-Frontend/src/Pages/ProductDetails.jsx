@@ -49,7 +49,7 @@ const ProductDetails = () => {
   }, [wishlist, product]);
 
   const handleCardClick = (id) => {
-    navigate(`/products/${id}`);
+    navigate(`/products/${id}`); 
     window.scrollTo(0, 0);
   };
 

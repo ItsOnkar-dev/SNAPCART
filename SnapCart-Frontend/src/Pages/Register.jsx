@@ -65,7 +65,6 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState("Buyer");
   const modalRef = useRef(null);
   const { login } = useUserContext();
 
@@ -114,32 +113,25 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
         userData = {
           username: name,
           password: password,
-          role: role || "Buyer", // Default to buyer if no role is specified during login
+          role: "Buyer" // Default to buyer for login
         };
         // Use context login function
-        login(userData);
+        await login(userData);
+        toast.success("Logged in successfully!");
+        closeModal();
       } else {
-        if (!role) {
-          toast.error("Please select a role (Seller or Buyer)");
-          setIsLoading(false);
-          return;
-        }
         userData = {
           username: name,
           email: email,
           password: password,
-          role: role,
+          role: "Buyer" // Default to buyer for registration
         };
-      }
 
-      console.log(isLogin ? "Logging in with:" : "Signing up with:", userData);
-
-      const response = await axios.post(`http://localhost:8000/auth/${isLogin ? "login" : "register"}`, userData);
-      if (response.status === "success") {
-        toast.success(response.data?.message || "Logged In successful");
-      } else {
-        toast.success(response.data?.message || "Account Created Successfully")
-        closeModal()
+        const response = await axios.post(`http://localhost:8000/auth/register`, userData);
+        if (response.data.status === "success") {
+          toast.success(response.data.message || "Account Created Successfully");
+          closeModal();
+        }
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.response?.data?.errors?.[0]?.msg || error.response?.data || "An error occurred. Please try again.";
@@ -265,43 +257,6 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
                     </button>
                   </div>
                 </div>
-
-                {/* Role selection (only for signup) */}
-                {!isLogin && (
-                  <div className="flex items-center gap-6 py-2">
-                    <label
-                      className={`${styles.radioButtons} ${role === "Seller" ? "text-purple-800 dark:text-purple-200 border-purple-500 dark:border-purple-500" : ""}`}>
-                      <input 
-                        type="radio" 
-                        name="role" 
-                        value="Seller" 
-                        checked={role === "Seller"} 
-                        onChange={(e) => setRole(e.target.value)} 
-                        className="hidden" 
-                      />
-                      <div className="flex gap-2 items-center">
-                        <FaSackDollar/>
-                        <span>Seller</span>
-                      </div>
-                    </label>
-
-                    <label
-                      className={`${styles.radioButtons} ${role === "Buyer" ? "text-indigo-700 dark:text-indigo-200 border-indigo-500 dark:border-indigo-500" : ""}`}>
-                      <input 
-                        type="radio" 
-                        name="role" 
-                        value="Buyer" 
-                        checked={role === "Buyer"} 
-                        onChange={(e) => setRole(e.target.value)} 
-                        className="hidden" 
-                      />
-                      <div className="flex gap-2 items-center">
-                        <FaShoppingBag/>
-                        <span>Buyer</span>
-                      </div>
-                    </label>
-                  </div>
-                )}
 
                 {/* Forgot password (login only) */}
                 {isLogin && (
