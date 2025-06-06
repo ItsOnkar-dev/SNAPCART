@@ -88,7 +88,7 @@ const MainFooter = () => {
       </div>
 
       {/* Main Footer Content */}
-      <div className="w-full mx-auto px-6 lg:px-28 pt-12 mt-8">
+      <div className="w-full mx-auto px-6 lg:px-28 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About Section */}
           <div className="space-y-4">
