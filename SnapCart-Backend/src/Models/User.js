@@ -29,8 +29,22 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['Seller', 'Buyer', 'Admin'],
+    enum: ['PlatformAdmin', 'Seller', 'Buyer'],
     default: 'Buyer'
+  },
+  // Additional fields for platform admin
+  isPlatformAdmin: {
+    type: Boolean,
+    default: false
+  },
+  // Additional fields for seller
+  isSeller: {
+    type: Boolean,
+    default: false
+  },
+  sellerProfile: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Seller'
   },
   avatar: {
     type: String
@@ -40,6 +54,16 @@ const userSchema = new mongoose.Schema({
     default: Date.now
   }
 }, { timestamps: true, versionKey: false })
+
+// Middleware to ensure role and isPlatformAdmin stay in sync
+userSchema.pre('save', function(next) {
+  if (this.role === 'PlatformAdmin') {
+    this.isPlatformAdmin = true;
+  } else {
+    this.isPlatformAdmin = false;
+  }
+  next();
+});
 
 const User = mongoose.model('User', userSchema)
 

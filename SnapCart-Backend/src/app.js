@@ -1,14 +1,15 @@
-import express from 'express'
-import productRoutes from './Routes/products.js'
-import userRoutes from './Routes/users.js'
-import authRoutes from './Routes/auth.js'
-import sellerRoutes from './Routes/sellers.js'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import session from 'express-session'
-import passport from './Config/passport-setup.js'
-import helmet from 'helmet'
+import express from 'express'
 import rateLimit from 'express-rate-limit'
+import session from 'express-session'
+import helmet from 'helmet'
+import passport from './Config/passport-setup.js'
+import adminRoutes from './Routes/admin.js'
+import authRoutes from './Routes/auth.js'
+import productRoutes from './Routes/products.js'
+import sellerRoutes from './Routes/sellers.js'
+import userRoutes from './Routes/users.js'
 
 const app = express()
 
@@ -47,6 +48,7 @@ app.use('/api', productRoutes) // Add product routes
 app.use('/user', userRoutes) // Add user routes
 app.use('/auth', authRoutes) // Add auth routes
 app.use(sellerRoutes)
+app.use('/api/admin', adminRoutes) // Add admin routes
 
 // Global Express Error Handler
 app.use((err, req, res, next) => {
