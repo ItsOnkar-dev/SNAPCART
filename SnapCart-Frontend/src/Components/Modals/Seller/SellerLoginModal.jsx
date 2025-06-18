@@ -66,9 +66,7 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
 
       // Use the loginSeller function from context
       const sellerData = await loginSeller(formData);
-
-      // If successful, navigate and close modal
-      toast.success("Login successful!");
+      console.log(sellerData);
       navigate("/seller/dashboard");
       onClose();
     } catch (error) {
@@ -95,7 +93,7 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 relative">
+      <div className="bg-white dark:bg-gray-800 rounded-xl px-8 py-14 max-w-md w-full mx-4 relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -146,13 +144,15 @@ const SellerLoginModal = ({ isOpen, onClose, switchToRegister }) => {
 
           {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full mt-6 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? "Logging in..." : "Login as Seller"}
-          </button>
+          <div>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? "Logging in..." : "Login as Seller"}
+            </button>
+          </div>
 
           {/* Register link */}
           <div className="mt-4 text-center">

@@ -36,7 +36,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const location = useLocation();
   const cartContext = useCartContext();
   const { user, isLoggedIn } = useUserContext();
-  const { seller } = useSellerContext();
+  const { seller, isLoggedInAsSeller } = useSellerContext();
 
   // Update displayName whenever user data changes
   useEffect(() => {
@@ -164,26 +164,26 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             <SearchBar />
 
             {/* Become a Seller */}
-            <div
-              className={`${
-                isLoggedIn ? "max-sm:hidden sm-block" : "hidden"
-              } text-sm lg:text-base`}
-              onClick={handleIsLoggedIn}
-            >
-              <NavLink
-                to="/become-seller"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-pink-600"
-                    : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-center gap-2"
-                }
+            {isLoggedIn && !isLoggedInAsSeller && (
+              <div
+                className={"hidden sm:block text-sm lg:text-base"}
+                onClick={handleIsLoggedIn}
               >
-                <div className="flex items-center gap-2">
-                  <BadgeIndianRupee />
-                  <span>Become a Seller</span>
-                </div>
-              </NavLink>
-            </div>
+                <NavLink
+                  to="/become-seller"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "text-pink-600"
+                      : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-center gap-2"
+                  }
+                >
+                  <div className="flex items-center gap-2">
+                    <BadgeIndianRupee />
+                    <span>Become a Seller</span>
+                  </div>
+                </NavLink>
+              </div>
+            )}
             <NavLink
               to="/wishlist"
               className={({ isActive }) =>
@@ -293,6 +293,22 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             ) : (
               <NavLink
                 to="/registration"
+                state={{ scrollToForm: true }}
+                onClick={(e) => {
+                  if (location.pathname === "/registration") {
+                    e.preventDefault();
+                    // If already on registration page, scroll to form on small to medium screens
+                    const isSmallToMedium =
+                      window.innerWidth >= 640 && window.innerWidth < 768;
+                    if (isSmallToMedium) {
+                      setTimeout(() => {
+                        navigate("/registration", {
+                          state: { scrollToForm: true },
+                        });
+                      }, 100);
+                    }
+                  }
+                }}
                 className="hidden sm:flex items-center gap-1 text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white"
               >
                 <UserRound />

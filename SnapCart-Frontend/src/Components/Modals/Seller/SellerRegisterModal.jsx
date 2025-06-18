@@ -6,8 +6,6 @@ import { toast } from "react-toastify";
 import useSellerContext from "../../../context/Seller/useSellerContext";
 import useUserContext from "../../../context/User/useUserContext";
 
-const API_BASE_URL = "http://localhost:8000";
-
 const SellerRegisterModal = ({ isOpen, onClose, switchToLogin }) => {
   const [formData, setFormData] = useState({
     username: "",
@@ -89,12 +87,10 @@ const SellerRegisterModal = ({ isOpen, onClose, switchToLogin }) => {
 
       if (sellerData) {
         // Wait for a short delay to ensure state is updated
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         // Refresh seller data to ensure state is synchronized
         await refreshSellerData();
-        
-        toast.success("Seller account created successfully!");
         onClose();
         navigate("/seller/dashboard");
       }
@@ -116,7 +112,7 @@ const SellerRegisterModal = ({ isOpen, onClose, switchToLogin }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 relative">
+      <div className="bg-white dark:bg-gray-800 rounded-xl px-10 py-14 max-w-lg w-full mx-4 relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"

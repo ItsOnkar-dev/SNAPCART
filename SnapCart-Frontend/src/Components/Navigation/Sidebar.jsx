@@ -1,23 +1,24 @@
 /* eslint-disable react/prop-types */
 import {
-  BadgeIndianRupee,
   Heart,
   House,
   Info,
-  LayoutList,
+  LayoutDashboard,
   LogOut,
   Moon,
+  Store,
   Sun,
   UserRound,
   UserRoundPen,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { MdClose } from "react-icons/md";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import SnapCartLogo from "../../assets/SnapCart.png";
 import SnapCartLogo1 from "../../assets/SnapCart1.png";
 import SnapCartLogo2 from "../../assets/SnapCartLog01.png";
 import SnapCartLogo3 from "../../assets/SnapCartLogo2.png";
+import useSellerContext from "../../context/Seller/useSellerContext";
 import useUserContext from "../../context/User/useUserContext";
 import LogOutModal from "../Modals/LogOutModal";
 import SidebarFooter from "./SidebarFooter";
@@ -29,15 +30,28 @@ const Sidebar = ({
   handleThemeToggle,
 }) => {
   const navigate = useNavigate();
-  const { isLoggedIn } = useUserContext();
+  const location = useLocation();
+  const { isLoggedIn, user } = useUserContext();
+  const { isLoggedInAsSeller, seller } = useSellerContext();
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
   const handleLogin = useCallback(() => {
+    // Always close sidebar first
     if (isSidebarOpen) {
       toggleSidebar();
     }
-    navigate("/registration");
-  }, [isSidebarOpen, toggleSidebar, navigate]);
+
+    if (location.pathname === "/registration") {
+      const isSmallToMedium = window.innerWidth < 768;
+      if (isSmallToMedium) {
+        setTimeout(() => {
+          navigate("/registration", { state: { scrollToForm: true } });
+        }, 300);
+      }
+    } else {
+      navigate("/registration", { state: { scrollToForm: true } });
+    }
+  }, [isSidebarOpen, toggleSidebar, navigate, location.pathname]);
 
   const handleLogOut = useCallback(() => {
     setShowLogoutConfirmation(true);
@@ -57,61 +71,90 @@ const Sidebar = ({
   const navItems = useMemo(() => {
     const items = [
       { id: 1, icon: <House size={20} />, title: "Home", path: "/" },
-      isLoggedIn && {
-        id: 2,
-        icon: <LayoutList size={20} />,
-        title: "Products",
-        path: "/products",
-      },
-      { id: 3, icon: <Info size={20} />, title: "About", path: "/about" },
+      { id: 2, icon: <Info size={20} />, title: "About", path: "/about" },
       {
-        id: 4,
+        id: 3,
         icon: <UserRoundPen size={20} />,
         title: "Contact",
         path: "/contact",
       },
       {
-        id: 5,
+        id: 4,
         icon: <Heart size={20} />,
         title: "Favorites",
         path: "/favorites",
       },
       isLoggedIn && {
-        id: 6,
+        id: 5,
         icon: <UserRound size={20} />,
         title: "Profile",
         path: "/profile",
       },
-      isLoggedIn && {
-        id: 7,
-        icon: <BadgeIndianRupee size={20} />,
+    ];
+
+    // Add role-specific tab (only one)
+    if (user?.role === "PlatformAdmin") {
+      items.splice(1, 0, {
+        id: 6,
+        icon: <LayoutDashboard size={20} />,
+        title: "Admin Dashboard",
+        path: "/admin/dashboard",
+      });
+    } else if (isLoggedInAsSeller && seller) {
+      items.splice(1, 0, {
+        id: 6,
+        icon: <Store size={20} />,
+        title: "Manage Products",
+        path: "/seller/dashboard",
+      });
+    } else if (!seller && !isLoggedInAsSeller) {
+      items.splice(1, 0, {
+        id: 6,
+        icon: <Store size={20} />,
         title: "Become a Seller",
         path: "/become-seller",
-      },
-      {
-        id: 8,
-        icon: isDark ? (
-          <Sun size={20} className="text-cyan-300" />
-        ) : (
-          <Moon size={20} />
-        ),
-        title: isDark ? "Light Mode" : "Dark Mode",
-        onClick: handleThemeToggle,
-        className: "md:hidden",
-      },
-      {
-        id: 9,
-        icon: <LogOut size={20} />,
-        title: isLoggedIn ? "Log Out" : "Login/Register",
-        onClick: isLoggedIn ? handleLogOut : handleLogin,
-        className: "md:hidden",
-        path: isLoggedIn ? null : "/registration",
-      },
-    ];
+      });
+    } else {
+      items.splice(1, 0, {
+        id: 6,
+        icon: <Store size={20} />,
+        title: "Login as Seller",
+        path: "/become-seller",
+      });
+    }
+
+    items.push({
+      id: 7,
+      icon: isDark ? (
+        <Sun size={20} className="text-cyan-300" />
+      ) : (
+        <Moon size={20} />
+      ),
+      title: isDark ? "Light Mode" : "Dark Mode",
+      onClick: handleThemeToggle,
+      className: "md:hidden",
+    });
+    items.push({
+      id: 8,
+      icon: <LogOut size={20} />,
+      title: isLoggedIn ? "Log Out" : "Login/Register",
+      onClick: isLoggedIn ? handleLogOut : handleLogin,
+      className: "md:hidden",
+      path: isLoggedIn ? null : "/registration",
+    });
 
     // Filter out falsy values like 'false' from isLoggedIn && {...}
     return items.filter(Boolean);
-  }, [isDark, handleThemeToggle, handleLogOut, isLoggedIn, handleLogin]);
+  }, [
+    isDark,
+    handleThemeToggle,
+    handleLogOut,
+    isLoggedIn,
+    handleLogin,
+    isLoggedInAsSeller,
+    seller,
+    user,
+  ]);
 
   return (
     <>

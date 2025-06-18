@@ -12,10 +12,11 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaApple, FaGoogle } from "react-icons/fa";
 import { toast } from "react-toastify";
 import useUserContext from "../context/User/useUserContext";
+import useScrollToElement from "../hooks/useScrollToElement";
 
 // Framer Motion variants
 const overlayVariants = {
@@ -79,21 +80,22 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const modalRef = useRef(null);
+
+  // Use custom hook for scrolling
+  const { ref: modalRef, scrollToElement } = useScrollToElement({
+    behavior: "smooth",
+    block: "center",
+  });
+
   const { login } = useUserContext();
 
   // Add effect to scroll the modal into view when it opens
   useEffect(() => {
-    if (isModalOpen && modalRef.current) {
-      // Small delay to ensure the modal is rendered before scrolling
-      setTimeout(() => {
-        modalRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }, 100);
+    if (isModalOpen) {
+      // Use the custom hook's scroll function
+      scrollToElement(100);
     }
-  }, [isModalOpen]);
+  }, [isModalOpen, scrollToElement]);
 
   const handleGoogleSignIn = () => {
     // Redirect to backend Google OAuth endpoint
@@ -131,7 +133,7 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
         // Use context login function
         const loginSuccess = await login(userData);
         if (loginSuccess) {
-        closeModal();
+          closeModal();
         }
       } else {
         userData = {

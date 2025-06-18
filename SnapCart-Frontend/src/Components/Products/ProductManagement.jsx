@@ -1,10 +1,11 @@
 import PropTypes from "prop-types";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useProductContext from "../../context/Product/useProductContext";
 import useSellerContext from "../../context/Seller/useSellerContext";
+import useScrollToElement from "../../hooks/useScrollToElement";
 import DeleteModal from "../Modals/DeleteModal";
 import DeleteSellerModal from "../Modals/Seller/DeleteSellerModal";
 import SellerNavbar from "../Navigation/SellerNavBar";
@@ -22,7 +23,12 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [isDeleteSellerModalOpen, setIsDeleteSellerModalOpen] = useState(false);
-  const productFormRef = useRef(null);
+
+  // Use custom hook for scrolling
+  const { ref: productFormRef, scrollToElement } = useScrollToElement({
+    behavior: "smooth",
+    block: "start",
+  });
 
   const navigate = useNavigate();
 
@@ -93,7 +99,7 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
   };
 
   const scrollToForm = () => {
-    productFormRef.current?.scrollIntoView({ behavior: "smooth" });
+    scrollToElement(100);
   };
 
   const handleEditClick = (product) => {

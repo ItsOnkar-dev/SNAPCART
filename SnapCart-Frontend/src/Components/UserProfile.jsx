@@ -20,7 +20,7 @@ import useUserContext from "../context/User/useUserContext";
 
 const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
   const { isLoggedIn, user } = useUserContext();
-  const { isLoggedInAsSeller } = useSellerContext();
+  const { isLoggedInAsSeller, seller } = useSellerContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
@@ -49,7 +49,7 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
       },
     ];
 
-    // Add role-specific tabs
+    // Add role-specific tab (only one)
     if (user?.role === "PlatformAdmin") {
       baseTabs.splice(1, 0, {
         id: 8,
@@ -57,26 +57,28 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
         icon: LayoutDashboard,
         path: "/admin/dashboard",
       });
-    } else if (user?.role === "Seller") {
-      // Only show Seller Dashboard if user is logged in as seller
-      if (isLoggedInAsSeller) {
-        baseTabs.splice(1, 0, {
-          id: 8,
-          label: "Seller Dashboard",
-          icon: Store,
-          path: "/seller/dashboard",
-        });
-      } else {
-        // If user has seller role but not logged in as seller, show Become Seller option
-        baseTabs.splice(1, 0, {
-          id: 8,
-          label: "Become a Seller",
-          icon: Store,
-          path: "/become-seller",
-        });
-      }
+    } else if (isLoggedInAsSeller && seller) {
+      baseTabs.splice(1, 0, {
+        id: 8,
+        label: "Manage Products",
+        icon: Store,
+        path: "/seller/dashboard",
+      });
+    } else if (!seller && !isLoggedInAsSeller) {
+      baseTabs.splice(1, 0, {
+        id: 8,
+        label: "Become a Seller",
+        icon: Store,
+        path: "/become-seller",
+      });
+    } else {
+      baseTabs.splice(1, 0, {
+        id: 8,
+        label: "Login as Seller",
+        icon: Store,
+        path: "/become-seller",
+      });
     }
-
     return baseTabs;
   };
 
@@ -89,7 +91,6 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
     setActiveTab(location.pathname);
   }, [location.pathname]);
 
-  // Control visibility for smooth transitions
   useEffect(() => {
     if (isOpen && !showLogoutConfirmation) {
       setTimeout(() => setIsVisible(true), 10);
@@ -232,8 +233,8 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
               </p>
               <p className="text-sm font-medium text-cyan-600 dark:text-cyan-400 mt-1">
                 {userData.role === "PlatformAdmin"
-                  ? "Platform Admin"
-                  : userData.role === "Seller"
+                  ? "Admin"
+                  : isLoggedInAsSeller === "Seller"
                   ? "Seller"
                   : "Customer"}
               </p>

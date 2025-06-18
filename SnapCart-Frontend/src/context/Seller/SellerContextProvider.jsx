@@ -135,6 +135,14 @@ const SellerContextProvider = ({ children }) => {
         toast.success(
           response.data.message || "Seller account created successfully!"
         );
+        setTimeout(() => {
+          toast.info(
+            "You are now a seller! You can manage your products from your userprofile menu.",
+            {
+              autoClose: 5000,
+            }
+          );
+        }, 200);
         return response.data.data;
       } else {
         throw new Error(
