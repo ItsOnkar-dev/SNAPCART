@@ -1,14 +1,14 @@
-import express from "express";
 import bcrypt from "bcrypt"; // A library to help you hash passwords.
-import { validationResult } from "express-validator";
-import rateLimit from "express-rate-limit";
-import UserRepo from "../Repositories/UserRepo.js";
-import catchAsync from "../Core/catchAsync.js";
-import { AuthenticationError, BadRequestError } from "../Core/ApiError.js";
-import passport from "../Config/passport-setup.js"
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { registerAuthValidator, loginAuthValidator } from '../Validators/authValidator.js';
+import express from "express";
+import rateLimit from "express-rate-limit";
+import { validationResult } from "express-validator";
+import jwt from "jsonwebtoken";
+import passport from "../Config/passport-setup.js";
+import { AuthenticationError, BadRequestError } from "../Core/ApiError.js";
+import catchAsync from "../Core/catchAsync.js";
+import UserRepo from "../Repositories/UserRepo.js";
+import { loginAuthValidator, registerAuthValidator } from '../Validators/authValidator.js';
 
 dotenv.config();
 
