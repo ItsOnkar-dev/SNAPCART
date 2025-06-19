@@ -86,6 +86,11 @@ const AdminDashboard = () => {
     }
   };
 
+  const allUsers = [
+    ...buyers,
+    ...(user && user.role === "PlatformAdmin" ? [user] : []),
+  ];
+
   return (
     <div className="block mx-auto px-6 md:px-10 py-24">
       <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
@@ -239,6 +244,7 @@ const AdminDashboard = () => {
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b dark:border-gray-700">
+                  <th className="py-2 px-3 text-left">#</th>
                   <th className="py-2 px-3 text-left">Product Name</th>
                   <th className="py-2 px-3 text-left">Price</th>
                   <th className="py-2 px-3 text-left">Seller</th>
@@ -247,11 +253,12 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {products.map((product) => (
+                {products.map((product, idx) => (
                   <tr
                     key={product._id}
                     className="border-b dark:border-gray-700"
                   >
+                    <td className="py-2 px-3">{idx + 1}</td>
                     <td className="py-2 px-3">{product.title}</td>
                     <td className="py-2 px-3">₹{product.price}</td>
                     <td className="py-2 px-3">
@@ -290,17 +297,19 @@ const AdminDashboard = () => {
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b dark:border-gray-700">
+                    <th className="py-2 px-3 text-left">#</th>
                     <th className="py-2 px-3 text-left">Username</th>
                     <th className="py-2 px-3 text-left">Email</th>
                     <th className="py-2 px-3 text-left">Role</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {buyers.map((user) => (
+                  {allUsers.map((user, idx) => (
                     <tr
                       key={user._id}
                       className="border-b dark:border-gray-700"
                     >
+                      <td className="py-2 px-3">{idx + 1}</td>
                       <td className="py-2 px-3">{user.username}</td>
                       <td className="py-2 px-3">{user.email}</td>
                       <td className="py-2 px-3">{user.role}</td>
@@ -321,17 +330,19 @@ const AdminDashboard = () => {
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b dark:border-gray-700">
+                    <th className="py-2 px-3 text-left">#</th>
                     <th className="py-2 px-3 text-left">Username</th>
                     <th className="py-2 px-3 text-left">Email</th>
                     <th className="py-2 px-3 text-left">Role</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sellers.map((seller) => (
+                  {sellers.map((seller, idx) => (
                     <tr
                       key={seller._id}
                       className="border-b dark:border-gray-700"
                     >
+                      <td className="py-2 px-3">{idx + 1}</td>
                       <td className="py-2 px-3">{seller.username}</td>
                       <td className="py-2 px-3">{seller.email}</td>
                       <td className="py-2 px-3">{seller.role}</td>

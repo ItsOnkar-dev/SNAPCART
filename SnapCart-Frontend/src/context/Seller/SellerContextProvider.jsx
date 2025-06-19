@@ -142,7 +142,7 @@ const SellerContextProvider = ({ children }) => {
               autoClose: 5000,
             }
           );
-        }, 200);
+        }, 400);
         return response.data.data;
       } else {
         throw new Error(
@@ -286,6 +286,7 @@ const SellerContextProvider = ({ children }) => {
         isSellerLoading,
         errors,
         loginSeller,
+        isSellerLoggedOut,
         createSeller,
         checkSellerEmail,
         hasCheckedSellerStatus,

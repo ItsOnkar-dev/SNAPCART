@@ -20,69 +20,71 @@ import useUserContext from "../context/User/useUserContext";
 
 const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
   const { isLoggedIn, user } = useUserContext();
-  const { isLoggedInAsSeller, seller } = useSellerContext();
+  const { isLoggedInAsSeller, seller, isSellerLoggedOut } = useSellerContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
-  const getTabs = () => {
-    const baseTabs = [
-      { id: 1, label: "My Profile", icon: User, path: "/profile" },
-      { id: 2, label: "Orders", icon: Package, path: "/orders" },
-      { id: 3, label: "Wishlist", icon: Heart, path: "/wishlist" },
-      { id: 4, label: "Payment", icon: CreditCard, path: "/payment" },
-      { id: 5, label: "Settings", icon: Settings, path: "/settings" },
-      {
-        id: 6,
-        label: isDark ? "Light Mode" : "Dark Mode",
-        icon: isDark ? Sun : Moon,
-        onClick: handleThemeToggle,
-        path: null,
-      },
-      {
-        id: 7,
-        label: "Log Out",
-        icon: LogOut,
-        onClick: () => setShowLogoutConfirmation(true),
-        path: null,
-      },
-    ];
+  const profileTabs = [
+    { id: 1, label: "My Profile", icon: <User />, path: "/profile" },
+    { id: 2, label: "Orders", icon: <Package />, path: "/orders" },
+    { id: 3, label: "Wishlist", icon: <Heart />, path: "/wishlist" },
+    { id: 4, label: "Payment", icon: <CreditCard />, path: "/payment" },
+    { id: 5, label: "Settings", icon: <Settings />, path: "/settings" },
+  ];
 
-    // Add role-specific tab (only one)
-    if (user?.role === "PlatformAdmin") {
-      baseTabs.splice(1, 0, {
+  let tabs = profileTabs;
+
+  if (user?.role === "PlatformAdmin") {
+    tabs = [
+      ...profileTabs.slice(0, 1),
+      {
         id: 8,
         label: "Admin Dashboard",
-        icon: LayoutDashboard,
+        icon: <LayoutDashboard />,
         path: "/admin/dashboard",
-      });
-    } else if (isLoggedInAsSeller && seller) {
-      baseTabs.splice(1, 0, {
+      },
+      ...profileTabs.slice(1),
+    ];
+  } else if (isLoggedInAsSeller && seller) {
+    tabs = [
+      ...profileTabs.slice(0, 1),
+      {
         id: 8,
         label: "Manage Products",
-        icon: Store,
+        icon: <Store />,
         path: "/seller/dashboard",
-      });
-    } else if (!seller && !isLoggedInAsSeller) {
-      baseTabs.splice(1, 0, {
-        id: 8,
-        label: "Become a Seller",
-        icon: Store,
-        path: "/become-seller",
-      });
-    } else {
-      baseTabs.splice(1, 0, {
+      },
+      ...profileTabs.slice(1),
+    ];
+  } else if (isSellerLoggedOut) {
+    tabs = [
+      ...profileTabs.slice(0, 1),
+      {
         id: 8,
         label: "Login as Seller",
-        icon: Store,
+        icon: <Store />,
         path: "/become-seller",
-      });
-    }
-    return baseTabs;
-  };
+      },
+      ...profileTabs.slice(1),
+    ];
+  }
 
-  const tabs = getTabs();
+  tabs.push({
+    id: 6,
+    label: isDark ? "Light Mode" : "Dark Mode",
+    icon: isDark ? <Sun /> : <Moon />,
+    onClick: handleThemeToggle,
+    path: null,
+  });
+  tabs.push({
+    id: 7,
+    label: "Log Out",
+    icon: <LogOut />,
+    onClick: () => setShowLogoutConfirmation(true),
+    path: null,
+  });
 
   const [activeTab, setActiveTab] = useState(location.pathname);
 
@@ -183,7 +185,7 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
     <>
       {/* Main Profile Modal */}
       <div className={modalClasses}>
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-md w-full px-6 py-10 transform transition-transform duration-300 ease-in-out">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-md h-auto w-full px-6 py-8 transform transition-transform duration-300 ease-in-out">
           {/* Modal Header */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-800 dark:text-white">
@@ -234,7 +236,7 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
               <p className="text-sm font-medium text-cyan-600 dark:text-cyan-400 mt-1">
                 {userData.role === "PlatformAdmin"
                   ? "Admin"
-                  : isLoggedInAsSeller === "Seller"
+                  : userData.role === "Seller" && isLoggedInAsSeller
                   ? "Seller"
                   : "Customer"}
               </p>
@@ -244,7 +246,7 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
           <div className="border-b-2 border-gray-200 dark:border-gray-700"></div>
 
           {/* Navigation Tabs */}
-          <div className="space-y-2 pt-4">
+          <div className="space-y-1 pt-4">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -255,7 +257,7 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
                     : ""
                 }`}
               >
-                <tab.icon size={18} />
+                {tab.icon}
                 <span>{tab.label}</span>
               </button>
             ))}

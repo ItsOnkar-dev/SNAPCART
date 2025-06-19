@@ -34,9 +34,6 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
           console.log(
             "User is already a seller and logged in, redirecting to product management"
           );
-          // Add a small delay to ensure state is stable
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          toast.info("You are already registered as a seller!");
           navigate("/seller/dashboard", { replace: true });
         }
       }
@@ -193,7 +190,7 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
               profit. Reach millions of customers and scale your business with
               our powerful selling tools.
             </p>
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8  flex sm:hidden justify-center">
               <div className="inline-flex rounded-md shadow">
                 <button
                   onClick={

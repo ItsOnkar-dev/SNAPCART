@@ -36,7 +36,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const location = useLocation();
   const cartContext = useCartContext();
   const { user, isLoggedIn } = useUserContext();
-  const { seller, isLoggedInAsSeller } = useSellerContext();
+  const { seller, isLoggedInAsSeller, isSellerLoggedOut } = useSellerContext();
 
   // Update displayName whenever user data changes
   useEffect(() => {
@@ -164,7 +164,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             <SearchBar />
 
             {/* Become a Seller */}
-            {isLoggedIn && !isLoggedInAsSeller && (
+            {isLoggedIn && !isLoggedInAsSeller && !isSellerLoggedOut && (
               <div
                 className={"hidden sm:block text-sm lg:text-base"}
                 onClick={handleIsLoggedIn}
@@ -225,15 +225,15 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             </NavLink>
 
             <span
-              className={`rounded-full transition-transform duration-700 ease-in-ou cursor-pointer ${
+              className={`rounded-full transition-transform duration-700 ease-in-ou cursor-pointer p-1.5 bg-gray-200 dark:bg-slate-700 ${
                 isDark ? "rotate-90" : "rotate-0"
               }`}
               onClick={handleThemeToggle}
             >
               {isDark ? (
-                <Sun size={22} className="text-cyan-300 hover:text-cyan-400" />
+                <Sun size={20} className="text-cyan-300 hover:text-cyan-400" />
               ) : (
-                <Moon size={22} className=" text-black/60 hover:text-black " />
+                <Moon size={20} className=" text-black/60 hover:text-black " />
               )}
             </span>
 

@@ -32,7 +32,7 @@ const Sidebar = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoggedIn, user } = useUserContext();
-  const { isLoggedInAsSeller, seller } = useSellerContext();
+  const { isLoggedInAsSeller, seller, isSellerLoggedOut } = useSellerContext();
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
   const handleLogin = useCallback(() => {
@@ -69,7 +69,7 @@ const Sidebar = ({
   }, [navigate, isSidebarOpen, toggleSidebar]);
 
   const navItems = useMemo(() => {
-    const items = [
+    let items = [
       { id: 1, icon: <House size={20} />, title: "Home", path: "/" },
       { id: 2, icon: <Info size={20} />, title: "About", path: "/about" },
       {
@@ -84,42 +84,50 @@ const Sidebar = ({
         title: "Favorites",
         path: "/favorites",
       },
-      isLoggedIn && {
-        id: 5,
-        icon: <UserRound size={20} />,
-        title: "Profile",
-        path: "/profile",
-      },
     ];
 
     // Add role-specific tab (only one)
     if (user?.role === "PlatformAdmin") {
-      items.splice(1, 0, {
-        id: 6,
-        icon: <LayoutDashboard size={20} />,
-        title: "Admin Dashboard",
-        path: "/admin/dashboard",
-      });
+      items = [
+        ...items.slice(0, 1),
+        {
+          id: 6,
+          icon: <LayoutDashboard size={20} />,
+          title: "Admin Dashboard",
+          path: "/admin/dashboard",
+        },
+        ...items.slice(1),
+      ];
     } else if (isLoggedInAsSeller && seller) {
-      items.splice(1, 0, {
-        id: 6,
-        icon: <Store size={20} />,
-        title: "Manage Products",
-        path: "/seller/dashboard",
-      });
-    } else if (!seller && !isLoggedInAsSeller) {
-      items.splice(1, 0, {
-        id: 6,
-        icon: <Store size={20} />,
-        title: "Become a Seller",
-        path: "/become-seller",
-      });
-    } else {
-      items.splice(1, 0, {
-        id: 6,
-        icon: <Store size={20} />,
-        title: "Login as Seller",
-        path: "/become-seller",
+      items = [
+        ...items.slice(0, 1),
+        {
+          id: 6,
+          icon: <Store size={20} />,
+          title: "Manage Products",
+          path: "/seller/dashboard",
+        },
+        ...items.slice(1),
+      ];
+    } else if (isSellerLoggedOut) {
+      items = [
+        ...items.slice(0, 1),
+        {
+          id: 6,
+          icon: <Store size={20} />,
+          title: "Login as Seller",
+          path: "/become-seller",
+        },
+        ...items.slice(1),
+      ];
+    }
+
+    if (isLoggedIn) {
+      items.push({
+        id: 5,
+        icon: <UserRound size={20} />,
+        title: "Profile",
+        path: "/profile",
       });
     }
 
@@ -143,8 +151,7 @@ const Sidebar = ({
       path: isLoggedIn ? null : "/registration",
     });
 
-    // Filter out falsy values like 'false' from isLoggedIn && {...}
-    return items.filter(Boolean);
+    return items;
   }, [
     isDark,
     handleThemeToggle,
@@ -152,6 +159,7 @@ const Sidebar = ({
     isLoggedIn,
     handleLogin,
     isLoggedInAsSeller,
+    isSellerLoggedOut,
     seller,
     user,
   ]);
