@@ -7,8 +7,11 @@ import { isLoggedIn } from '../Middlewares/Auth.js'
 import Product from '../Models/Product.js'
 import Seller from '../Models/Seller.js'
 import { createProductValidator, updateProductValidator } from '../Validators/productValidator.js'
+import Review from '../Models/Reviews.js'
 
 const router = express.Router(); // Creates a new instance of an Express Router. The Router in Express is like a mini Express application that you can use to handle routes separately instead of defining all routes in server.js.
+
+// Product.sellerId must always reference the User _id, not Seller _id, for correct population and username display.
 
 // Utility for standardized API responses
 const sendResponse = (res, { status = 'success', statusCode = 200, message = '', data = null, errors = null }) => {
@@ -21,7 +24,7 @@ const sendResponse = (res, { status = 'success', statusCode = 200, message = '',
 // Get All products (public)
 router.get('/products', catchAsync(async(req, res) => {
   Logger.info("Fetch all products request received")
-  const products = await Product.find({}).lean()
+  const products = await Product.find({}).populate('sellerId', 'username').lean();
   if (!products || products.length === 0) throw NotFoundError('Products not found');
   return sendResponse(res, { message: 'Fetched all the products successfully', data: products });
 }));
@@ -36,7 +39,7 @@ router.get('/my-products', isLoggedIn, catchAsync(async(req, res) => {
     throw AuthenticationError("You need to create a seller profile first");
   }
 
-  // Use seller._id instead of req.userId to find products
+  // Use seller._id to find products
   const products = await Product.find({ sellerId: seller._id }).lean();
   return sendResponse(res, { message: 'Fetched your products successfully', data: products });
 }));
@@ -68,7 +71,7 @@ router.post('/products', isLoggedIn, createProductValidator, (req, res, next) =>
       description, 
       image, 
       price: parseFloat(price),
-      sellerId: seller._id // Use seller._id instead of req.userId
+      sellerId: seller._id // Use Seller's _id
     }
   );
 
@@ -82,7 +85,7 @@ router.route('/products/:productId')
 .get(catchAsync(async(req, res) => {
   Logger.info("Show the product request received")
   const { productId } = req.params;
-  const product = await Product.findById(productId).lean();
+  const product = await Product.findById(productId).populate('sellerId', 'username').lean();
 
   if (!product) throw NotFoundError('Product not found');
 
@@ -148,6 +151,11 @@ router.route('/products/:productId')
   // Then check if user owns the product using seller._id
   if (productExists.sellerId.toString() !== seller._id.toString()) {
     throw AuthorizationError('You do not have permission to delete this product');
+  }
+
+  // Delete all reviews associated with this product
+  if (productExists.reviews && productExists.reviews.length > 0) {
+    await Review.deleteMany({ _id: { $in: productExists.reviews } });
   }
 
   // Now delete the product

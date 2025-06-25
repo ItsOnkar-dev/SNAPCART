@@ -19,9 +19,13 @@ const ProductSchema = new mongoose.Schema({
   },
   sellerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Seller',
     required: [true, 'Seller ID is required']
-  }
+  },
+  reviews: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Review'
+  }]
 }, {
   versionKey: false,
   timestamps: true

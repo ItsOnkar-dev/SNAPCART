@@ -10,6 +10,7 @@ import authRoutes from './Routes/auth.js'
 import productRoutes from './Routes/products.js'
 import sellerRoutes from './Routes/sellers.js'
 import userRoutes from './Routes/users.js'
+import reviewRoutes from './Routes/review.js'
 
 const app = express()
 
@@ -45,6 +46,7 @@ const globalLimiter = rateLimit({
 app.use(globalLimiter)
 
 app.use('/api', productRoutes) // Add product routes
+app.use('/api', reviewRoutes) // Add review routes
 app.use('/user', userRoutes) // Add user routes
 app.use('/auth', authRoutes) // Add auth routes
 app.use(sellerRoutes)
