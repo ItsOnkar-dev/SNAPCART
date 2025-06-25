@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   ArrowLeft,
   ChevronRight,
@@ -8,15 +9,15 @@ import {
   Plus,
   ShieldCheck,
   ShoppingCart,
-  Star,
   Truck,
   Twitter,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import Reviews from "../Components/Products/Reviews";
 import useCartContext from "../context/Cart/useCartContext";
 import useProductContext from "../context/Product/useProductContext";
-import useSellerContext from "../context/Seller/useSellerContext";
+import useUserContext from "../context/User/useUserContext";
 
 const ProductDetails = () => {
   const { productId } = useParams();
@@ -25,15 +26,47 @@ const ProductDetails = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [activeTab, setActiveTab] = useState("description");
+  const [reviewsCount, setReviewsCount] = useState(0);
 
   const { getProductById, loading, error, getRelatedProducts } =
     useProductContext();
   const { addToCart, wishlist, addToWishlist, removeFromWishlist } =
     useCartContext();
-  const { seller } = useSellerContext();
+  const { user, isLoggedIn } = useUserContext();
 
   // Get the product from context
   const product = getProductById(productId);
+
+  // Fetch full product details from backend for always-populated seller info
+  const [fullProduct, setFullProduct] = useState(null);
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8000/api/products/${productId}`
+        );
+        setFullProduct(res.data.data);
+      } catch {
+        setFullProduct(null);
+      }
+    };
+    if (productId) fetchProductDetails();
+  }, [productId]);
+
+  // Fetch reviews count separately
+  useEffect(() => {
+    const fetchReviewsCount = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8000/api/products/${productId}/reviews`
+        );
+        setReviewsCount(res.data.data?.length || 0);
+      } catch {
+        setReviewsCount(0);
+      }
+    };
+    if (productId) fetchReviewsCount();
+  }, [productId]);
 
   // Get related products
   const relatedProducts = getRelatedProducts(productId, 4);
@@ -49,7 +82,7 @@ const ProductDetails = () => {
   }, [wishlist, product]);
 
   const handleCardClick = (id) => {
-    navigate(`/products/${id}`); 
+    navigate(`/products/${id}`);
     window.scrollTo(0, 0);
   };
 
@@ -94,40 +127,10 @@ const ProductDetails = () => {
     navigate("/");
   };
 
-  // Mock data for reviews
-  const reviews = [
-    {
-      id: 1,
-      name: "Jane Smith",
-      rating: 5,
-      comment:
-        "Excellent product! Exactly as described and arrived well packaged. The quality exceeded my expectations and it's a perfect addition to my collection.",
-      date: "2 weeks ago",
-      avatar: "/api/placeholder/32/32",
-    },
-    {
-      id: 2,
-      name: "John Doe",
-      rating: 4,
-      comment:
-        "Good quality for the price. Shipping was faster than expected. One star off because the color was slightly different than in the photos.",
-      date: "1 month ago",
-      avatar: "/api/placeholder/32/32",
-    },
-    {
-      id: 3,
-      name: "Michelle Lee",
-      rating: 5,
-      comment:
-        "Perfect fit and looks great. Would recommend to anyone! Customer service was also very helpful when I had questions about sizing.",
-      date: "2 months ago",
-      avatar: "/api/placeholder/32/32",
-    },
-  ];
-
-  // Calculate average rating
-  const averageRating =
-    reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+  // Function to update reviews count when reviews change
+  const handleReviewsChange = (newCount) => {
+    setReviewsCount(newCount);
+  };
 
   if (loading) {
     return (
@@ -244,38 +247,20 @@ const ProductDetails = () => {
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
               {title}
             </h1>
-            {product.sellerId && (
+            {fullProduct && fullProduct.sellerId && (
               <p className="text-sm font-medium text-gray-600 dark:text-white/70">
                 Seller :{" "}
                 <span className="text-blue-600 dark:text-blue-400 font-bold">
-                  {seller.username}
+                  {typeof fullProduct.sellerId === "object" &&
+                  fullProduct.sellerId.username
+                    ? fullProduct.sellerId.username
+                    : "Unknown"}
                 </span>
               </p>
             )}
           </div>
 
-          {/* Ratings */}
-          <div className="flex items-center mb-4">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-5 h-5 ${
-                    i < Math.round(averageRating)
-                      ? "text-yellow-400 fill-yellow-400"
-                      : "text-gray-300 dark:text-gray-600"
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="ml-2 text-gray-600 dark:text-gray-300">
-              {averageRating.toFixed(1)}
-            </span>
-            <span className="mx-2 text-gray-400">•</span>
-            <span className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
-              {reviews.length} reviews
-            </span>
-          </div>
+          {/* Ratings are now handled in the Reviews component */}
 
           {/* Price */}
           <div className="mb-6">
@@ -463,7 +448,7 @@ const ProductDetails = () => {
               aria-selected={activeTab === "reviews"}
               aria-controls="tab-reviews"
             >
-              Reviews ({reviews.length})
+              Reviews ({reviewsCount})
             </button>
           </nav>
         </div>
@@ -480,13 +465,6 @@ const ProductDetails = () => {
               </h3>
               <div className="prose prose-lg max-w-none text-gray-700 dark:text-gray-300">
                 <p className="mb-4">{description}</p>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-                  euismod, velit vel bibendum bibendum, enim risus ultricies
-                  nisi, id aliquam magna lectus id nisi. Donec auctor, nunc vel
-                  ultricies ultricies, nisl velit aliquam magna, id aliquam
-                  magna lectus id nisi.
-                </p>
                 <div className="my-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800">
                     <h4 className="font-medium text-blue-800 dark:text-blue-400 mb-2">
@@ -659,122 +637,12 @@ const ProductDetails = () => {
           )}
 
           {activeTab === "reviews" && (
-            <div
-              id="tab-reviews"
-              role="tabpanel"
-              aria-labelledby="tab-reviews-tab"
-            >
-              <h3
-                className="text-xl font-semibold text-gray-900 dark:text-white mb-4"
-                id="reviews"
-              >
-                Customer Reviews
-              </h3>
-
-              {/* Review Summary */}
-              <div className="flex flex-col md:flex-row md:items-center mb-8 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                <div className="flex items-center mb-4 md:mb-0">
-                  <div className="flex-shrink-0 flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full mr-4">
-                    <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {averageRating.toFixed(1)}
-                    </span>
-                  </div>
-                  <div>
-                    <div className="flex mb-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-5 h-5 ${
-                            i < Math.round(averageRating)
-                              ? "text-yellow-400 fill-yellow-400"
-                              : "text-gray-300 dark:text-gray-600"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Based on {reviews.length} reviews
-                    </span>
-                  </div>
-                </div>
-                <div className="md:ml-auto">
-                  <button
-                    className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 shadow-sm"
-                    aria-label="Write a review"
-                  >
-                    Write a Review
-                  </button>
-                </div>
-              </div>
-
-              {/* Reviews List */}
-              <div className="space-y-6">
-                {reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="border-b border-gray-200 dark:border-gray-700 pb-6"
-                  >
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0 mr-4">
-                        <img
-                          src={review.avatar}
-                          alt={review.name}
-                          className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <h4 className="font-medium text-gray-900 dark:text-white">
-                            {review.name}
-                          </h4>
-                          <span className="text-sm text-gray-500 dark:text-gray-400">
-                            • {review.date}
-                          </span>
-                        </div>
-                        <div className="flex mb-2">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-4 h-4 ${
-                                i < review.rating
-                                  ? "text-yellow-400 fill-yellow-400"
-                                  : "text-gray-300 dark:text-gray-600"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <p className="text-gray-700 dark:text-gray-300">
-                          {review.comment}
-                        </p>
-
-                        <div className="flex items-center mt-3">
-                          <button className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
-                            <svg
-                              className="w-4 h-4 mr-1"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
-                              ></path>
-                            </svg>
-                            Helpful
-                          </button>
-                          <button className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 ml-4">
-                            Reply
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <Reviews
+              productId={productId}
+              isLoggedIn={isLoggedIn}
+              user={user}
+              onReviewsChange={handleReviewsChange}
+            />
           )}
         </div>
       </div>

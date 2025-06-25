@@ -1,27 +1,23 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import useUserContext from "../context/User/useUserContext";
 import "react-toastify/dist/ReactToastify.css";
 
-const PrivateRoute = ({ isAuthenticated }) => {
-  const [redirect, setRedirect] = useState(false);
+const PrivateRoute = () => {
+  const { isLoggedIn, isLoading } = useUserContext();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      toast.info("Please login/register to continue");
+  if (isLoading) {
+    // Optionally, show a loading spinner here
+    return null;
+  }
 
-      // Delay redirection slightly to allow toast to render
-      const timer = setTimeout(() => {
-        setRedirect(true);
-      }, 500); // You can tweak this time
+  if (!isLoggedIn) {
+    toast.info("Please login/register to continue");
+    return <Navigate to="/registration" replace />;
+  }
 
-      return () => clearTimeout(timer);
-    }
-  }, [isAuthenticated]);
-
-  if (redirect) return <Navigate to="/registration" replace />;
-  return isAuthenticated ? <Outlet /> : null;
+  return <Outlet />;
 };
 
 export default PrivateRoute;

@@ -192,14 +192,6 @@ const UserContextProvider = ({ children }) => {
       return;
     }
 
-    if (
-      !window.confirm(
-        "Are you sure you want to delete your account? This action is irreversible!"
-      )
-    ) {
-      return;
-    }
-
     try {
       const response = await axios.delete(
         "http://localhost:8000/user/delete-account",

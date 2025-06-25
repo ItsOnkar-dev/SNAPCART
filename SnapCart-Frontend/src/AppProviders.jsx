@@ -2,6 +2,7 @@
 import AdminContextProvider from "./context/Admin/AdminContextProvider";
 import CartContextProvider from "./context/Cart/CartContextProvider";
 import ProductContextProvider from "./context/Product/ProductContextProvider";
+import ReviewContextProvider from "./context/Review/ReviewContextProvider";
 import SellerContextProvider from "./context/Seller/SellerContextProvider";
 import UserContextProvider from "./context/User/UserContextProvider";
 
@@ -12,7 +13,9 @@ const AppProviders = ({ children }) => {
       <CartContextProvider>
         <SellerContextProvider>
           <ProductContextProvider>
-            <AdminContextProvider>{children}</AdminContextProvider>
+            <AdminContextProvider>
+              <ReviewContextProvider>{children}</ReviewContextProvider>
+            </AdminContextProvider>
           </ProductContextProvider>
         </SellerContextProvider>
       </CartContextProvider>
