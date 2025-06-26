@@ -20,12 +20,14 @@ import UserProfile from "../../Components/UserProfile";
 import useCartContext from "../../context/Cart/useCartContext";
 import useSellerContext from "../../context/Seller/useSellerContext";
 import useUserContext from "../../context/User/useUserContext";
+import LogOutModal from "../Modals/LogOutModal";
 import SearchBar from "../SearchBar";
 import Sidebar from "./Sidebar";
 
 const NavBar = ({ isDark, toggleDarkMode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const profileIconRef = useRef(null);
   const profileModalRef = useRef(null);
   const hoverTimeoutRef = useRef(null);
@@ -81,9 +83,11 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   };
 
   const handleProfileLeave = () => {
-    hoverTimeoutRef.current = setTimeout(() => {
-      setIsProfileModalOpen(false);
-    }, 200);
+    if (!showLogoutConfirmation) {
+      hoverTimeoutRef.current = setTimeout(() => {
+        setIsProfileModalOpen(false);
+      }, 200);
+    }
   };
 
   const handleIsLoggedIn = () => {
@@ -102,7 +106,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
   const styles = useMemo(
     () => ({
-      navbar: `fixed top-0 w-full p-4 md:px-10 z-30 transition-colors duration-300 bg-[rgb(255,255,255)] dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800`,
+      navbar: `fixed top-0 w-full p-4 md:px-10 z-30 transition-colors duration-300 border-b border-gray-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-lg shadow-lg`,
       authNavbar:
         "fixed w-full p-4 md:px-10 xl:px-32 z-30 transition-colors duration-300 bg-[rgba(255,255,255,0.5)] dark:bg-[rgba(10,18,49,0.5)] border-b border-gray-200 dark:border-slate-800 backdrop-blur-xl",
       itemsList:
@@ -130,6 +134,19 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
 
   // Check if avatar URL is valid
   const hasValidAvatar = userAvatar && userAvatar.trim() !== "";
+
+  // Add handlers for logout modal
+  const handleLogoutModalClose = () => {
+    setShowLogoutConfirmation(false);
+    // Make profile modal visible again if needed
+    if (isProfileModalOpen === false) {
+      setTimeout(() => setIsProfileModalOpen(true), 10);
+    }
+  };
+  const handleLogoutComplete = () => {
+    setShowLogoutConfirmation(false);
+    setIsProfileModalOpen(false);
+  };
 
   return (
     <>
@@ -287,6 +304,8 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                     onClose={() => setIsProfileModalOpen(false)}
                     isDark={isDark}
                     handleThemeToggle={handleThemeToggle}
+                    showLogoutConfirmation={showLogoutConfirmation}
+                    setShowLogoutConfirmation={setShowLogoutConfirmation}
                   />
                 )}
               </div>
@@ -326,6 +345,15 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
         handleThemeToggle={handleThemeToggle}
         isDark={isDark}
       />
+
+      {/* Logout Confirmation Dialog */}
+      {showLogoutConfirmation && (
+        <LogOutModal
+          isOpen={showLogoutConfirmation}
+          onClose={handleLogoutModalClose}
+          onLogoutComplete={handleLogoutComplete}
+        />
+      )}
     </>
   );
 };

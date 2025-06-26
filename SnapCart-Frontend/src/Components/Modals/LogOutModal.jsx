@@ -45,12 +45,12 @@ const LogOutModal = ({ isOpen, onClose, onLogoutComplete }) => {
 
   return (
     <div
-      className={`fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 transition-opacity duration-300 ${
+      className={`fixed inset-0 flex items-center justify-center z-[120] bg-black bg-opacity-50 transition-opacity duration-300 pointer-events-auto ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
     >
       <div
-        className={`bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-lg w-full px-10 py-8 transform transition-all duration-300 ease-in-out text-center relative ${
+        className={`bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-md mx-auto w-full px-10 py-8 transform transition-all duration-300 ease-in-out text-center relative ${
           isVisible ? "scale-100 translate-y-0" : "scale-95 -translate-y-4"
         }`}
       >

@@ -14,17 +14,22 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import LogOutModal from "../Components/Modals/LogOutModal";
 import useSellerContext from "../context/Seller/useSellerContext";
 import useUserContext from "../context/User/useUserContext";
 
-const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
+const UserProfile = ({
+  isOpen,
+  onClose,
+  isDark,
+  handleThemeToggle,
+  showLogoutConfirmation,
+  setShowLogoutConfirmation,
+}) => {
   const { isLoggedIn, user } = useUserContext();
   const { isLoggedInAsSeller, seller, isSellerLoggedOut } = useSellerContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
-  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
   const profileTabs = [
     { id: 1, label: "My Profile", icon: <User />, path: "/profile" },
@@ -264,15 +269,6 @@ const UserProfile = ({ isOpen, onClose, isDark, handleThemeToggle }) => {
           </div>
         </div>
       </div>
-
-      {/* Logout Confirmation Dialog */}
-      {showLogoutConfirmation && (
-        <LogOutModal
-          isOpen={showLogoutConfirmation}
-          onClose={handleLogoutModalClose}
-          onLogoutComplete={handleLogoutComplete}
-        />
-      )}
     </>
   );
 };
