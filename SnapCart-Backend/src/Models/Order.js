@@ -4,7 +4,8 @@ const orderSchema = new mongoose.Schema({
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'Customer ID is required']
+    required: [true, 'Customer ID is required'],
+    index: true
   },
   customerName: {
     type: String,

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -15,7 +15,8 @@ const userSchema = new mongoose.Schema({
     required: function () {
       // Only required if password is set (local account)
       return this.password ? true : false
-    }
+    },
+    index: true
   },
   password: {
     type: String,

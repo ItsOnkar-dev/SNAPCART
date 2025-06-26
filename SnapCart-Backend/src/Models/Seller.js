@@ -11,7 +11,8 @@ const sellerSchema = new mongoose.Schema({
     required: [true, 'Email is required'],
     unique: true,
     trim: true,
-    lowercase: true
+    lowercase: true,
+    index: true
   },
   phone: {
     type: String,
@@ -30,7 +31,8 @@ const sellerSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'User ID is required']
+    required: [true, 'User ID is required'],
+    index: true
   },
   createdAt: {
     type: Date,
