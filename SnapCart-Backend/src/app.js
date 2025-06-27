@@ -5,12 +5,12 @@ import rateLimit from 'express-rate-limit'
 import session from 'express-session'
 import helmet from 'helmet'
 import passport from './Config/passport-setup.js'
-import adminRoutes from './Routes/admin.js'
-import authRoutes from './Routes/auth.js'
-import productRoutes from './Routes/products.js'
-import reviewRoutes from './Routes/review.js'
-import sellerRoutes from './Routes/sellers.js'
-import userRoutes from './Routes/users.js'
+import adminRoutes from './RoutesTemp/admin.js'
+import authRoutes from './RoutesTemp/auth.js'
+import productRoutes from './RoutesTemp/products.js'
+import reviewRoutes from './RoutesTemp/review.js'
+import sellerRoutes from './RoutesTemp/sellers.js'
+import userRoutes from './RoutesTemp/users.js'
 
 const app = express()
 
