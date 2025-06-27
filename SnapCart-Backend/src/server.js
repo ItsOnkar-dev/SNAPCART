@@ -1,7 +1,7 @@
-import app from './app.js'
-import AppDataSource from './database/data-source.js'
-import Logger from './Config/Logger.js'
 import dotenv from 'dotenv';
+import app from './app.js';
+import Logger from './Config/Logger.js';
+import AppDataSource from './Database/data-source.js';
 
 dotenv.config();
 
