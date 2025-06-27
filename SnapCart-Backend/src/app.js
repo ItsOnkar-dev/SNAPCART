@@ -8,15 +8,19 @@ import passport from './Config/passport-setup.js'
 import adminRoutes from './Routes/admin.js'
 import authRoutes from './Routes/auth.js'
 import productRoutes from './Routes/products.js'
+import reviewRoutes from './Routes/review.js'
 import sellerRoutes from './Routes/sellers.js'
 import userRoutes from './Routes/users.js'
-import reviewRoutes from './Routes/review.js'
 
 const app = express()
 
 dotenv.config(); // Load environment variables from .env file
 
-app.use(cors()) // Enable CORS for all requests
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] ,
+  credentials: true
+})) 
 app.use(express.json()) // Parse incoming JSON requests
 app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
 

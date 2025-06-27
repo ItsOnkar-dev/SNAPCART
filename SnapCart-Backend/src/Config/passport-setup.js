@@ -1,8 +1,8 @@
+import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import dotenv from 'dotenv';
 import User from '../Models/User.js';
-import bcrypt from 'bcrypt';
 
 dotenv.config();
 
@@ -12,7 +12,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${process.env.API_URL || 'http://localhost:8000'}/auth/google/callback`,
+      callbackURL: `${process.env.BACKEND_URL}/auth/google/callback`,
       userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo',
       profileFields: ['id', 'displayName', 'photos', 'email']
     },

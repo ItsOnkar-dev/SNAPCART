@@ -136,10 +136,10 @@ router.get(
       const userData = encodeURIComponent(JSON.stringify(userWithoutPassword));
       
       // Redirect to frontend success page with token and user data
-      res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/oauth-success?token=${jwtToken}&userData=${userData}`);
+      res.redirect(`${process.env.FRONTEND_URL}/oauth-success?token=${jwtToken}&userData=${userData}`);
     } catch (error) {
       console.error("OAuth callback error:", error);
-      res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/registration?error=authentication_failed`);
+      res.redirect(`${process.env.FRONTEND_URL}/registration?error=authentication_failed`);
     }
   })
 );
