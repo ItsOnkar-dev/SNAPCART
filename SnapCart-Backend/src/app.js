@@ -1,3 +1,4 @@
+import MongoStore from 'connect-mongo'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import express from 'express'
@@ -29,6 +30,10 @@ app.use(session({
   secret: process.env.SESSION_SECRET_KEY || 'cdhbuebyewruflewbr6374fjkd',
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.DB_URL, 
+    collectionName: 'sessions'
+  }),
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     maxAge: 24 * 60 * 60 * 1000 // 1 day
