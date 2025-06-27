@@ -2,8 +2,8 @@ import bcrypt from "bcrypt"; // A library to help you hash passwords.
 import express from "express";
 import rateLimit from "express-rate-limit";
 import { validationResult } from 'express-validator';
-import { AuthenticationError, BadRequestError } from "../CoreTemp/ApiError.js";
-import catchAsync from "../CoreTemp/catchAsync.js";
+import { AuthenticationError, BadRequestError } from "../Core/ApiError.js";
+import catchAsync from "../Core/catchAsync.js";
 import { isLoggedIn } from "../Middlewares/Auth.js";
 import UserRepo from "../Repositories/UserRepo.js";
 import { updatePasswordValidator } from '../Validators/userValidator.js';

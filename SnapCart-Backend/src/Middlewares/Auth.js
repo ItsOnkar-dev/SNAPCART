@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
-import { AuthorizationError } from '../CoreTemp/ApiError.js'
+import { AuthorizationError } from '../Core/ApiError.js'
 
 dotenv.config()
 
