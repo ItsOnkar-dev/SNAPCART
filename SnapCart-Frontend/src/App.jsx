@@ -17,7 +17,7 @@ import Contact from "./Pages/Contact";
 import Home from "./Pages/Home";
 import ProductDetails from "./Pages/ProductDetails";
 import Profile from "./Pages/Profile";
-import WishList from "./Pages/WishList";
+import WishList from "./Pages/WishListTemp";
 import useUserContext from "./context/User/useUserContext";
 
 // Get initial theme from localStorage or system preference
