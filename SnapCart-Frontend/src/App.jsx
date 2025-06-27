@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useLayoutEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -41,7 +41,7 @@ const App = () => {
   const { isLoggedIn } = useUserContext();
 
   // Update theme in localStorage and document class
-  useEffect(() => {
+  useLayoutEffect(() => {
     localStorage.setItem("theme", isDark ? "dark" : "light");
     if (isDark) {
       document.documentElement.classList.add("dark");
