@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import ProductContext from "./ProductContext";
 
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 const ProductContextProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [sellerProducts, setSellerProducts] = useState([]);
@@ -13,7 +15,7 @@ const ProductContextProvider = ({ children }) => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:8000/api/products");
+      const res = await axios.get(`${API_BASE_URL}/api/products`);
       if (res.data && Array.isArray(res.data.data)) {
         setProducts(res.data.data);
         setError(null);
@@ -45,7 +47,7 @@ const ProductContextProvider = ({ children }) => {
       setLoading(true);
       console.log("Fetching seller products with token:", token);
       // Use the my-products endpoint which uses the token to identify the seller
-      const res = await axios.get("http://localhost:8000/api/my-products", {
+      const res = await axios.get(`${API_BASE_URL}/api/my-products`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -97,7 +99,7 @@ const ProductContextProvider = ({ children }) => {
     try {
       console.log("Adding product with data:", productData);
       const response = await axios.post(
-        "http://localhost:8000/api/products",
+        `${API_BASE_URL}/api/products`,
         productData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -147,7 +149,7 @@ const ProductContextProvider = ({ children }) => {
     try {
       console.log(`Updating product ${productId} with data:`, productData);
       const response = await axios.patch(
-        `http://localhost:8000/api/products/${productId}`,
+        `${API_BASE_URL}/api/products/${productId}`,
         {
           ...productData,
         },
@@ -186,7 +188,7 @@ const ProductContextProvider = ({ children }) => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:8000/api/products/${productId}`,
+        `${API_BASE_URL}/api/products/${productId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

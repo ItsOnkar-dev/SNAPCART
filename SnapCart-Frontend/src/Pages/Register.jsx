@@ -73,6 +73,8 @@ const styles = {
   formContainer: "p-6 space-y-4 bg-white dark:bg-slate-900 dark:text-white",
 };
 
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
   // Form states
   const [isLoading, setIsLoading] = useState(false);
@@ -99,7 +101,7 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
 
   const handleGoogleSignIn = () => {
     // Redirect to backend Google OAuth endpoint
-    window.location.href = "http://localhost:8000/auth/google";
+    window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
   const validateForm = () => {
@@ -144,7 +146,7 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
         };
 
         const response = await axios.post(
-          `http://localhost:8000/auth/register`,
+          `${API_BASE_URL}/auth/register`,
           userData
         );
         if (response.data.status === "success") {

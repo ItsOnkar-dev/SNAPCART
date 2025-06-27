@@ -19,6 +19,8 @@ import useCartContext from "../context/Cart/useCartContext";
 import useProductContext from "../context/Product/useProductContext";
 import useUserContext from "../context/User/useUserContext";
 
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 const ProductDetails = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
@@ -43,7 +45,7 @@ const ProductDetails = () => {
     const fetchProductDetails = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8000/api/products/${productId}`
+          `${API_BASE_URL}/api/products/${productId}`
         );
         setFullProduct(res.data.data);
       } catch {
@@ -58,7 +60,7 @@ const ProductDetails = () => {
     const fetchReviewsCount = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8000/api/products/${productId}/reviews`
+          `${API_BASE_URL}/api/products/${productId}/reviews`
         );
         setReviewsCount(res.data.data?.length || 0);
       } catch {

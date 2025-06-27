@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 import useUserContext from "../User/useUserContext";
 import AdminContext from "./AdminContext";
 
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 const AdminContextProvider = ({ children }) => {
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -18,7 +20,7 @@ const AdminContextProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { user, isLoading: userLoading } = useUserContext();
+  const { user } = useUserContext();
 
   const fetchDashboardData = async () => {
     try {
@@ -50,38 +52,32 @@ const AdminContextProvider = ({ children }) => {
         buyersResponse,
         productsResponse,
       ] = await Promise.all([
-        axios.get("http://localhost:8000/api/admin/stats", {
+        axios.get(`${API_BASE_URL}/api/admin/stats`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }),
-        axios.get("http://localhost:8000/api/admin/recent-orders", {
+        axios.get(`${API_BASE_URL}/api/admin/recent-orders`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }),
-        axios.get("http://localhost:8000/api/admin/sellers", {
+        axios.get(`${API_BASE_URL}/api/admin/sellers`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }),
-        axios.get("http://localhost:8000/api/admin/buyers", {
+        axios.get(`${API_BASE_URL}/api/admin/buyers`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }),
-        axios.get("http://localhost:8000/api/admin/products", {
+        axios.get(`${API_BASE_URL}/api/admin/products`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }),
       ]);
-
-      console.log("[AdminContext] Stats response:", statsResponse.data);
-      console.log("[AdminContext] Orders response:", ordersResponse.data);
-      console.log("[AdminContext] Sellers response:", sellersResponse.data);
-      console.log("[AdminContext] Buyers response:", buyersResponse.data);
-      console.log("[AdminContext] Products response:", productsResponse.data);
 
       if (
         statsResponse.data.status === "success" &&
@@ -125,7 +121,7 @@ const AdminContextProvider = ({ children }) => {
       }
 
       const response = await axios.patch(
-        `http://localhost:8000/api/admin/orders/${orderId}/status`,
+        `${API_BASE_URL}/api/admin/orders/${orderId}/status`,
         { status: newStatus },
         {
           headers: { Authorization: `Bearer ${token}` },

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import UserContext from "./UserContext";
 
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 const UserContextProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
@@ -23,7 +25,7 @@ const UserContextProvider = ({ children }) => {
 
     try {
       console.log("[UserContext] Making API call to fetch user profile");
-      const response = await axios.get("http://localhost:8000/user/profile", {
+      const response = await axios.get(`${API_BASE_URL}/user/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -76,7 +78,7 @@ const UserContextProvider = ({ children }) => {
         username: userCredentials.username,
       });
       const response = await axios.post(
-        "http://localhost:8000/auth/login",
+        `${API_BASE_URL}/auth/login`,
         userCredentials
       );
 
@@ -155,7 +157,7 @@ const UserContextProvider = ({ children }) => {
 
     try {
       const response = await axios.put(
-        "http://localhost:8000/user/update-password",
+        `${API_BASE_URL}/user/update-password`,
         { currentPassword, newPassword },
         {
           headers: {
@@ -194,11 +196,11 @@ const UserContextProvider = ({ children }) => {
 
     try {
       const response = await axios.delete(
-        "http://localhost:8000/user/delete-account",
+        `${API_BASE_URL}/user/delete-account`,
         {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       window.localStorage.removeItem("token");
@@ -221,15 +223,12 @@ const UserContextProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.get(
-        "http://localhost:8000/user/download-data",
-        {
+      const response = await axios.get(`${API_BASE_URL}/user/download-data`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
         responseType: "blob",
-        }
-      );
+      });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;

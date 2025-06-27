@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import SellerContext from "./SellerContext";
 
 const SellerContextProvider = ({ children }) => {
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
   const [seller, setSeller] = useState(null);
   const [isSellerLoading, setIsSellerLoading] = useState(true);
   const [errors, setErrors] = useState({});
@@ -14,8 +15,6 @@ const SellerContextProvider = ({ children }) => {
     // Initialize from localStorage
     return localStorage.getItem("isSellerLoggedOut") === "true";
   });
-
-  const API_BASE_URL = "http://localhost:8000";
 
   // Try to fetch current seller if user is logged in
   const fetchSellerData = async () => {

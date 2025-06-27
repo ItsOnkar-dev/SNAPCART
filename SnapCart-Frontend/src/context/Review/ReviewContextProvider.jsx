@@ -4,6 +4,8 @@ import { useCallback, useState } from "react";
 import { toast } from "react-toastify";
 import ReviewContext from "./ReviewContext";
 
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 const ReviewContextProvider = ({ productId, isLoggedIn, children }) => {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
@@ -22,7 +24,7 @@ const ReviewContextProvider = ({ productId, isLoggedIn, children }) => {
     setReviewsLoading(true);
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/products/${productId}/reviews`
+        `${API_BASE_URL}/api/products/${productId}/reviews`
       );
       setReviews(res.data.data || []);
     } catch {
@@ -39,7 +41,7 @@ const ReviewContextProvider = ({ productId, isLoggedIn, children }) => {
     try {
       const token = window.localStorage.getItem("token");
       await axios.post(
-        `http://localhost:8000/api/products/${productId}/reviews`,
+        `${API_BASE_URL}/api/products/${productId}/reviews`,
         { rating: reviewRating, review: reviewText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -63,7 +65,7 @@ const ReviewContextProvider = ({ productId, isLoggedIn, children }) => {
     try {
       const token = window.localStorage.getItem("token");
       await axios.delete(
-        `http://localhost:8000/api/products/${productId}/reviews/${reviewId}`,
+        `${API_BASE_URL}/api/products/${productId}/reviews/${reviewId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchReviews();
@@ -101,7 +103,7 @@ const ReviewContextProvider = ({ productId, isLoggedIn, children }) => {
     try {
       const token = window.localStorage.getItem("token");
       await axios.patch(
-        `http://localhost:8000/api/products/${productId}/reviews/${editReviewId}`,
+        `${API_BASE_URL}/api/products/${productId}/reviews/${editReviewId}`,
         { rating: editReviewRating, review: editReviewText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
