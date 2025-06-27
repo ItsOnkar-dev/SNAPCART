@@ -5,8 +5,8 @@ import rateLimit from "express-rate-limit";
 import { validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import passport from "../Config/passport-setup.js";
-import { AuthenticationError, BadRequestError } from "../Core/ApiError.js";
-import catchAsync from "../Core/catchAsync.js";
+import { AuthenticationError, BadRequestError } from "../CoreTemp/ApiError.js";
+import catchAsync from "../CoreTemp/catchAsync.js";
 import UserRepo from "../Repositories/UserRepo.js";
 import { loginAuthValidator, registerAuthValidator } from '../Validators/authValidator.js';
 

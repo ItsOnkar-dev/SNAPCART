@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import express from 'express';
-import { BadRequestError } from '../Core/ApiError.js';
-import catchAsync from '../Core/catchAsync.js';
+import { BadRequestError } from '../CoreTemp/ApiError.js';
+import catchAsync from '../CoreTemp/catchAsync.js';
 import { isLoggedIn, restrictTo } from '../Middlewares/Auth.js';
 import Order from '../Models/Order.js';
 import Product from '../Models/Product.js';
