@@ -17,8 +17,10 @@ const app = express()
 
 dotenv.config(); // Load environment variables from .env file
 
+const allowedOrigins = process.env.FRONTEND_URL.split(',');
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] ,
   credentials: true
 })) 
