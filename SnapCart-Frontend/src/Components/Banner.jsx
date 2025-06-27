@@ -1,13 +1,12 @@
-
-import { Carousel } from "react-responsive-carousel"
-import "react-responsive-carousel/lib/styles/carousel.min.css"
-import Joggers from "../assets/joggers.webp"
-import SummerShirts from "../assets/Summer-Shirts.webp"
-import Shoes from "../assets/Shoes.webp"
-import Perfume from "../assets/Perfume.webp"
-import SummerSkirts from "../assets/girl_summer.webp"
-import socks from "../assets/socks.webp"
-import Backpack from "../assets/Backpack.webp"
+import { Carousel } from "react-responsive-carousel";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+import Backpack from "../assets/Backpack.webp";
+import SummerSkirts from "../assets/girl_summer.webp";
+import Joggers from "../assets/joggers.webp";
+import Perfume from "../assets/Perfume.webp";
+import Shoes from "../assets/Shoes.webp";
+import socks from "../assets/Socks.webp";
+import SummerShirts from "../assets/Summer-Shirts.webp";
 
 const Banner = () => {
   const images = [
@@ -46,7 +45,7 @@ const Banner = () => {
       src: Backpack,
       alt: "Backpacks",
     },
-  ]
+  ];
 
   return (
     <div className="block w-full mx-auto md:px-4 relative cursor-pointer">
@@ -77,7 +76,11 @@ const Banner = () => {
                 stroke="currentColor"
                 className="w-6 h-6"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 19.5L8.25 12l7.5-7.5"
+                />
               </svg>
             </button>
           )
@@ -98,7 +101,11 @@ const Banner = () => {
                 stroke="currentColor"
                 className="w-6 h-6"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                />
               </svg>
             </button>
           )
@@ -106,13 +113,16 @@ const Banner = () => {
       >
         {images.map((image) => (
           <div key={image.id} className="h-[50vh] sm:h-[70vh]">
-            <img src={image.src} alt={image.alt} className="object-cover w-full h-full" />
+            <img
+              src={image.src}
+              alt={image.alt}
+              className="object-cover w-full h-full"
+            />
           </div>
         ))}
       </Carousel>
     </div>
-  )
-}
+  );
+};
 
-export default Banner
-
+export default Banner;
