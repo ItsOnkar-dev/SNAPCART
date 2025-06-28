@@ -172,7 +172,7 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
     <AnimatePresence>
       {isModalOpen && (
         <motion.div
-          className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4 md:mt-24"
+          className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-2 md:mt-24"
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -384,7 +384,7 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
                   <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
                     Or continue with
                   </div>
-                  <div className="flex items-center justify-center space-x-2">
+                  <div className="flex  items-center before  justify-center space-x-5">
                     <button
                       type="button"
                       className={styles.socialButton}
