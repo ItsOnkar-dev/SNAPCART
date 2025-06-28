@@ -45,6 +45,42 @@ router.get("/test", (req, res) => {
   return sendResponse(res, { message: "Auth server is working", data: { timestamp: new Date().toISOString() } });
 });
 
+// Test OAuth route to simulate successful authentication
+router.get("/test-oauth", (req, res) => {
+  try {
+    // Create a test user object
+    const testUser = {
+      _id: "test_user_id",
+      username: "test_oauth_user",
+      email: "test@example.com",
+      role: "Buyer",
+      name: "Test OAuth User",
+      googleId: "test_google_id",
+      isOAuthUser: true
+    };
+
+    // Generate JWT token
+    const jwtToken = jwt.sign({ userId: testUser._id, role: testUser.role }, JWT_SECRET_KEY, { expiresIn: "24h" });
+
+    // Remove sensitive information
+    const { password, ...userWithoutPassword } = testUser;
+    
+    // Create a URL-safe JSON string of user data
+    const userData = encodeURIComponent(JSON.stringify(userWithoutPassword));
+    
+    // Get the first frontend URL from the comma-separated list
+    const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',')[0].trim() : 'http://localhost:5173';
+    
+    console.log("Test OAuth redirecting to:", `${frontendUrl}/oauth-success?token=${jwtToken}&userData=${userData}`);
+    
+    // Redirect to frontend success page with token and user data
+    res.redirect(`${frontendUrl}/oauth-success?token=${jwtToken}&userData=${userData}`);
+  } catch (error) {
+    console.error("Test OAuth error:", error);
+    res.status(500).json({ error: "Test OAuth failed" });
+  }
+});
+
 // User Register
 router.post(
   "/register",
@@ -135,10 +171,17 @@ router.get(
 router.get(
   "/google/callback",
   (req, res, next) => {
+    console.log("Google OAuth callback initiated");
+    console.log("Query parameters:", req.query);
+    
     passport.authenticate("google", { 
-      session: false,
-      failureRedirect: "/registration" 
+      session: false
     }, (err, user, info) => {
+      console.log("Passport callback executed");
+      console.log("Error:", err);
+      console.log("User:", user ? user._id : 'No user');
+      console.log("Info:", info);
+      
       if (err) {
         console.error("Passport authentication error:", err);
         const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',')[0].trim() : 'http://localhost:5173';
@@ -174,6 +217,8 @@ router.get(
       
       // Get the first frontend URL from the comma-separated list
       const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',')[0].trim() : 'http://localhost:5173';
+      
+      console.log("Redirecting to:", `${frontendUrl}/oauth-success?token=${jwtToken}&userData=${userData}`);
       
       // Redirect to frontend success page with token and user data
       res.redirect(`${frontendUrl}/oauth-success?token=${jwtToken}&userData=${userData}`);

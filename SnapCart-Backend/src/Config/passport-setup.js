@@ -18,9 +18,15 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        console.log("Google OAuth callback initiated");
+        console.log("=== Google OAuth Strategy Started ===");
         console.log("Access token received:", !!accessToken);
         console.log("Refresh token received:", !!refreshToken);
+        console.log("Profile received:", {
+          id: profile.id,
+          displayName: profile.displayName,
+          email: profile.emails ? profile.emails[0]?.value : 'No email',
+          photos: profile.photos ? profile.photos.length : 0
+        });
         
         // Check database connection
         const mongoose = await import('mongoose');
@@ -118,9 +124,16 @@ passport.use(
           }
         }
         
-        console.log("Google strategy completed successfully for user:", user._id);
+        console.log("=== Google OAuth Strategy Completed Successfully ===");
+        console.log("Final user object:", {
+          _id: user._id,
+          username: user.username,
+          email: user.email,
+          role: user.role
+        });
         return done(null, user);
       } catch (error) {
+        console.error('=== Google OAuth Strategy Error ===');
         console.error('Passport Google Strategy Error:', error);
         console.error('Error stack:', error.stack);
         return done(error, null);
