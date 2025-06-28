@@ -19,7 +19,7 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "JWTKJDGFSDFHDGSVFSDUFSDBFS
 // Rate limiting middleware
 const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 1000, // 1000 login attempts per window per IP (was too restrictive at 5)
+  max: 1000, // 5 login attempts per window per IP
   message: "Too many login attempts, please try again later",
 });
 
@@ -121,127 +121,75 @@ router.get("/google/test", (req, res) => {
 // Initiate Google OAuth login
 router.get(
   "/google",
-  (req, res, next) => {
-    console.log("=== Google OAuth Initiation ===");
-    console.log("Backend URL:", process.env.BACKEND_URL);
-    console.log("Frontend URL:", process.env.FRONTEND_URL);
-    console.log("Google Client ID:", process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not set');
-    next();
-  },
-  passport.authenticate("google", { 
-    scope: ["profile", "email"],
-    failureRedirect: '/registration'
-  })
+  passport.authenticate("google", { scope: ["profile", "email"] })
 );
-
-// Add failure route for debugging
-router.get("/google/failure", (req, res) => {
-  console.log("=== Google OAuth Failed ===");
-  console.log("Session:", req.session);
-  console.log("Query:", req.query);
-  
-  const frontendUrl = process.env.FRONTEND_URL;
-  res.redirect(`${frontendUrl}/registration?error=oauth_failed`);
-});
 
 // Handle Google callback
 router.get(
   "/google/callback",
   (req, res, next) => {
-    console.log("=== Google Callback Route Hit ===");
+    console.log("Google callback route hit");
     console.log("Query params:", req.query);
-    console.log("Headers:", req.headers);
-    console.log("URL:", req.url);
-    console.log("Original URL:", req.originalUrl);
-    
-    // Check for error in query parameters
-    if (req.query.error) {
-      console.error("OAuth error in callback:", req.query.error);
-      console.error("Error description:", req.query.error_description);
-      
-      const frontendUrl = process.env.FRONTEND_URL;
-      return res.redirect(`${frontendUrl}/registration?error=oauth_error&message=${encodeURIComponent(req.query.error_description || 'OAuth failed')}`);
-    }
-    
+    console.log("Session:", req.session);
     next();
   },
   passport.authenticate("google", { 
-    session: true,  // Changed to true for better session handling
-    failureRedirect: "/auth/google/failure"
+    session: false,  // Change this to true if you want to use sessions
+    failureRedirect: "/registration" 
   }),
   catchAsync(async (req, res) => {
     try {
-      console.log("=== OAuth Callback Success ===");
-      console.log("Authenticated user:", req.user ? req.user._id : 'No user');
-      
       // At this point req.user should be populated by Passport
+      console.log("Authenticated user:", req.user);
+      
+      // Ensure user exists in database (double-check)
       if (!req.user || !req.user._id) {
         console.error("No user found in request after authentication");
-        throw new Error("User authentication failed - no user object");
+        throw AuthenticationError("User authentication failed");
       }
 
       // Generate JWT token for OAuth user
-      const jwtToken = jwt.sign(
-        { 
-          userId: req.user._id, 
-          role: req.user.role || 'Buyer' 
-        }, 
-        JWT_SECRET_KEY, 
-        { expiresIn: "24h" }
-      );
+      const jwtToken = jwt.sign({ userId: req.user._id }, JWT_SECRET_KEY, { expiresIn: "24h" });
 
-      // Remove sensitive information safely
-      let userWithoutPassword;
-      if (req.user.toObject) {
-        const userObj = req.user.toObject();
-        const { password, ...rest } = userObj;
-        userWithoutPassword = rest;
-      } else {
-        const { password, ...rest } = req.user;
-        userWithoutPassword = rest;
+      // Remove sensitive information
+      const { password, ...userWithoutPassword } = req.user.toObject ? req.user.toObject() : req.user;
+      
+      // Create a URL-safe JSON string of user data
+      const userData = encodeURIComponent(JSON.stringify(userWithoutPassword));
+      
+      // Safely get frontend URL
+      let frontendUrl = process.env.FRONTEND_URL;
+      if (!frontendUrl) {
+        console.error("FRONTEND_URL environment variable is not set");
+        throw new Error("Frontend URL not configured");
       }
       
-      console.log("User data prepared for frontend:", {
-        id: userWithoutPassword._id,
-        username: userWithoutPassword.username,
-        email: userWithoutPassword.email
-      });
+      // Handle comma-separated URLs and get the first one
+      const frontendUrls = frontendUrl.split(',').map(url => url.trim());
+      const redirectUrl = frontendUrls[0];
       
-      // Get frontend URL safely
-      const frontendUrl = process.env.FRONTEND_URL;;
-      console.log("Frontend URL for redirect:", frontendUrl);
+      console.log("Redirecting to:", `${redirectUrl}/oauth-success`);
       
-      // Create success URL with token and minimal user data
-      const successUrl = `${frontendUrl}/oauth-success?token=${jwtToken}&userId=${userWithoutPassword._id}&username=${encodeURIComponent(userWithoutPassword.username || '')}&email=${encodeURIComponent(userWithoutPassword.email || '')}`;
-      
-      console.log("Redirecting to success URL");
-      
-      // Redirect to frontend success page
-      res.redirect(successUrl);
-      
+      // Redirect to frontend success page with token and user data
+      res.redirect(`${redirectUrl}/oauth-success?token=${jwtToken}&userData=${userData}`);
     } catch (error) {
-      console.error("=== OAuth Callback Error ===");
-      console.error("Error:", error.message);
-      console.error("Stack:", error.stack);
+      console.error("OAuth callback error:", error);
       
-      // Safe error redirect
-      const frontendUrl = process.env.FRONTEND_URL;
-      const errorUrl = `${frontendUrl}/registration?error=authentication_failed&message=${encodeURIComponent(error.message)}`;
-      
-      console.log("Redirecting to error URL:", errorUrl);
-      res.redirect(errorUrl);
+      // Safely handle error redirect
+      let frontendUrl = process.env.FRONTEND_URL;
+      if (frontendUrl) {
+        const frontendUrls = frontendUrl.split(',').map(url => url.trim());
+        const redirectUrl = frontendUrls[0];
+        res.redirect(`${redirectUrl}/registration?error=authentication_failed`);
+      } else {
+        // Fallback error response
+        res.status(500).json({ 
+          status: 'error', 
+          message: 'Authentication failed. Please try again.' 
+        });
+      }
     }
   })
 );
-
-// Add a health check route for OAuth
-router.get("/health", (req, res) => {
-  res.json({
-    status: 'success',
-    message: 'Auth service is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
 
 export default router;
