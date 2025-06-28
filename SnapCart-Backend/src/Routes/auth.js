@@ -103,6 +103,21 @@ router.post(
 );
 
 // Google OAuth Routes
+// Test route to verify OAuth configuration
+router.get("/google/test", (req, res) => {
+  res.json({
+    status: 'success',
+    message: 'Google OAuth configuration test',
+    config: {
+      clientId: process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not set',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Not set',
+      callbackUrl: `${process.env.BACKEND_URL}/auth/google/callback`,
+      backendUrl: process.env.BACKEND_URL,
+      frontendUrl: process.env.FRONTEND_URL
+    }
+  });
+});
+
 // Initiate Google OAuth login
 router.get(
   "/google",
@@ -112,6 +127,12 @@ router.get(
 // Handle Google callback
 router.get(
   "/google/callback",
+  (req, res, next) => {
+    console.log("Google callback route hit");
+    console.log("Query params:", req.query);
+    console.log("Session:", req.session);
+    next();
+  },
   passport.authenticate("google", { 
     session: false,  // Change this to true if you want to use sessions
     failureRedirect: "/registration" 
@@ -123,6 +144,7 @@ router.get(
       
       // Ensure user exists in database (double-check)
       if (!req.user || !req.user._id) {
+        console.error("No user found in request after authentication");
         throw AuthenticationError("User authentication failed");
       }
 

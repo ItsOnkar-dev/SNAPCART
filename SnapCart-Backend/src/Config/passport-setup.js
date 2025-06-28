@@ -1,10 +1,33 @@
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import User from '../Models/User.js';
 
 dotenv.config();
+
+// Utility function to check database connection
+const checkDatabaseConnection = async () => {
+  try {
+    // Check if mongoose is connected
+    if (mongoose.connection && mongoose.connection.readyState === 1) {
+      return true;
+    }
+    
+    // If not connected, try to connect
+    if (mongoose.connection.readyState === 0) {
+      console.log("Attempting to connect to database...");
+      await mongoose.connect(process.env.DB_URL);
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error("Database connection check failed:", error);
+    return false;
+  }
+};
 
 // Configure Google Strategy
 passport.use(
@@ -30,9 +53,8 @@ passport.use(
         }
         
         // Check database connection
-        const mongoose = await import('mongoose');
-        if (mongoose.connection.readyState !== 1) {
-          console.error("Database not connected. Ready state:", mongoose.connection.readyState);
+        if (!await checkDatabaseConnection()) {
+          console.error("Database connection not available");
           return done(new Error("Database connection not available"), null);
         }
         
@@ -47,6 +69,12 @@ passport.use(
         if (!profile.id) {
           console.error("No profile ID received from Google");
           return done(new Error("Invalid profile data received from Google"), null);
+        }
+
+        // Validate that we have either email or display name
+        if (!profile.emails || !profile.emails[0] || !profile.emails[0].value) {
+          console.error("No email received from Google profile");
+          return done(new Error("Email is required for registration"), null);
         }
 
         // First, check if user exists by googleId
