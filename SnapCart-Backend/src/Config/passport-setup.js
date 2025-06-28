@@ -18,28 +18,15 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        console.log("=== Google OAuth Strategy Started ===");
+        console.log("Google OAuth callback initiated");
         console.log("Access token received:", !!accessToken);
         console.log("Refresh token received:", !!refreshToken);
-        console.log("Profile received:", {
-          id: profile.id,
-          displayName: profile.displayName,
-          email: profile.emails ? profile.emails[0]?.value : 'No email',
-          photos: profile.photos ? profile.photos.length : 0
-        });
         
         // Check database connection
         const mongoose = await import('mongoose');
         if (mongoose.connection.readyState !== 1) {
           console.error("Database not connected. Ready state:", mongoose.connection.readyState);
-          console.error("Attempting to reconnect...");
-          try {
-            await mongoose.connect(process.env.DB_URL);
-            console.log("Database reconnected successfully");
-          } catch (dbError) {
-            console.error("Failed to reconnect to database:", dbError);
-            return done(new Error("Database connection not available"), null);
-          }
+          return done(new Error("Database connection not available"), null);
         }
         
         console.log("Google profile received:", {
@@ -53,11 +40,6 @@ passport.use(
         if (!profile.id) {
           console.error("No profile ID received from Google");
           return done(new Error("Invalid profile data received from Google"), null);
-        }
-
-        if (!profile.emails || !profile.emails[0] || !profile.emails[0].value) {
-          console.error("No email received from Google profile");
-          return done(new Error("Email is required for registration"), null);
         }
 
         // First, check if user exists by googleId
@@ -124,18 +106,10 @@ passport.use(
           }
         }
         
-        console.log("=== Google OAuth Strategy Completed Successfully ===");
-        console.log("Final user object:", {
-          _id: user._id,
-          username: user.username,
-          email: user.email,
-          role: user.role
-        });
+        console.log("Google strategy completed successfully for user:", user._id);
         return done(null, user);
       } catch (error) {
-        console.error('=== Google OAuth Strategy Error ===');
         console.error('Passport Google Strategy Error:', error);
-        console.error('Error stack:', error.stack);
         return done(error, null);
       }
     }

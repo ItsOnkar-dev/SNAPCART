@@ -135,37 +135,15 @@ const UserContextProvider = ({ children }) => {
   // Handle OAuth success (called from OAuthSuccess component)
   const handleOAuthSuccess = async (token, userData) => {
     try {
-      console.log("[UserContext] handleOAuthSuccess called with:", {
-        token: !!token,
-        userData,
-      });
-
-      if (!token || !userData) {
-        console.error(
-          "[UserContext] Missing token or userData in handleOAuthSuccess"
-        );
-        toast.error("Invalid authentication data received");
-        return false;
+      if (token && userData) {
+        window.localStorage.setItem("token", token);
+        setIsLoggedIn(true);
+        setUser(userData);
+        console.log("[UserContext] OAuth login success. User:", userData);
+        toast.success("Google Authentication Successful");
+        return true;
       }
-
-      // Store token in localStorage
-      window.localStorage.setItem("token", token);
-      console.log("[UserContext] Token stored in localStorage");
-
-      // Update state
-      setIsLoggedIn(true);
-      setUser(userData);
-      console.log("[UserContext] OAuth login success. User:", userData);
-
-      // Show success message
-      toast.success("Google Authentication Successful");
-
-      // Dispatch custom login event
-      window.dispatchEvent(new Event("userLogin"));
-
-      return true;
     } catch (error) {
-      console.error("[UserContext] handleOAuthSuccess error:", error);
       toast.error("Failed to process authentication. Please try again.");
       return false;
     }

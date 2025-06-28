@@ -13,16 +13,16 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: function () {
-      // Required for all users (both local and OAuth)
-      return true;
+      // Only required if password is set (local account)
+      return this.password ? true : false
     },
     index: true
   },
   password: {
     type: String,
     required: function () {
-      // Only required for local accounts (not OAuth users)
-      return !this.googleId;
+      // Only required if no googleId (local account)
+      return this.googleId ? false : true
     }
   },
   googleId: {
