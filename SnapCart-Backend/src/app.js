@@ -17,7 +17,11 @@ const app = express()
 
 dotenv.config();
 
-const allowedOrigins = process.env.FRONTEND_URL.split(',');
+// Safely handle FRONTEND_URL environment variable
+let allowedOrigins = ['http://localhost:5173']; // Default fallback
+if (process.env.FRONTEND_URL) {
+  allowedOrigins = process.env.FRONTEND_URL.split(',').map(url => url.trim());
+}
 
 app.use(cors({
   origin: allowedOrigins,

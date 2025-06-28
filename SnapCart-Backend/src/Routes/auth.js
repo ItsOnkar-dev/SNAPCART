@@ -135,11 +135,37 @@ router.get(
       // Create a URL-safe JSON string of user data
       const userData = encodeURIComponent(JSON.stringify(userWithoutPassword));
       
+      // Safely get frontend URL
+      let frontendUrl = process.env.FRONTEND_URL;
+      if (!frontendUrl) {
+        console.error("FRONTEND_URL environment variable is not set");
+        throw new Error("Frontend URL not configured");
+      }
+      
+      // Handle comma-separated URLs and get the first one
+      const frontendUrls = frontendUrl.split(',').map(url => url.trim());
+      const redirectUrl = frontendUrls[0];
+      
+      console.log("Redirecting to:", `${redirectUrl}/oauth-success`);
+      
       // Redirect to frontend success page with token and user data
-      res.redirect(`${process.env.FRONTEND_URL.split(',')[0]}/oauth-success?token=${jwtToken}&userData=${userData}`);
+      res.redirect(`${redirectUrl}/oauth-success?token=${jwtToken}&userData=${userData}`);
     } catch (error) {
       console.error("OAuth callback error:", error);
-      res.redirect(`${process.env.FRONTEND_URL.split(',')[0]}/registration?error=authentication_failed`);
+      
+      // Safely handle error redirect
+      let frontendUrl = process.env.FRONTEND_URL;
+      if (frontendUrl) {
+        const frontendUrls = frontendUrl.split(',').map(url => url.trim());
+        const redirectUrl = frontendUrls[0];
+        res.redirect(`${redirectUrl}/registration?error=authentication_failed`);
+      } else {
+        // Fallback error response
+        res.status(500).json({ 
+          status: 'error', 
+          message: 'Authentication failed. Please try again.' 
+        });
+      }
     }
   })
 );

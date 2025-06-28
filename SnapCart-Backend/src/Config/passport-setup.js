@@ -21,6 +21,13 @@ passport.use(
         console.log("Google OAuth callback initiated");
         console.log("Access token received:", !!accessToken);
         console.log("Refresh token received:", !!refreshToken);
+        console.log("Callback URL:", `${process.env.BACKEND_URL}/auth/google/callback`);
+        
+        // Validate environment variables
+        if (!process.env.BACKEND_URL) {
+          console.error("BACKEND_URL environment variable is not set");
+          return done(new Error("Backend URL not configured"), null);
+        }
         
         // Check database connection
         const mongoose = await import('mongoose');
