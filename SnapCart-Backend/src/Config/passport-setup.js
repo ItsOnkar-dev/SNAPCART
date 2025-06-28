@@ -18,24 +18,60 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
+        console.log("Google OAuth callback initiated");
+        console.log("Access token received:", !!accessToken);
+        console.log("Refresh token received:", !!refreshToken);
+        
+        // Check database connection
+        const mongoose = await import('mongoose');
+        if (mongoose.connection.readyState !== 1) {
+          console.error("Database not connected. Ready state:", mongoose.connection.readyState);
+          console.error("Attempting to reconnect...");
+          try {
+            await mongoose.connect(process.env.DB_URL);
+            console.log("Database reconnected successfully");
+          } catch (dbError) {
+            console.error("Failed to reconnect to database:", dbError);
+            return done(new Error("Database connection not available"), null);
+          }
+        }
+        
+        console.log("Google profile received:", {
+          id: profile.id,
+          displayName: profile.displayName,
+          email: profile.emails ? profile.emails[0]?.value : 'No email',
+          photos: profile.photos ? profile.photos.length : 0
+        });
 
-        // console.log("Google profile received:", profile);
+        // Validate required profile data
+        if (!profile.id) {
+          console.error("No profile ID received from Google");
+          return done(new Error("Invalid profile data received from Google"), null);
+        }
+
+        if (!profile.emails || !profile.emails[0] || !profile.emails[0].value) {
+          console.error("No email received from Google profile");
+          return done(new Error("Email is required for registration"), null);
+        }
+
         // First, check if user exists by googleId
         let user = await User.findOne({ googleId: profile.id });
-        console.log("Existing user by googleId:", user);
+        console.log("Existing user by googleId:", user ? user._id : 'Not found');
 
         if (!user) {
           // If not found by googleId, check by email
-          console.log("Creating new user from Google profile:", profile.id);
+          console.log("User not found by googleId, checking by email");
           const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
           console.log("Email from Google profile:", email);
           
           if (email) {
             user = await User.findOne({ email });
+            console.log("User found by email:", user ? user._id : 'Not found');
           }
           
           if (user) {
             // If user exists by email but no googleId, update the user to link Google account
+            console.log("Linking existing user to Google account");
             user.googleId = profile.id;
             // Store the original display name
             user.name = profile.displayName || user.name;
@@ -46,8 +82,10 @@ passport.use(
               user.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.displayName || user.username || 'User')}`;
             }
             await user.save();
+            console.log("User updated successfully");
           } else {
             // Create new user if doesn't exist at all
+            console.log("Creating new user from Google profile");
             const username = profile.displayName
               ? profile.displayName.replace(/\s+/g, '').toLowerCase() + Math.floor(Math.random() * 1000)
               : 'google_user_' + Math.floor(Math.random() * 10000);
@@ -69,19 +107,22 @@ passport.use(
             });
             
             user = await newUser.save();
-            console.log("New user successfully saved:", user);
+            console.log("New user successfully saved:", user._id);
           }
         } else {
           // Update the name if the user already exists
           if (profile.displayName && (!user.name || user.name !== profile.displayName)) {
             user.name = profile.displayName;
             await user.save();
+            console.log("User name updated");
           }
         }
         
+        console.log("Google strategy completed successfully for user:", user._id);
         return done(null, user);
       } catch (error) {
         console.error('Passport Google Strategy Error:', error);
+        console.error('Error stack:', error.stack);
         return done(error, null);
       }
     }

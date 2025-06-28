@@ -31,6 +31,20 @@ const sendResponse = (res, { status = 'success', statusCode = 200, message = '',
   return res.status(statusCode).json(response);
 };
 
+// OAuth error route
+router.get("/oauth-error", (req, res) => {
+  const { error, message } = req.query;
+  console.error("OAuth error:", { error, message });
+  
+  const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',')[0].trim() : 'http://localhost:5173';
+  res.redirect(`${frontendUrl}/registration?error=${error || 'oauth_failed'}&message=${encodeURIComponent(message || 'Authentication failed')}`);
+});
+
+// Test route to verify server is working
+router.get("/test", (req, res) => {
+  return sendResponse(res, { message: "Auth server is working", data: { timestamp: new Date().toISOString() } });
+});
+
 // User Register
 router.post(
   "/register",
@@ -106,16 +120,39 @@ router.post(
 // Initiate Google OAuth login
 router.get(
   "/google",
+  (req, res, next) => {
+    console.log("Google OAuth initiation - Environment check:");
+    console.log("GOOGLE_CLIENT_ID:", !!process.env.GOOGLE_CLIENT_ID);
+    console.log("GOOGLE_CLIENT_SECRET:", !!process.env.GOOGLE_CLIENT_SECRET);
+    console.log("BACKEND_URL:", process.env.BACKEND_URL);
+    console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+    next();
+  },
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
 // Handle Google callback
 router.get(
   "/google/callback",
-  passport.authenticate("google", { 
-    session: false,  // Change this to true if you want to use sessions
-    failureRedirect: "/registration" 
-  }),
+  (req, res, next) => {
+    passport.authenticate("google", { 
+      session: false,
+      failureRedirect: "/registration" 
+    }, (err, user, info) => {
+      if (err) {
+        console.error("Passport authentication error:", err);
+        const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',')[0].trim() : 'http://localhost:5173';
+        return res.redirect(`${frontendUrl}/registration?error=authentication_failed&message=${encodeURIComponent(err.message)}`);
+      }
+      if (!user) {
+        console.error("No user returned from passport authentication");
+        const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',')[0].trim() : 'http://localhost:5173';
+        return res.redirect(`${frontendUrl}/registration?error=no_user_found`);
+      }
+      req.user = user;
+      next();
+    })(req, res, next);
+  },
   catchAsync(async (req, res) => {
     try {
       // At this point req.user should be populated by Passport
@@ -127,7 +164,7 @@ router.get(
       }
 
       // Generate JWT token for OAuth user
-      const jwtToken = jwt.sign({ userId: req.user._id }, JWT_SECRET_KEY, { expiresIn: "24h" });
+      const jwtToken = jwt.sign({ userId: req.user._id, role: req.user.role }, JWT_SECRET_KEY, { expiresIn: "24h" });
 
       // Remove sensitive information
       const { password, ...userWithoutPassword } = req.user.toObject ? req.user.toObject() : req.user;
@@ -135,11 +172,18 @@ router.get(
       // Create a URL-safe JSON string of user data
       const userData = encodeURIComponent(JSON.stringify(userWithoutPassword));
       
+      // Get the first frontend URL from the comma-separated list
+      const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',')[0].trim() : 'http://localhost:5173';
+      
       // Redirect to frontend success page with token and user data
-      res.redirect(`${process.env.FRONTEND_URL}/oauth-success?token=${jwtToken}&userData=${userData}`);
+      res.redirect(`${frontendUrl}/oauth-success?token=${jwtToken}&userData=${userData}`);
     } catch (error) {
       console.error("OAuth callback error:", error);
-      res.redirect(`${process.env.FRONTEND_URL}/registration?error=authentication_failed`);
+      
+      // Get the first frontend URL from the comma-separated list
+      const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',')[0].trim() : 'http://localhost:5173';
+      
+      res.redirect(`${frontendUrl}/registration?error=authentication_failed&message=${encodeURIComponent(error.message)}`);
     }
   })
 );

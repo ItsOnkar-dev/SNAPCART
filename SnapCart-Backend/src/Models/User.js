@@ -50,6 +50,10 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String
   },
+  isOAuthUser: {
+    type: Boolean,
+    default: false
+  },
   createdAt: {
     type: Date,
     default: Date.now
