@@ -12,16 +12,6 @@ import { loginAuthValidator, registerAuthValidator } from '../Validators/authVal
 
 dotenv.config();
 const router = express.Router();
-
-// Simple test route to verify routing is working (no sensitive data)
-router.get("/ping", (req, res) => {
-  res.json({
-    status: 'success',
-    message: 'Auth routes are working!',
-    timestamp: new Date().toISOString()
-  });
-});
-
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "JWTKJDGFSDFHDGSVFSDUFSDBFS";
 
 // Rate limiting middleware
@@ -110,60 +100,6 @@ router.post(
   })
 );
 
-// Google OAuth Routes
-// Test route to verify OAuth configuration (secured - no sensitive data)
-router.get("/google/test", (req, res) => {
-  const frontendUrls = process.env.FRONTEND_URL ? 
-    process.env.FRONTEND_URL.split(',').map(url => url.trim()) : [];
-  
-  const deployedUrl = frontendUrls.find(url => 
-    !url.includes('localhost') && !url.includes('127.0.0.1')
-  );
-  
-  const localhostUrl = frontendUrls.find(url => 
-    url.includes('localhost') || url.includes('127.0.0.1')
-  );
-  
-  // Simulate the environment detection logic
-  const referer = req.headers.referer || req.headers.origin || '';
-  let detectedEnvironment = 'unknown';
-  let selectedUrl = frontendUrls[0];
-  
-  // Check if there's a state parameter in the query
-  if (req.query.state) {
-    try {
-      const stateData = JSON.parse(decodeURIComponent(req.query.state));
-      detectedEnvironment = stateData.environment || 'unknown';
-      selectedUrl = detectedEnvironment === 'development' ? localhostUrl : deployedUrl;
-    } catch (error) {
-      console.log("Could not parse state parameter");
-    }
-  } else if (referer.includes('localhost') || referer.includes('127.0.0.1')) {
-    detectedEnvironment = 'development';
-    selectedUrl = localhostUrl || frontendUrls[0];
-  } else if (referer.includes('netlify.app') || referer.includes('render.com')) {
-    detectedEnvironment = 'production';
-    selectedUrl = deployedUrl || frontendUrls[0];
-  }
-  
-  res.json({
-    status: 'success',
-    message: 'Google OAuth configuration test',
-    config: {
-      clientId: process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not set',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Not set',
-      callbackUrl: `${process.env.BACKEND_URL}/auth/google/callback`,
-      environment: process.env.NODE_ENV || 'development',
-      requestReferer: referer ? 'Present' : 'Not present',
-      detectedEnvironment: detectedEnvironment,
-      selectedUrl: selectedUrl ? 'Configured' : 'Not configured',
-      stateParameter: req.query.state ? 'Present' : 'Not present',
-      sessionEnabled: true,
-      totalFrontendUrls: frontendUrls.length
-    }
-  });
-});
-
 // Initiate Google OAuth login
 router.get(
   "/google",
@@ -191,14 +127,7 @@ router.get(
 
 // Handle Google callback
 router.get(
-  "/google/callback",
-  (req, res, next) => {
-    console.log("Google callback route hit");
-    console.log("Query params:", req.query);
-    console.log("State from query:", req.query.state);
-    console.log("State from cookie:", req.cookies?.oauth_state);
-    next();
-  },
+  "/google/callback", 
   passport.authenticate("google", { 
     session: false,
     failureRedirect: "/registration" 
@@ -226,7 +155,6 @@ router.get(
       // Safely get frontend URL - detect environment from state
       let frontendUrl = process.env.FRONTEND_URL;
       if (!frontendUrl) {
-        console.error("FRONTEND_URL environment variable is not set");
         throw new Error("Frontend URL not configured");
       }
 
@@ -236,7 +164,6 @@ router.get(
       
       // Try to get environment from state (from cookie or query)
       let environment = 'production'; // Default to production
-      let origin = '';
       
       try {
         const stateData = req.cookies?.oauth_state || req.query.state;
@@ -244,11 +171,8 @@ router.get(
           const parsedState = JSON.parse(decodeURIComponent(stateData));
           environment = parsedState.environment || 'production';
           origin = parsedState.origin || '';
-          console.log("Environment from state:", environment);
-          console.log("Origin from state:", origin);
         }
       } catch (error) {
-        console.log("Could not parse state, using default environment detection");
         // Fallback to referer-based detection
         const referer = req.headers.referer || req.headers.origin || '';
         if (referer.includes('localhost') || referer.includes('127.0.0.1')) {
@@ -263,24 +187,17 @@ router.get(
             url.includes('localhost') || url.includes('127.0.0.1')
           );
           if (localhostUrl) {
-            redirectUrl = localhostUrl;
-            console.log("Using localhost URL for development");
+            redirectUrl = localhostUrl; // Using localhost URL for development
           }
         } else {
           const deployedUrl = frontendUrls.find(url => 
             !url.includes('localhost') && !url.includes('127.0.0.1')
           );
           if (deployedUrl) {
-            redirectUrl = deployedUrl;
-            console.log("Using deployed URL for production");
+            redirectUrl = deployedUrl;  // Using deployed URL for production
           }
         }
       }
-      
-      console.log("Available frontend URLs:", frontendUrls);
-      console.log("Detected environment:", environment);
-      console.log("Selected redirect URL:", redirectUrl);
-      console.log("Redirecting to:", `${redirectUrl}/oauth-success`);
       
       // Clear the OAuth state cookie
       res.clearCookie('oauth_state');
@@ -340,47 +257,5 @@ router.get(
     }
   })
 );
-
-// Test environment detection without OAuth (secured - no sensitive data)
-router.get("/test-environment", (req, res) => {
-  const frontendUrls = process.env.FRONTEND_URL ? 
-    process.env.FRONTEND_URL.split(',').map(url => url.trim()) : [];
-  
-  const deployedUrl = frontendUrls.find(url => 
-    !url.includes('localhost') && !url.includes('127.0.0.1')
-  );
-  
-  const localhostUrl = frontendUrls.find(url => 
-    url.includes('localhost') || url.includes('127.0.0.1')
-  );
-  
-  // Simulate the state parameter that would be sent from frontend
-  const mockState = encodeURIComponent(JSON.stringify({ 
-    environment: req.query.env || 'production',
-    origin: req.query.origin || 'production-url',
-    timestamp: Date.now()
-  }));
-  
-  let environment = req.query.env || 'production';
-  let selectedUrl = environment === 'development' ? localhostUrl : deployedUrl;
-  
-  res.json({
-    status: 'success',
-    message: 'Environment detection test',
-    testData: {
-      mockState: mockState,
-      parsedState: JSON.parse(decodeURIComponent(mockState)),
-      frontendUrls: frontendUrls.length,
-      deployedUrl: deployedUrl ? 'Configured' : 'Not configured',
-      localhostUrl: localhostUrl ? 'Configured' : 'Not configured',
-      testEnvironment: environment,
-      selectedUrl: selectedUrl ? 'Configured' : 'Not configured'
-    },
-    instructions: {
-      testLocalhost: `${req.protocol}://${req.get('host')}/auth/test-environment?env=development&origin=localhost`,
-      testProduction: `${req.protocol}://${req.get('host')}/auth/test-environment?env=production&origin=production`
-    }
-  });
-});
 
 export default router;

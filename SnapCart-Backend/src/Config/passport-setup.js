@@ -41,66 +41,49 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        console.log("Google OAuth callback initiated");
-        console.log("Access token received:", !!accessToken);
-        console.log("Refresh token received:", !!refreshToken);
-        console.log("Callback URL:", `${process.env.BACKEND_URL}/auth/google/callback`);
-        console.log("Environment:", process.env.NODE_ENV || 'development');
-        
         // Validate environment variables
         if (!process.env.BACKEND_URL) {
-          console.error("BACKEND_URL environment variable is not set");
           return done(new Error("Backend URL not configured"), null);
         }
         
         if (!process.env.FRONTEND_URL) {
-          console.error("FRONTEND_URL environment variable is not set");
           return done(new Error("Frontend URL not configured"), null);
         }
         
         // Check database connection
         if (!await checkDatabaseConnection()) {
-          console.error("Database connection not available");
           return done(new Error("Database connection not available"), null);
         }
         
-        console.log("Google profile received:", {
-          id: profile.id,
-          displayName: profile.displayName,
-          email: profile.emails ? profile.emails[0]?.value : 'No email',
-          photos: profile.photos ? profile.photos.length : 0
-        });
+        // console.log("Google profile received:", {
+        //   id: profile.id,
+        //   displayName: profile.displayName,
+        //   email: profile.emails ? profile.emails[0]?.value : 'No email',
+        //   photos: profile.photos ? profile.photos.length : 0
+        // });
 
         // Validate required profile data
         if (!profile.id) {
-          console.error("No profile ID received from Google");
           return done(new Error("Invalid profile data received from Google"), null);
         }
 
         // Validate that we have either email or display name
         if (!profile.emails || !profile.emails[0] || !profile.emails[0].value) {
-          console.error("No email received from Google profile");
           return done(new Error("Email is required for registration"), null);
         }
 
         // First, check if user exists by googleId
         let user = await User.findOne({ googleId: profile.id });
-        console.log("Existing user by googleId:", user ? user._id : 'Not found');
 
         if (!user) {
-          // If not found by googleId, check by email
-          console.log("User not found by googleId, checking by email");
           const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
-          console.log("Email from Google profile:", email);
           
           if (email) {
             user = await User.findOne({ email });
-            console.log("User found by email:", user ? user._id : 'Not found');
           }
           
           if (user) {
             // If user exists by email but no googleId, update the user to link Google account
-            console.log("Linking existing user to Google account");
             user.googleId = profile.id;
             // Store the original display name
             user.name = profile.displayName || user.name;
