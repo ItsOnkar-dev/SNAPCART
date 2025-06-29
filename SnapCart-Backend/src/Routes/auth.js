@@ -112,6 +112,23 @@ router.get("/google/test", (req, res) => {
     !url.includes('localhost') && !url.includes('127.0.0.1')
   );
   
+  const localhostUrl = frontendUrls.find(url => 
+    url.includes('localhost') || url.includes('127.0.0.1')
+  );
+  
+  // Simulate the environment detection logic
+  const referer = req.headers.referer || req.headers.origin || '';
+  let detectedEnvironment = 'unknown';
+  let selectedUrl = frontendUrls[0];
+  
+  if (referer.includes('localhost') || referer.includes('127.0.0.1')) {
+    detectedEnvironment = 'development';
+    selectedUrl = localhostUrl || frontendUrls[0];
+  } else if (referer.includes('netlify.app') || referer.includes('render.com')) {
+    detectedEnvironment = 'production';
+    selectedUrl = deployedUrl || frontendUrls[0];
+  }
+  
   res.json({
     status: 'success',
     message: 'Google OAuth configuration test',
@@ -122,8 +139,12 @@ router.get("/google/test", (req, res) => {
       backendUrl: process.env.BACKEND_URL,
       frontendUrl: process.env.FRONTEND_URL,
       allFrontendUrls: frontendUrls,
-      selectedDeployedUrl: deployedUrl,
-      environment: process.env.NODE_ENV || 'development'
+      deployedUrl: deployedUrl,
+      localhostUrl: localhostUrl,
+      environment: process.env.NODE_ENV || 'development',
+      requestReferer: referer,
+      detectedEnvironment: detectedEnvironment,
+      selectedUrl: selectedUrl
     }
   });
 });
@@ -167,24 +188,41 @@ router.get(
       // Create a URL-safe JSON string of user data
       const userData = encodeURIComponent(JSON.stringify(userWithoutPassword));
       
-      // Safely get frontend URL - prioritize deployed URL over localhost
+      // Safely get frontend URL - detect environment from request origin
       let frontendUrl = process.env.FRONTEND_URL;
       if (!frontendUrl) {
         console.error("FRONTEND_URL environment variable is not set");
         throw new Error("Frontend URL not configured");
       }
 
-      // Handle comma-separated URLs and prioritize deployed URL
+      // Handle comma-separated URLs and detect environment
       const frontendUrls = frontendUrl.split(',').map(url => url.trim());
       let redirectUrl = frontendUrls[0]; // Default to first URL
       
-      // If we have multiple URLs, prefer the deployed one (not localhost)
+      // Check if we have multiple URLs and need to choose based on environment
       if (frontendUrls.length > 1) {
-        const deployedUrl = frontendUrls.find(url => 
-          !url.includes('localhost') && !url.includes('127.0.0.1')
-        );
-        if (deployedUrl) {
-          redirectUrl = deployedUrl;
+        // Get the referer or origin to determine where the request came from
+        const referer = req.headers.referer || req.headers.origin || '';
+        console.log("Request referer/origin:", referer);
+        
+        // If request came from localhost, use localhost URL
+        if (referer.includes('localhost') || referer.includes('127.0.0.1')) {
+          const localhostUrl = frontendUrls.find(url => 
+            url.includes('localhost') || url.includes('127.0.0.1')
+          );
+          if (localhostUrl) {
+            redirectUrl = localhostUrl;
+            console.log("Using localhost URL for development");
+          }
+        } else {
+          // If request came from deployed site, use deployed URL
+          const deployedUrl = frontendUrls.find(url => 
+            !url.includes('localhost') && !url.includes('127.0.0.1')
+          );
+          if (deployedUrl) {
+            redirectUrl = deployedUrl;
+            console.log("Using deployed URL for production");
+          }
         }
       }
       
@@ -197,19 +235,30 @@ router.get(
     } catch (error) {
       console.error("OAuth callback error:", error);
       
-      // Safely handle error redirect - also prioritize deployed URL
+      // Safely handle error redirect - use same logic as success
       let frontendUrl = process.env.FRONTEND_URL;
       if (frontendUrl) {
         const frontendUrls = frontendUrl.split(',').map(url => url.trim());
         let redirectUrl = frontendUrls[0];
         
-        // If we have multiple URLs, prefer the deployed one for error redirects too
+        // Apply same environment detection logic for error redirects
         if (frontendUrls.length > 1) {
-          const deployedUrl = frontendUrls.find(url => 
-            !url.includes('localhost') && !url.includes('127.0.0.1')
-          );
-          if (deployedUrl) {
-            redirectUrl = deployedUrl;
+          const referer = req.headers.referer || req.headers.origin || '';
+          
+          if (referer.includes('localhost') || referer.includes('127.0.0.1')) {
+            const localhostUrl = frontendUrls.find(url => 
+              url.includes('localhost') || url.includes('127.0.0.1')
+            );
+            if (localhostUrl) {
+              redirectUrl = localhostUrl;
+            }
+          } else {
+            const deployedUrl = frontendUrls.find(url => 
+              !url.includes('localhost') && !url.includes('127.0.0.1')
+            );
+            if (deployedUrl) {
+              redirectUrl = deployedUrl;
+            }
           }
         }
         
