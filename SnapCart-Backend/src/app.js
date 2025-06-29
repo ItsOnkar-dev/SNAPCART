@@ -1,4 +1,5 @@
 import MongoStore from 'connect-mongo'
+import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import express from 'express'
@@ -18,12 +19,13 @@ const app = express()
 dotenv.config();
 
 // Safely handle FRONTEND_URL environment variable - support both environments
-let allowedOrigins = ['http://localhost:5173']; // Default fallback
+let allowedOrigins = [];
 if (process.env.FRONTEND_URL) {
   const frontendUrls = process.env.FRONTEND_URL.split(',').map(url => url.trim());
-  
-  // Include all URLs in CORS - don't prioritize one over the other
   allowedOrigins = frontendUrls;
+} else {
+  // Only use fallback if FRONTEND_URL is not set
+  allowedOrigins = ['http://localhost:5173'];
 }
 
 console.log("CORS allowed origins:", allowedOrigins);
@@ -35,6 +37,7 @@ app.use(cors({
 })) 
 app.use(express.json()) // Parse incoming JSON requests
 app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
+app.use(cookieParser()); // Parse cookies
 
 // Session setup
 app.use(session({

@@ -164,13 +164,25 @@ router.get("/google/test", (req, res) => {
 router.get(
   "/google",
   (req, res, next) => {
-    // Store the state parameter for later use
-    if (req.query.state) {
-      req.session.oauthState = req.query.state;
-    }
+    // Create a custom state that includes environment info
+    const state = req.query.state || encodeURIComponent(JSON.stringify({
+      environment: 'production',
+      origin: 'https://snapcart-now.netlify.app'
+    }));
+    
+    // Store the state in a way that will be preserved
+    res.cookie('oauth_state', state, { 
+      maxAge: 5 * 60 * 1000, // 5 minutes
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    });
+    
     next();
   },
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  passport.authenticate("google", { 
+    scope: ["profile", "email"]
+  })
 );
 
 // Handle Google callback
@@ -179,12 +191,12 @@ router.get(
   (req, res, next) => {
     console.log("Google callback route hit");
     console.log("Query params:", req.query);
-    console.log("Session:", req.session);
-    console.log("OAuth State from session:", req.session?.oauthState);
+    console.log("State from query:", req.query.state);
+    console.log("State from cookie:", req.cookies?.oauth_state);
     next();
   },
   passport.authenticate("google", { 
-    session: true,  // Enable sessions for OAuth
+    session: false,
     failureRedirect: "/registration" 
   }),
   catchAsync(async (req, res) => {
@@ -207,7 +219,7 @@ router.get(
       // Create a URL-safe JSON string of user data
       const userData = encodeURIComponent(JSON.stringify(userWithoutPassword));
       
-      // Safely get frontend URL - detect environment from OAuth state
+      // Safely get frontend URL - detect environment from state
       let frontendUrl = process.env.FRONTEND_URL;
       if (!frontendUrl) {
         console.error("FRONTEND_URL environment variable is not set");
@@ -218,20 +230,21 @@ router.get(
       const frontendUrls = frontendUrl.split(',').map(url => url.trim());
       let redirectUrl = frontendUrls[0]; // Default to first URL
       
-      // Try to get environment from OAuth state
+      // Try to get environment from state (from cookie or query)
       let environment = 'production'; // Default to production
       let origin = '';
       
       try {
-        if (req.session && req.session.oauthState) {
-          const stateData = JSON.parse(decodeURIComponent(req.session.oauthState));
-          environment = stateData.environment || 'production';
-          origin = stateData.origin || '';
-          console.log("Environment from OAuth state:", environment);
-          console.log("Origin from OAuth state:", origin);
+        const stateData = req.cookies?.oauth_state || req.query.state;
+        if (stateData) {
+          const parsedState = JSON.parse(decodeURIComponent(stateData));
+          environment = parsedState.environment || 'production';
+          origin = parsedState.origin || '';
+          console.log("Environment from state:", environment);
+          console.log("Origin from state:", origin);
         }
       } catch (error) {
-        console.log("Could not parse OAuth state, using default environment detection");
+        console.log("Could not parse state, using default environment detection");
         // Fallback to referer-based detection
         const referer = req.headers.referer || req.headers.origin || '';
         if (referer.includes('localhost') || referer.includes('127.0.0.1')) {
@@ -265,10 +278,8 @@ router.get(
       console.log("Selected redirect URL:", redirectUrl);
       console.log("Redirecting to:", `${redirectUrl}/oauth-success`);
       
-      // Clean up the session state
-      if (req.session) {
-        delete req.session.oauthState;
-      }
+      // Clear the OAuth state cookie
+      res.clearCookie('oauth_state');
       
       // Redirect to frontend success page with token and user data
       res.redirect(`${redirectUrl}/oauth-success?token=${jwtToken}&userData=${userData}`);
@@ -284,9 +295,10 @@ router.get(
         // Apply same environment detection logic for error redirects
         let environment = 'production';
         try {
-          if (req.session && req.session.oauthState) {
-            const stateData = JSON.parse(decodeURIComponent(req.session.oauthState));
-            environment = stateData.environment || 'production';
+          const stateData = req.cookies?.oauth_state || req.query.state;
+          if (stateData) {
+            const parsedState = JSON.parse(decodeURIComponent(stateData));
+            environment = parsedState.environment || 'production';
           }
         } catch (error) {
           const referer = req.headers.referer || req.headers.origin || '';
@@ -363,6 +375,66 @@ router.get("/test-environment", (req, res) => {
     instructions: {
       testLocalhost: `${req.protocol}://${req.get('host')}/auth/test-environment?env=development&origin=http://localhost:5173`,
       testProduction: `${req.protocol}://${req.get('host')}/auth/test-environment?env=production&origin=https://snapcart-now.netlify.app`
+    }
+  });
+});
+
+// Debug route to show current configuration
+router.get("/debug", (req, res) => {
+  const frontendUrls = process.env.FRONTEND_URL ? 
+    process.env.FRONTEND_URL.split(',').map(url => url.trim()) : [];
+  
+  const deployedUrl = frontendUrls.find(url => 
+    !url.includes('localhost') && !url.includes('127.0.0.1')
+  );
+  
+  const localhostUrl = frontendUrls.find(url => 
+    url.includes('localhost') || url.includes('127.0.0.1')
+  );
+  
+  // Create test state data
+  const testStateDevelopment = encodeURIComponent(JSON.stringify({
+    environment: 'development',
+    origin: 'http://localhost:5173',
+    timestamp: Date.now()
+  }));
+  
+  const testStateProduction = encodeURIComponent(JSON.stringify({
+    environment: 'production',
+    origin: 'https://snapcart-now.netlify.app',
+    timestamp: Date.now()
+  }));
+  
+  res.json({
+    status: 'success',
+    message: 'Debug information',
+    environment: {
+      NODE_ENV: process.env.NODE_ENV,
+      BACKEND_URL: process.env.BACKEND_URL,
+      FRONTEND_URL: process.env.FRONTEND_URL,
+      parsedFrontendUrls: frontendUrls
+    },
+    urlDetection: {
+      deployedUrl: deployedUrl,
+      localhostUrl: localhostUrl,
+      firstUrl: frontendUrls[0],
+      totalUrls: frontendUrls.length
+    },
+    request: {
+      referer: req.headers.referer,
+      origin: req.headers.origin,
+      host: req.headers.host,
+      userAgent: req.headers['user-agent'],
+      cookies: req.cookies
+    },
+    testUrls: {
+      testLocalhost: `${req.protocol}://${req.get('host')}/auth/google?state=${testStateDevelopment}`,
+      testProduction: `${req.protocol}://${req.get('host')}/auth/google?state=${testStateProduction}`,
+      testEnvironment: `${req.protocol}://${req.get('host')}/auth/test-environment?env=development&origin=http://localhost:5173`
+    },
+    testStates: {
+      development: testStateDevelopment,
+      production: testStateProduction
     }
   });
 });
