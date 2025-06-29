@@ -64,7 +64,7 @@ const styles = {
   gradientButton:
     "w-full bg-gradient text-white py-2 rounded-lg shadow-md hover:from-indigo-500 hover:to-purple-500 transition-colors flex items-center justify-center",
   socialButton:
-    "flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500",
+    "flex-1 py-1.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500",
   socialButtonInner: "flex items-center justify-center gap-2",
   toggleLink: "dark:text-indigo-300 text-indigo-500 dark:hover:text-indigo-400",
   headerGradient: "relative bg-gradient p-6 text-white",
@@ -391,14 +391,14 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
                       onClick={handleGoogleSignIn}
                     >
                       <div className={styles.socialButtonInner}>
-                        <FaGoogle />
-                        Sign In With Google
+                        <FaGoogle className="text-base" />
+                        <h4 className="mt-1">Google</h4>
                       </div>
                     </button>
                     <button type="button" className={styles.socialButton}>
                       <div className={styles.socialButtonInner}>
-                        <FaApple />
-                        Sign In With Apple
+                        <FaApple className="text-xl" />
+                        <h4 className="mt-1">Apple</h4>
                       </div>
                     </button>
                   </div>
