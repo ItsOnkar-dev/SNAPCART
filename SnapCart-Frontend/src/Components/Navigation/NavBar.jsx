@@ -170,7 +170,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
               <img
                 src={isDark ? SnapCartLogo2 : SnapCartLogo3}
                 alt="Logo"
-                className="w-32 sm:w-40"
+                className="w-40"
               />
             </div>
           </div>

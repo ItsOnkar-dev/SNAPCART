@@ -100,8 +100,23 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
   }, [isModalOpen, scrollToElement]);
 
   const handleGoogleSignIn = () => {
-    // Redirect to backend Google OAuth endpoint
-    window.location.href = `${API_BASE_URL}/auth/google`;
+    // Detect current environment
+    const isLocalhost =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
+    const environment = isLocalhost ? "development" : "production";
+
+    // Create state parameter with environment info
+    const state = encodeURIComponent(
+      JSON.stringify({
+        environment,
+        origin: window.location.origin,
+        timestamp: Date.now(),
+      })
+    );
+
+    // Redirect to backend Google OAuth endpoint with state
+    window.location.href = `${API_BASE_URL}/auth/google?state=${state}`;
   };
 
   const validateForm = () => {

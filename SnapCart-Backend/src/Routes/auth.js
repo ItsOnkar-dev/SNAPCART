@@ -121,7 +121,16 @@ router.get("/google/test", (req, res) => {
   let detectedEnvironment = 'unknown';
   let selectedUrl = frontendUrls[0];
   
-  if (referer.includes('localhost') || referer.includes('127.0.0.1')) {
+  // Check if there's a state parameter in the query
+  if (req.query.state) {
+    try {
+      const stateData = JSON.parse(decodeURIComponent(req.query.state));
+      detectedEnvironment = stateData.environment || 'unknown';
+      selectedUrl = detectedEnvironment === 'development' ? localhostUrl : deployedUrl;
+    } catch (error) {
+      console.log("Could not parse state parameter");
+    }
+  } else if (referer.includes('localhost') || referer.includes('127.0.0.1')) {
     detectedEnvironment = 'development';
     selectedUrl = localhostUrl || frontendUrls[0];
   } else if (referer.includes('netlify.app') || referer.includes('render.com')) {
@@ -144,7 +153,9 @@ router.get("/google/test", (req, res) => {
       environment: process.env.NODE_ENV || 'development',
       requestReferer: referer,
       detectedEnvironment: detectedEnvironment,
-      selectedUrl: selectedUrl
+      selectedUrl: selectedUrl,
+      stateParameter: req.query.state ? 'Present' : 'Not present',
+      sessionEnabled: true
     }
   });
 });
@@ -152,6 +163,13 @@ router.get("/google/test", (req, res) => {
 // Initiate Google OAuth login
 router.get(
   "/google",
+  (req, res, next) => {
+    // Store the state parameter for later use
+    if (req.query.state) {
+      req.session.oauthState = req.query.state;
+    }
+    next();
+  },
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
@@ -162,10 +180,11 @@ router.get(
     console.log("Google callback route hit");
     console.log("Query params:", req.query);
     console.log("Session:", req.session);
+    console.log("OAuth State from session:", req.session?.oauthState);
     next();
   },
   passport.authenticate("google", { 
-    session: false,  // Change this to true if you want to use sessions
+    session: true,  // Enable sessions for OAuth
     failureRedirect: "/registration" 
   }),
   catchAsync(async (req, res) => {
@@ -188,25 +207,41 @@ router.get(
       // Create a URL-safe JSON string of user data
       const userData = encodeURIComponent(JSON.stringify(userWithoutPassword));
       
-      // Safely get frontend URL - detect environment from request origin
+      // Safely get frontend URL - detect environment from OAuth state
       let frontendUrl = process.env.FRONTEND_URL;
       if (!frontendUrl) {
         console.error("FRONTEND_URL environment variable is not set");
         throw new Error("Frontend URL not configured");
       }
 
-      // Handle comma-separated URLs and detect environment
+      // Handle comma-separated URLs and detect environment from state
       const frontendUrls = frontendUrl.split(',').map(url => url.trim());
       let redirectUrl = frontendUrls[0]; // Default to first URL
       
-      // Check if we have multiple URLs and need to choose based on environment
-      if (frontendUrls.length > 1) {
-        // Get the referer or origin to determine where the request came from
+      // Try to get environment from OAuth state
+      let environment = 'production'; // Default to production
+      let origin = '';
+      
+      try {
+        if (req.session && req.session.oauthState) {
+          const stateData = JSON.parse(decodeURIComponent(req.session.oauthState));
+          environment = stateData.environment || 'production';
+          origin = stateData.origin || '';
+          console.log("Environment from OAuth state:", environment);
+          console.log("Origin from OAuth state:", origin);
+        }
+      } catch (error) {
+        console.log("Could not parse OAuth state, using default environment detection");
+        // Fallback to referer-based detection
         const referer = req.headers.referer || req.headers.origin || '';
-        console.log("Request referer/origin:", referer);
-        
-        // If request came from localhost, use localhost URL
         if (referer.includes('localhost') || referer.includes('127.0.0.1')) {
+          environment = 'development';
+        }
+      }
+      
+      // Choose URL based on environment
+      if (frontendUrls.length > 1) {
+        if (environment === 'development') {
           const localhostUrl = frontendUrls.find(url => 
             url.includes('localhost') || url.includes('127.0.0.1')
           );
@@ -215,7 +250,6 @@ router.get(
             console.log("Using localhost URL for development");
           }
         } else {
-          // If request came from deployed site, use deployed URL
           const deployedUrl = frontendUrls.find(url => 
             !url.includes('localhost') && !url.includes('127.0.0.1')
           );
@@ -227,8 +261,14 @@ router.get(
       }
       
       console.log("Available frontend URLs:", frontendUrls);
+      console.log("Detected environment:", environment);
       console.log("Selected redirect URL:", redirectUrl);
       console.log("Redirecting to:", `${redirectUrl}/oauth-success`);
+      
+      // Clean up the session state
+      if (req.session) {
+        delete req.session.oauthState;
+      }
       
       // Redirect to frontend success page with token and user data
       res.redirect(`${redirectUrl}/oauth-success?token=${jwtToken}&userData=${userData}`);
@@ -242,10 +282,21 @@ router.get(
         let redirectUrl = frontendUrls[0];
         
         // Apply same environment detection logic for error redirects
-        if (frontendUrls.length > 1) {
+        let environment = 'production';
+        try {
+          if (req.session && req.session.oauthState) {
+            const stateData = JSON.parse(decodeURIComponent(req.session.oauthState));
+            environment = stateData.environment || 'production';
+          }
+        } catch (error) {
           const referer = req.headers.referer || req.headers.origin || '';
-          
           if (referer.includes('localhost') || referer.includes('127.0.0.1')) {
+            environment = 'development';
+          }
+        }
+        
+        if (frontendUrls.length > 1) {
+          if (environment === 'development') {
             const localhostUrl = frontendUrls.find(url => 
               url.includes('localhost') || url.includes('127.0.0.1')
             );
