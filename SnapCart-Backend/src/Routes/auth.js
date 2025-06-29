@@ -12,7 +12,19 @@ import { loginAuthValidator, registerAuthValidator } from '../Validators/authVal
 
 dotenv.config();
 
+// SECURITY NOTE: All routes in this file are designed to not expose sensitive environment variables
+// like URLs, API keys, or database connections. Only status indicators are returned.
+
 const router = express.Router();
+
+// Simple test route to verify routing is working (no sensitive data)
+router.get("/ping", (req, res) => {
+  res.json({
+    status: 'success',
+    message: 'Auth routes are working!',
+    timestamp: new Date().toISOString()
+  });
+});
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY || "JWTKJDGFSDFHDGSVFSDUFSDBFS";
 
@@ -103,7 +115,7 @@ router.post(
 );
 
 // Google OAuth Routes
-// Test route to verify OAuth configuration
+// Test route to verify OAuth configuration (secured - no sensitive data)
 router.get("/google/test", (req, res) => {
   const frontendUrls = process.env.FRONTEND_URL ? 
     process.env.FRONTEND_URL.split(',').map(url => url.trim()) : [];
@@ -145,17 +157,13 @@ router.get("/google/test", (req, res) => {
       clientId: process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not set',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Not set',
       callbackUrl: `${process.env.BACKEND_URL}/auth/google/callback`,
-      backendUrl: process.env.BACKEND_URL,
-      frontendUrl: process.env.FRONTEND_URL,
-      allFrontendUrls: frontendUrls,
-      deployedUrl: deployedUrl,
-      localhostUrl: localhostUrl,
       environment: process.env.NODE_ENV || 'development',
-      requestReferer: referer,
+      requestReferer: referer ? 'Present' : 'Not present',
       detectedEnvironment: detectedEnvironment,
-      selectedUrl: selectedUrl,
+      selectedUrl: selectedUrl ? 'Configured' : 'Not configured',
       stateParameter: req.query.state ? 'Present' : 'Not present',
-      sessionEnabled: true
+      sessionEnabled: true,
+      totalFrontendUrls: frontendUrls.length
     }
   });
 });
@@ -337,7 +345,7 @@ router.get(
   })
 );
 
-// Test environment detection without OAuth
+// Test environment detection without OAuth (secured - no sensitive data)
 router.get("/test-environment", (req, res) => {
   const frontendUrls = process.env.FRONTEND_URL ? 
     process.env.FRONTEND_URL.split(',').map(url => url.trim()) : [];
@@ -353,7 +361,7 @@ router.get("/test-environment", (req, res) => {
   // Simulate the state parameter that would be sent from frontend
   const mockState = encodeURIComponent(JSON.stringify({ 
     environment: req.query.env || 'production',
-    origin: req.query.origin || 'https://snapcart-now.netlify.app',
+    origin: req.query.origin || 'production-url',
     timestamp: Date.now()
   }));
   
@@ -366,75 +374,15 @@ router.get("/test-environment", (req, res) => {
     testData: {
       mockState: mockState,
       parsedState: JSON.parse(decodeURIComponent(mockState)),
-      frontendUrls: frontendUrls,
-      deployedUrl: deployedUrl,
-      localhostUrl: localhostUrl,
+      frontendUrls: frontendUrls.length,
+      deployedUrl: deployedUrl ? 'Configured' : 'Not configured',
+      localhostUrl: localhostUrl ? 'Configured' : 'Not configured',
       testEnvironment: environment,
-      selectedUrl: selectedUrl
+      selectedUrl: selectedUrl ? 'Configured' : 'Not configured'
     },
     instructions: {
-      testLocalhost: `${req.protocol}://${req.get('host')}/auth/test-environment?env=development&origin=http://localhost:5173`,
-      testProduction: `${req.protocol}://${req.get('host')}/auth/test-environment?env=production&origin=https://snapcart-now.netlify.app`
-    }
-  });
-});
-
-// Debug route to show current configuration
-router.get("/debug", (req, res) => {
-  const frontendUrls = process.env.FRONTEND_URL ? 
-    process.env.FRONTEND_URL.split(',').map(url => url.trim()) : [];
-  
-  const deployedUrl = frontendUrls.find(url => 
-    !url.includes('localhost') && !url.includes('127.0.0.1')
-  );
-  
-  const localhostUrl = frontendUrls.find(url => 
-    url.includes('localhost') || url.includes('127.0.0.1')
-  );
-  
-  // Create test state data
-  const testStateDevelopment = encodeURIComponent(JSON.stringify({
-    environment: 'development',
-    origin: 'http://localhost:5173',
-    timestamp: Date.now()
-  }));
-  
-  const testStateProduction = encodeURIComponent(JSON.stringify({
-    environment: 'production',
-    origin: 'https://snapcart-now.netlify.app',
-    timestamp: Date.now()
-  }));
-  
-  res.json({
-    status: 'success',
-    message: 'Debug information',
-    environment: {
-      NODE_ENV: process.env.NODE_ENV,
-      BACKEND_URL: process.env.BACKEND_URL,
-      FRONTEND_URL: process.env.FRONTEND_URL,
-      parsedFrontendUrls: frontendUrls
-    },
-    urlDetection: {
-      deployedUrl: deployedUrl,
-      localhostUrl: localhostUrl,
-      firstUrl: frontendUrls[0],
-      totalUrls: frontendUrls.length
-    },
-    request: {
-      referer: req.headers.referer,
-      origin: req.headers.origin,
-      host: req.headers.host,
-      userAgent: req.headers['user-agent'],
-      cookies: req.cookies
-    },
-    testUrls: {
-      testLocalhost: `${req.protocol}://${req.get('host')}/auth/google?state=${testStateDevelopment}`,
-      testProduction: `${req.protocol}://${req.get('host')}/auth/google?state=${testStateProduction}`,
-      testEnvironment: `${req.protocol}://${req.get('host')}/auth/test-environment?env=development&origin=http://localhost:5173`
-    },
-    testStates: {
-      development: testStateDevelopment,
-      production: testStateProduction
+      testLocalhost: `${req.protocol}://${req.get('host')}/auth/test-environment?env=development&origin=localhost`,
+      testProduction: `${req.protocol}://${req.get('host')}/auth/test-environment?env=production&origin=production`
     }
   });
 });
