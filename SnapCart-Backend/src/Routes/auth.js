@@ -105,6 +105,13 @@ router.post(
 // Google OAuth Routes
 // Test route to verify OAuth configuration
 router.get("/google/test", (req, res) => {
+  const frontendUrls = process.env.FRONTEND_URL ? 
+    process.env.FRONTEND_URL.split(',').map(url => url.trim()) : [];
+  
+  const deployedUrl = frontendUrls.find(url => 
+    !url.includes('localhost') && !url.includes('127.0.0.1')
+  );
+  
   res.json({
     status: 'success',
     message: 'Google OAuth configuration test',
@@ -113,7 +120,10 @@ router.get("/google/test", (req, res) => {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Not set',
       callbackUrl: `${process.env.BACKEND_URL}/auth/google/callback`,
       backendUrl: process.env.BACKEND_URL,
-      frontendUrl: process.env.FRONTEND_URL
+      frontendUrl: process.env.FRONTEND_URL,
+      allFrontendUrls: frontendUrls,
+      selectedDeployedUrl: deployedUrl,
+      environment: process.env.NODE_ENV || 'development'
     }
   });
 });
@@ -157,17 +167,29 @@ router.get(
       // Create a URL-safe JSON string of user data
       const userData = encodeURIComponent(JSON.stringify(userWithoutPassword));
       
-      // Safely get frontend URL
+      // Safely get frontend URL - prioritize deployed URL over localhost
       let frontendUrl = process.env.FRONTEND_URL;
       if (!frontendUrl) {
         console.error("FRONTEND_URL environment variable is not set");
         throw new Error("Frontend URL not configured");
       }
 
-      // Handle comma-separated URLs and get the first one
+      // Handle comma-separated URLs and prioritize deployed URL
       const frontendUrls = frontendUrl.split(',').map(url => url.trim());
-      const redirectUrl = frontendUrls[0];
+      let redirectUrl = frontendUrls[0]; // Default to first URL
       
+      // If we have multiple URLs, prefer the deployed one (not localhost)
+      if (frontendUrls.length > 1) {
+        const deployedUrl = frontendUrls.find(url => 
+          !url.includes('localhost') && !url.includes('127.0.0.1')
+        );
+        if (deployedUrl) {
+          redirectUrl = deployedUrl;
+        }
+      }
+      
+      console.log("Available frontend URLs:", frontendUrls);
+      console.log("Selected redirect URL:", redirectUrl);
       console.log("Redirecting to:", `${redirectUrl}/oauth-success`);
       
       // Redirect to frontend success page with token and user data
@@ -175,11 +197,22 @@ router.get(
     } catch (error) {
       console.error("OAuth callback error:", error);
       
-      // Safely handle error redirect
+      // Safely handle error redirect - also prioritize deployed URL
       let frontendUrl = process.env.FRONTEND_URL;
       if (frontendUrl) {
         const frontendUrls = frontendUrl.split(',').map(url => url.trim());
-        const redirectUrl = frontendUrls[0];
+        let redirectUrl = frontendUrls[0];
+        
+        // If we have multiple URLs, prefer the deployed one for error redirects too
+        if (frontendUrls.length > 1) {
+          const deployedUrl = frontendUrls.find(url => 
+            !url.includes('localhost') && !url.includes('127.0.0.1')
+          );
+          if (deployedUrl) {
+            redirectUrl = deployedUrl;
+          }
+        }
+        
         res.redirect(`${redirectUrl}/registration?error=authentication_failed`);
       } else {
         // Fallback error response

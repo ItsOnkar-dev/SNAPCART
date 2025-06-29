@@ -45,11 +45,17 @@ passport.use(
         console.log("Access token received:", !!accessToken);
         console.log("Refresh token received:", !!refreshToken);
         console.log("Callback URL:", `${process.env.BACKEND_URL}/auth/google/callback`);
+        console.log("Environment:", process.env.NODE_ENV || 'development');
         
         // Validate environment variables
         if (!process.env.BACKEND_URL) {
           console.error("BACKEND_URL environment variable is not set");
           return done(new Error("Backend URL not configured"), null);
+        }
+        
+        if (!process.env.FRONTEND_URL) {
+          console.error("FRONTEND_URL environment variable is not set");
+          return done(new Error("Frontend URL not configured"), null);
         }
         
         // Check database connection

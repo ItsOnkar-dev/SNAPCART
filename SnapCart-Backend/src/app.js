@@ -17,11 +17,27 @@ const app = express()
 
 dotenv.config();
 
-// Safely handle FRONTEND_URL environment variable
+// Safely handle FRONTEND_URL environment variable - prioritize deployed URL
 let allowedOrigins = ['http://localhost:5173']; // Default fallback
 if (process.env.FRONTEND_URL) {
-  allowedOrigins = process.env.FRONTEND_URL.split(',').map(url => url.trim());
+  const frontendUrls = process.env.FRONTEND_URL.split(',').map(url => url.trim());
+  
+  // If we have multiple URLs, prioritize the deployed one
+  if (frontendUrls.length > 1) {
+    const deployedUrl = frontendUrls.find(url => 
+      !url.includes('localhost') && !url.includes('127.0.0.1')
+    );
+    if (deployedUrl) {
+      allowedOrigins = [deployedUrl, ...frontendUrls.filter(url => url !== deployedUrl)];
+    } else {
+      allowedOrigins = frontendUrls;
+    }
+  } else {
+    allowedOrigins = frontendUrls;
+  }
 }
+
+console.log("CORS allowed origins:", allowedOrigins);
 
 app.use(cors({
   origin: allowedOrigins,
