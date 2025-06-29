@@ -325,4 +325,46 @@ router.get(
   })
 );
 
+// Test environment detection without OAuth
+router.get("/test-environment", (req, res) => {
+  const frontendUrls = process.env.FRONTEND_URL ? 
+    process.env.FRONTEND_URL.split(',').map(url => url.trim()) : [];
+  
+  const deployedUrl = frontendUrls.find(url => 
+    !url.includes('localhost') && !url.includes('127.0.0.1')
+  );
+  
+  const localhostUrl = frontendUrls.find(url => 
+    url.includes('localhost') || url.includes('127.0.0.1')
+  );
+  
+  // Simulate the state parameter that would be sent from frontend
+  const mockState = encodeURIComponent(JSON.stringify({ 
+    environment: req.query.env || 'production',
+    origin: req.query.origin || 'https://snapcart-now.netlify.app',
+    timestamp: Date.now()
+  }));
+  
+  let environment = req.query.env || 'production';
+  let selectedUrl = environment === 'development' ? localhostUrl : deployedUrl;
+  
+  res.json({
+    status: 'success',
+    message: 'Environment detection test',
+    testData: {
+      mockState: mockState,
+      parsedState: JSON.parse(decodeURIComponent(mockState)),
+      frontendUrls: frontendUrls,
+      deployedUrl: deployedUrl,
+      localhostUrl: localhostUrl,
+      testEnvironment: environment,
+      selectedUrl: selectedUrl
+    },
+    instructions: {
+      testLocalhost: `${req.protocol}://${req.get('host')}/auth/test-environment?env=development&origin=http://localhost:5173`,
+      testProduction: `${req.protocol}://${req.get('host')}/auth/test-environment?env=production&origin=https://snapcart-now.netlify.app`
+    }
+  });
+});
+
 export default router;
