@@ -2,24 +2,19 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import Logger from '../Config/Logger.js';
 
-dotenv.config()
+dotenv.config();
 
 const DB_URL = process.env.DB_URL || 'mongodb://localhost:27017/SnapCart_DB';
 
-class AppDataSource{
-  static async connect(retries = 5) {
-    while (retries) {
-      try {
-        await mongoose.connect(DB_URL) 
-        Logger.info("Successfully connected to database")
-        break;
-      } catch (error) {
-        Logger.error("DB connection failed, retrying...", { error });
-        retries -= 1;
-        await new Promise(res => setTimeout(res, 5000));
-      }
+class AppDataSource {
+  static async connect() {
+    try {
+      await mongoose.connect(DB_URL);
+      Logger.info("Successfully connected to database");
+    } catch (error) {
+      Logger.error("DB connection failed", { error });
+      throw new Error("Could not connect to DB: " + error.message);
     }
-    if (!retries) throw new Error("Could not connect to DB after multiple attempts");
   }
 }
 

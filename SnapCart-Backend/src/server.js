@@ -8,10 +8,15 @@ dotenv.config();
 const PORT = process.env.PORT || 5555;
 
 const connectDataSource = async () => {
-    await AppDataSource.connect()
-    app.listen(PORT, () => {
-        Logger.info(`Server is running on port ${PORT}`)
-    })
-}
+    try {
+        await AppDataSource.connect();
+        app.listen(PORT, () => {
+            Logger.info(`Server is running on port ${PORT}`);
+        });
+    } catch (err) {
+        Logger.error('Failed to connect to database. Server not started.', { error: err });
+        process.exit(1);
+    }
+};
 
-connectDataSource()
+connectDataSource();

@@ -11,10 +11,6 @@ import UserRepo from "../Repositories/UserRepo.js";
 import { loginAuthValidator, registerAuthValidator } from '../Validators/authValidator.js';
 
 dotenv.config();
-
-// SECURITY NOTE: All routes in this file are designed to not expose sensitive environment variables
-// like URLs, API keys, or database connections. Only status indicators are returned.
-
 const router = express.Router();
 
 // Simple test route to verify routing is working (no sensitive data)
