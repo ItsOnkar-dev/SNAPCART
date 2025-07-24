@@ -20,7 +20,7 @@ html {
 }
 
 body {
-  @apply font-bahnschrift;
+  @apply font-barlow;
 }
 
 /* ::-webkit-scrollbar {

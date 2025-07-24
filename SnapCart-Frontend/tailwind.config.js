@@ -9,6 +9,7 @@ export default {
     extend: {
       fontFamily: {
         bahnschrift: ["Bahnschrift", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", "Arial", "sans-serif"],
+        barlow: ["Barlow", "sans-serif"],
       },
     }
   },

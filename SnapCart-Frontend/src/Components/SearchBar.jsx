@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { GoSearch } from "react-icons/go";
 
 const SearchBar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [expandInput, setExpandInput] = useState(false);
   const [expandMobileInput, setExpandMobileInput] = useState(false);
+  const mobileInputRef = useRef(null);
 
   const handleSearchFocus = () => setExpandInput(true);
   const handleSearchBlur = () => setExpandInput(false);
@@ -17,8 +18,7 @@ const SearchBar = () => {
     setIsSearchOpen(!isSearchOpen);
     if (!isSearchOpen) {
       setTimeout(() => {
-        const inputElement = document.getElementById("mobileSearchInput");
-        if (inputElement) inputElement.focus();
+        if (mobileInputRef.current) mobileInputRef.current.focus();
       }, 100);
     }
   };
@@ -65,7 +65,7 @@ const SearchBar = () => {
           <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-lg p-4 shadow-lg">
             <div className="relative">
               <input
-                id="mobileSearchInput"
+                ref={mobileInputRef}
                 type="text"
                 placeholder="Search products..."
                 className={styles.mobileInputStyles(expandMobileInput)}
