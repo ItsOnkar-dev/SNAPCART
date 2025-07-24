@@ -30,15 +30,7 @@ const SellerContextProvider = ({ children }) => {
         return;
       }
 
-      // If seller was explicitly logged out, don't fetch data
-      if (isSellerLoggedOut) {
-        console.log("Seller was logged out, not fetching data");
-        setSeller(null);
-        setIsSellerLoading(false);
-        setHasCheckedSellerStatus(true);
-        return;
-      }
-
+      // Always fetch seller data if token exists, even if isSellerLoggedOut
       console.log("Fetching seller data with token");
       const response = await axios.get(`${API_BASE_URL}/sellers/current`, {
         headers: {
@@ -225,6 +217,7 @@ const SellerContextProvider = ({ children }) => {
     setIsSellerLoggedOut(true);
     localStorage.setItem("isSellerLoggedOut", "true"); // Persist the logout state
     toast.success("Successfully logged out from seller account!");
+    fetchSellerData(); // Immediately refresh seller info
     return true;
   };
 

@@ -52,7 +52,7 @@ const UserProfile = ({
       },
       ...profileTabs.slice(1),
     ];
-  } else if (isLoggedInAsSeller && seller) {
+  } else if (isLoggedIn && isLoggedInAsSeller) {
     tabs = [
       ...profileTabs.slice(0, 1),
       {
@@ -63,7 +63,7 @@ const UserProfile = ({
       },
       ...profileTabs.slice(1),
     ];
-  } else if (isSellerLoggedOut) {
+  } else if (isLoggedIn && seller && isSellerLoggedOut) {
     tabs = [
       ...profileTabs.slice(0, 1),
       {

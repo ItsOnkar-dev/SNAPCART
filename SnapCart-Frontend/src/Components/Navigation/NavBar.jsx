@@ -38,7 +38,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const location = useLocation();
   const cartContext = useCartContext();
   const { user, isLoggedIn } = useUserContext();
-  const { seller, isLoggedInAsSeller, isSellerLoggedOut } = useSellerContext();
+  const { seller } = useSellerContext();
 
   // Update displayName whenever user data changes
   useEffect(() => {
@@ -181,7 +181,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
             <SearchBar />
 
             {/* Become a Seller */}
-            {isLoggedIn && !isLoggedInAsSeller && !isSellerLoggedOut && (
+            {isLoggedIn && !seller && (
               <div
                 className={"hidden sm:block text-sm lg:text-base"}
                 onClick={handleIsLoggedIn}
@@ -194,7 +194,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                       : "text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white flex items-center gap-2"
                   }
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 font-semibold tracking-wide">
                     <BadgeIndianRupee />
                     <span>Become a Seller</span>
                   </div>
@@ -265,8 +265,8 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                   ref={profileIconRef}
                   className={`${
                     location.pathname === "/profile"
-                      ? "hidden sm:flex gap-2 items-center text-pink-500 placeholder:font-bold cursor-pointer"
-                      : "hidden sm:flex items-center gap-2 cursor-pointer text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white"
+                      ? "hidden sm:flex gap-2 items-center text-cyan-400 placeholder:font-bold cursor-pointer font-semibold"
+                      : "hidden sm:flex items-center gap-2 cursor-pointer font-semibold text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white"
                   }`}
                 >
                   {hasValidAvatar ? (
@@ -285,7 +285,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                       {getInitial()}
                     </div>
                   )}
-                  <h3 className="hidden lg:block text-sm lg:text-base">
+                  <h3 className="hidden lg:block text-sm lg:text-base tracking-wider">
                     {displayName}
                   </h3>
                   <span

@@ -98,7 +98,7 @@ const Sidebar = ({
         },
         ...items.slice(1),
       ];
-    } else if (isLoggedInAsSeller && seller) {
+    } else if (isLoggedIn && isLoggedInAsSeller) {
       items = [
         ...items.slice(0, 1),
         {
@@ -109,13 +109,24 @@ const Sidebar = ({
         },
         ...items.slice(1),
       ];
-    } else if (isSellerLoggedOut) {
+    } else if (isLoggedIn && seller && isSellerLoggedOut) {
       items = [
         ...items.slice(0, 1),
         {
           id: 6,
           icon: <Store size={20} />,
           title: "Login as Seller",
+          path: "/become-seller",
+        },
+        ...items.slice(1),
+      ];
+    } else if (isLoggedIn && !seller) {
+      items = [
+        ...items.slice(0, 1),
+        {
+          id: 6,
+          icon: <Store size={20} />,
+          title: "Become a Seller",
           path: "/become-seller",
         },
         ...items.slice(1),
@@ -221,7 +232,7 @@ const Sidebar = ({
           {navItems.map((item) => (
             <li
               key={item.id}
-              className="flex items-center gap-3 transition-all hover:duration-300 ease-in-out hover:skew-x-3 hover:skew-y-1 cursor-pointer tracking-wider text-sm"
+              className="flex items-center gap-3 transition-all hover:duration-300 ease-in-out hover:skew-x-3 hover:skew-y-1 cursor-pointer tracking-wider"
             >
               {item.onClick ? (
                 <div
