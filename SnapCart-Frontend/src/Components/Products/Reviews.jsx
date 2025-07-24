@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import ReviewContextProvider from "../../context/Review/ReviewContextProvider";
 import useReviewContext from "../../context/Review/useReviewContext";
 
-const ReviewsInner = ({ productId, isLoggedIn, onReviewsChange }) => {
+const ReviewsInner = ({ productId, isLoggedIn, user, onReviewsChange }) => {
   const {
     reviews,
     reviewsLoading,
@@ -198,26 +198,29 @@ const ReviewsInner = ({ productId, isLoggedIn, onReviewsChange }) => {
                         ? review.user.name
                         : "User"}
                     </h4>
-                    <div className="flex items-center gap-6">
-                      <button
-                        className="text-blue-500 hover:text-blue-700"
-                        title="Edit Review"
-                        onClick={() => handleEditReview(review)}
-                        disabled={editSubmitting || deleteSubmitting}
-                      >
-                        <Edit size={20} />
-                      </button>
-                      <button
-                        className="text-red-500 hover:text-red-700"
-                        title="Delete Review"
-                        onClick={() => handleDeleteReview(review._id)}
-                        disabled={
-                          deleteSubmitting === review._id || editSubmitting
-                        }
-                      >
-                        <Trash2 size={20} />
-                      </button>
-                    </div>
+                    {/* Only show edit/delete if current user is the author */}
+                    {user && review.user && user._id === review.user._id && (
+                      <div className="flex items-center gap-6">
+                        <button
+                          className="text-blue-500 hover:text-blue-700"
+                          title="Edit Review"
+                          onClick={() => handleEditReview(review)}
+                          disabled={editSubmitting || deleteSubmitting}
+                        >
+                          <Edit size={20} />
+                        </button>
+                        <button
+                          className="text-red-500 hover:text-red-700"
+                          title="Delete Review"
+                          onClick={() => handleDeleteReview(review._id)}
+                          disabled={
+                            deleteSubmitting === review._id || editSubmitting
+                          }
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                   {/* Edit form for this review */}
                   {editReviewId === review._id ? (
@@ -297,7 +300,7 @@ const Reviews = (props) => (
     productId={props.productId}
     isLoggedIn={props.isLoggedIn}
   >
-    <ReviewsInner {...props} />
+    <ReviewsInner {...props} user={props.user} />
   </ReviewContextProvider>
 );
 

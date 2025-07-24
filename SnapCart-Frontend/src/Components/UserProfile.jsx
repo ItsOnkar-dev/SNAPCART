@@ -228,7 +228,7 @@ const UserProfile = ({
                   ? "Admin"
                   : userData.role === "Seller" && isLoggedInAsSeller
                   ? "Seller"
-                  : "Customer"}
+                  : "Customer"} 
               </p>
             </div>
           </div>
