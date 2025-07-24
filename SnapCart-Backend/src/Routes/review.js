@@ -1,5 +1,5 @@
 import express from 'express'
-import { BadRequestError, InternalServerError, NotFoundError } from '../Core/ApiError.js'
+import { AuthorizationError, BadRequestError, InternalServerError, NotFoundError } from '../Core/ApiError.js'
 import catchAsync from '../Core/catchAsync.js'
 import { isLoggedIn } from '../Middlewares/Auth.js'
 import Product from '../Models/Product.js'
@@ -77,6 +77,14 @@ router.delete('/products/:productId/reviews/:reviewId', isLoggedIn, catchAsync(a
   const reviewIndex = product.reviews.findIndex(rid => rid.toString() === reviewId)
   if (reviewIndex === -1) throw NotFoundError('Review not found for this product')
 
+  // Fetch the review document
+  const reviewDoc = await Review.findById(reviewId)
+  if (!reviewDoc) throw NotFoundError('Review not found')
+  // Ownership check
+  if (reviewDoc.user.toString() !== req.userId.toString()) {
+    throw AuthorizationError('You are not authorized to delete this review')
+  }
+
   // Remove review from product
   product.reviews.splice(reviewIndex, 1)
   await product.save()
@@ -107,6 +115,14 @@ router.patch('/products/:productId/reviews/:reviewId', isLoggedIn, catchAsync(as
   // Check if review exists in product
   const reviewIndex = product.reviews.findIndex(rid => rid.toString() === reviewId);
   if (reviewIndex === -1) throw NotFoundError('Review not found for this product');
+
+  // Fetch the review document
+  const reviewDoc = await Review.findById(reviewId);
+  if (!reviewDoc) throw NotFoundError('Review not found');
+  // Ownership check
+  if (reviewDoc.user.toString() !== req.userId.toString()) {
+    throw AuthorizationError('You are not authorized to edit this review');
+  }
 
   // Update review document
   const updatedReview = await Review.findByIdAndUpdate(
