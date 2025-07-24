@@ -399,7 +399,7 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
                   <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
                     Or continue with
                   </div>
-                  <div className="flex  items-center before  justify-center space-x-5">
+                  <div className="flex  items-center justify-center space-x-5">
                     <button
                       type="button"
                       className={styles.socialButton}
@@ -407,13 +407,13 @@ const Register = ({ isModalOpen, isLogin, closeModal, toggleForm }) => {
                     >
                       <div className={styles.socialButtonInner}>
                         <FaGoogle className="text-base" />
-                        <h4 className="mt-1">Google</h4>
+                        <h4>Google</h4>
                       </div>
                     </button>
                     <button type="button" className={styles.socialButton}>
                       <div className={styles.socialButtonInner}>
                         <FaApple className="text-xl" />
-                        <h4 className="mt-1">Apple</h4>
+                        <h4>Apple</h4>
                       </div>
                     </button>
                   </div>

@@ -135,21 +135,6 @@ const UserProfile = ({
     }, 300);
   };
 
-  // Handle logout modal close
-  const handleLogoutModalClose = () => {
-    setShowLogoutConfirmation(false);
-    // Make profile modal visible again
-    if (isOpen) {
-      setTimeout(() => setIsVisible(true), 10);
-    }
-  };
-
-  // Handle successful logout completion
-  const handleLogoutComplete = () => {
-    // No need to set showLogoutConfirmation to false as the component will unmount
-    onClose();
-  };
-
   const modalClasses = `
     fixed z-50 right-0 
     transition-all duration-500 ease-in-out
@@ -232,7 +217,7 @@ const UserProfile = ({
               )}
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-800 dark:text-white">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white tracking-wider">
                 {userData.name || userData.username || "User"}
               </h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
@@ -256,9 +241,9 @@ const UserProfile = ({
               <button
                 key={tab.id}
                 onClick={() => handleTabClick(tab)}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md transition-all duration-500 transform hover:translate-x-1 ${
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-md transition-all duration-500 transform hover:translate-x-1 tracking-wider ${
                   tab.path && activeTab === tab.path
-                    ? "bg-gray-100 dark:bg-gray-700"
+                    ? "bg-gray-100 dark:bg-gray-700 font-semibold"
                     : ""
                 }`}
               >

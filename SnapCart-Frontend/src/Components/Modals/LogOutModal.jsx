@@ -55,7 +55,7 @@ const LogOutModal = ({ isOpen, onClose, onLogoutComplete }) => {
         }`}
       >
         {/* Modal Header */}
-        <h2 className="text-2xl mb-4 font-bold text-gray-800 dark:text-white">
+        <h2 className="text-2xl mb-4 font-bold text-gray-800 dark:text-white tracking-wider">
           Confirm Logout
         </h2>
 

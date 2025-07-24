@@ -328,10 +328,10 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                     }
                   }
                 }}
-                className="hidden sm:flex items-center gap-1 text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white"
+                className="hidden sm:flex font-semibold items-center gap-1 text-black/60 dark:text-white/80 hover:text-black dark:hover:text-white"
               >
                 <UserRound />
-                <span className="">Login/Register</span>
+                <span>Login/Register</span>
               </NavLink>
             )}
           </div>

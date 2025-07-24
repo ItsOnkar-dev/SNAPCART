@@ -221,11 +221,11 @@ const Sidebar = ({
           {navItems.map((item) => (
             <li
               key={item.id}
-              className="flex items-center gap-3 transition-all hover:duration-300 ease-in-out hover:skew-x-3 hover:skew-y-1 cursor-pointer tracking-wide"
+              className="flex items-center gap-3 transition-all hover:duration-300 ease-in-out hover:skew-x-3 hover:skew-y-1 cursor-pointer tracking-wider text-sm"
             >
               {item.onClick ? (
                 <div
-                  className="flex items-center gap-3 md:gap-1 cursor-pointer text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                  className="flex items-center gap-3 md:gap-1  cursor-pointer text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                   onClick={item.onClick}
                 >
                   {item.icon}
@@ -238,7 +238,7 @@ const Sidebar = ({
                   className={({ isActive }) =>
                     `flex items-center gap-3 md:gap-1 ${
                       isActive
-                        ? "brightness-125 font-semibold tracking-wide"
+                        ? "brightness-125 font-semibold tracking-wider"
                         : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                     }`
                   }
