@@ -6,7 +6,6 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  font-family:'Bahnschrift', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   font-display: swap;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -18,6 +17,10 @@ body,
 html {
   overflow-x: hidden;
   transition: background-color 0.2s, color 0.2s;
+}
+
+body {
+  @apply font-bahnschrift;
 }
 
 /* ::-webkit-scrollbar {

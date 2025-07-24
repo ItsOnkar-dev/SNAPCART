@@ -73,7 +73,7 @@ const SearchBar = () => {
                 onBlur={handleMobileSearchBlur}
                 autoFocus
               />
-              <GoSearch className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer text-xl hover:text-white" />
+              <GoSearch className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer text-xl hover:text-black dark:hover:text-white" />
             </div>
           </div>
         </div>

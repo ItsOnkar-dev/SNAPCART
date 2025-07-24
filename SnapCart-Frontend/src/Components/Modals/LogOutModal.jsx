@@ -26,7 +26,7 @@ const LogOutModal = ({ isOpen, onClose, onLogoutComplete }) => {
       logout();
 
       if (onClose) onClose();
-      navigate("/");
+      navigate("/registration");
 
       if (onLogoutComplete) onLogoutComplete();
     }, 300);

@@ -62,7 +62,7 @@ const Sidebar = ({
   }, []);
 
   const handleLogoutComplete = useCallback(() => {
-    navigate("/");
+    navigate("/registration");
     if (isSidebarOpen) {
       toggleSidebar();
     }

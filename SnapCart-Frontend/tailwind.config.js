@@ -6,7 +6,11 @@ export default {
   ],
   darkMode: 'class',
   theme: {
-    extend: {}
+    extend: {
+      fontFamily: {
+        bahnschrift: ["Bahnschrift", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", "Arial", "sans-serif"],
+      },
+    }
   },
   plugins: []
 }
