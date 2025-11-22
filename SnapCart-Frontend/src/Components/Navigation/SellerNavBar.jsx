@@ -2,12 +2,15 @@
 /* eslint-disable no-unused-vars */
 import { Moon, Sun } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { MdMenu } from "react-icons/md";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import SnapCartLogo2 from "../../assets/SnapCartLog01.png";
 import SnapCartLogo3 from "../../assets/SnapCartLogo2.png";
 import useSellerContext from "../../context/Seller/useSellerContext";
+import useSidebarContext from "../../context/Sidebar/useSidebarContext";
 import useUserContext from "../../context/User/useUserContext";
 import DeleteSellerModal from "../Modals/Seller/DeleteSellerModal";
+import Sidebar from "./Sidebar";
 
 const SellerNavBar = ({
   isDark,
@@ -19,6 +22,7 @@ const SellerNavBar = ({
   const { isLoggedIn } = useUserContext();
   const { seller, logoutSeller, isLoggedInAsSeller, refreshSellerData } =
     useSellerContext();
+  const { isSidebarOpen, toggleSidebar } = useSidebarContext();
 
   useEffect(() => {
     if (isLoggedIn && isLoggedInAsSeller) {
@@ -46,6 +50,11 @@ const SellerNavBar = ({
     <>
       <nav className="fixed top-0 w-full p-4 md:px-10 z-30 transition-colors duration-300 bg-[rgb(255,255,255)] dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800">
         <div className="flex items-center justify-between">
+          {/* Mobile Menu Button */}
+          <button className="sm:hidden" onClick={toggleSidebar}>
+            <MdMenu className="text-2xl" />
+          </button>
+
           {/* Logo */}
           <NavLink to="/" className="flex items-center gap-2">
             <img
@@ -117,6 +126,14 @@ const SellerNavBar = ({
           </div>
         </div>
       </nav>
+
+      {/* Sidebar Component */}
+      <Sidebar
+        isSidebarOpen={isSidebarOpen}
+        toggleSidebar={toggleSidebar}
+        isDark={isDark}
+        handleThemeToggle={handleThemeToggle}
+      />
 
       {/* Delete Account Modal */}
       <DeleteSellerModal

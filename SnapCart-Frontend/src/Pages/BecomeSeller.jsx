@@ -1,4 +1,6 @@
 /* eslint-disable react/prop-types */
+import { motion } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -179,6 +181,20 @@ const BecomeSeller = ({ isDark, toggleDarkMode }) => {
           openRegisterModal={handleStartSelling}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+          {/* Back Button */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <button
+              onClick={() => navigate("/")}
+              className="p-2 rounded-lg bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-shadow"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          </motion.div>
+
           {/* Hero Section */}
           <div className="text-center mb-16">
             <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">

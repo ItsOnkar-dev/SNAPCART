@@ -147,7 +147,11 @@ const AdminContextProvider = ({ children }) => {
 
   // Fetch dashboard data when component mounts and user is admin
   useEffect(() => {
-    fetchDashboardData();
+    // Only fetch if user is loaded and is admin
+    if (user && user.role === "PlatformAdmin") {
+      fetchDashboardData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const value = {

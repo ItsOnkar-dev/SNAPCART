@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -175,6 +177,22 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
       <SellerNavbar isDark={isDark} toggleDarkMode={toggleDarkMode} />
       <div className="min-h-screen mt-16 pt-6 bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-slate-800">
         <div className="container mx-auto p-6 md:p-8 max-w-7xl">
+          {/* Back Button and Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="flex items-center gap-4 mb-6">
+              <button
+                onClick={() => navigate("/")}
+                className="p-2 rounded-lg bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-shadow"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            </div>
+          </motion.div>
+
           {/* Header Section with Stats */}
           <div className="mb-12 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex flex-col gap-2 items-center md:items-start">

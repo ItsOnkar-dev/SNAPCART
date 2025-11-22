@@ -19,13 +19,13 @@ import SnapCartLogo3 from "../../assets/SnapCartLogo2.png";
 import UserProfile from "../../Components/UserProfile";
 import useCartContext from "../../context/Cart/useCartContext";
 import useSellerContext from "../../context/Seller/useSellerContext";
+import useSidebarContext from "../../context/Sidebar/useSidebarContext";
 import useUserContext from "../../context/User/useUserContext";
 import LogOutModal from "../Modals/LogOutModal";
 import SearchBar from "../SearchBar";
 import Sidebar from "./Sidebar";
 
 const NavBar = ({ isDark, toggleDarkMode }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const profileIconRef = useRef(null);
@@ -39,6 +39,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   const cartContext = useCartContext();
   const { user, isLoggedIn } = useUserContext();
   const { seller } = useSellerContext();
+  const { isSidebarOpen, toggleSidebar } = useSidebarContext();
 
   // Update displayName whenever user data changes
   useEffect(() => {
@@ -58,13 +59,6 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
   useEffect(() => {
     console.log("[NavBar] isLoggedIn:", isLoggedIn);
   }, [isLoggedIn]);
-
-  const toggleSidebar = useCallback(() => {
-    setIsSidebarOpen((prev) => {
-      document.body.style.overflow = !prev ? "hidden" : "auto";
-      return !prev;
-    });
-  }, []);
 
   const handleThemeToggle = useCallback(
     (e) => {

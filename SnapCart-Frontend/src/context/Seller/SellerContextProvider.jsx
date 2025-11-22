@@ -36,6 +36,8 @@ const SellerContextProvider = ({ children }) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        // Add timeout to prevent hanging requests
+        timeout: 10000, // 10 seconds
       });
 
       if (response.data.status === "success" && response.data.data) {
@@ -48,6 +50,7 @@ const SellerContextProvider = ({ children }) => {
     } catch (error) {
       console.error("Error fetching seller data:", error);
       setSeller(null);
+      // Only set error for non-404 errors (404 means user is not a seller, which is fine)
       if (error.response && error.response.status !== 404) {
         setErrors({ fetch: "Failed to fetch seller information" });
       }
@@ -57,9 +60,17 @@ const SellerContextProvider = ({ children }) => {
     }
   };
 
-  // Load seller data on initial mount
+  // Load seller data on initial mount - but only if we have a token
   useEffect(() => {
-    fetchSellerData();
+    const token = localStorage.getItem("token");
+    // Only fetch if token exists to avoid unnecessary API calls
+    if (token) {
+      fetchSellerData();
+    } else {
+      // No token, so definitely no seller
+      setIsSellerLoading(false);
+      setHasCheckedSellerStatus(true);
+    }
   }, []);
 
   // Login as seller

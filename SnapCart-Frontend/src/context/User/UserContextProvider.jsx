@@ -29,6 +29,8 @@ const UserContextProvider = ({ children }) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        // Add timeout to prevent hanging requests
+        timeout: 10000, // 10 seconds
       });
 
       setIsLoggedIn(true);

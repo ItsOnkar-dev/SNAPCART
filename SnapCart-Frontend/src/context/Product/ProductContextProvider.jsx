@@ -1,6 +1,6 @@
 import axios from "axios";
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ProductContext from "./ProductContext";
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
@@ -10,32 +10,58 @@ const ProductContextProvider = ({ children }) => {
   const [sellerProducts, setSellerProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const fetchProductsPromiseRef = useRef(null);
+  const hasFetchedRef = useRef(false);
 
-  // Fetch all products (public)
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${API_BASE_URL}/api/products`);
-      if (res.data && Array.isArray(res.data.data)) {
-        setProducts(res.data.data);
-        setError(null);
-      } else {
-        setProducts([]);
-        setError(res.data?.message || "Unexpected response format");
-      }
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Failed to load products. Please try again."
-      );
-      setProducts([]);
-    } finally {
-      setLoading(false);
+  // Fetch all products (public) with request deduplication
+  const fetchProducts = useCallback(async (forceRefresh = false) => {
+    // If already fetching, return the existing promise
+    if (fetchProductsPromiseRef.current && !forceRefresh) {
+      return fetchProductsPromiseRef.current;
     }
-  };
+
+    // If already fetched and not forcing refresh, skip
+    if (hasFetchedRef.current && !forceRefresh) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchPromise = (async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${API_BASE_URL}/api/products`, {
+          // Add cache control to prevent unnecessary requests
+          headers: {
+            "Cache-Control": "no-cache",
+          },
+          timeout: 10000, // 10 seconds timeout
+        });
+        if (res.data && Array.isArray(res.data.data)) {
+          setProducts(res.data.data);
+          setError(null);
+          hasFetchedRef.current = true;
+        } else {
+          setProducts([]);
+          setError(res.data?.message || "Unexpected response format");
+        }
+      } catch (err) {
+        setError(
+          err.response?.data?.message ||
+            "Failed to load products. Please try again."
+        );
+        setProducts([]);
+      } finally {
+        setLoading(false);
+        fetchProductsPromiseRef.current = null;
+      }
+    })();
+
+    fetchProductsPromiseRef.current = fetchPromise;
+    return fetchPromise;
+  }, []);
 
   // Fetch products for the logged-in seller
-  const fetchSellerProducts = async () => {
+  const fetchSellerProducts = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       console.log("No token found, cannot fetch seller products");
@@ -44,11 +70,12 @@ const ProductContextProvider = ({ children }) => {
     }
 
     try {
-      setLoading(true);
+      // Don't set global loading for seller products to avoid blocking UI
       console.log("Fetching seller products with token:", token);
       // Use the my-products endpoint which uses the token to identify the seller
       const res = await axios.get(`${API_BASE_URL}/api/my-products`, {
         headers: { Authorization: `Bearer ${token}` },
+        timeout: 10000, // 10 seconds timeout
       });
 
       console.log("Seller products response:", res.data);
@@ -77,10 +104,8 @@ const ProductContextProvider = ({ children }) => {
         success: false,
         error: err.response?.data?.message || "Failed to load products",
       };
-    } finally {
-      setLoading(false);
     }
-  };
+  }, []);
 
   // Get a single product by ID (from public list)
   const getProductById = (productId) => {
@@ -162,7 +187,7 @@ const ProductContextProvider = ({ children }) => {
 
       if (response.data && response.data.data) {
         // Re-fetch both seller products and public products to ensure state is in sync with backend
-        await Promise.all([fetchSellerProducts(), fetchProducts()]);
+        await Promise.all([fetchSellerProducts(), fetchProducts(true)]);
         return { success: true, data: response.data.data };
       } else {
         return {
@@ -196,7 +221,7 @@ const ProductContextProvider = ({ children }) => {
 
       if (response.data && response.data.status === "success") {
         // Re-fetch both seller products and public products to ensure state is in sync with backend
-        await Promise.all([fetchSellerProducts(), fetchProducts()]);
+        await Promise.all([fetchSellerProducts(), fetchProducts(true)]);
         return { success: true };
       } else {
         return {
@@ -219,17 +244,17 @@ const ProductContextProvider = ({ children }) => {
       .slice(0, limit);
   };
 
-  // Load all products on mount
+  // Load all products on mount (only once)
   useEffect(() => {
     fetchProducts();
     // We'll load seller products in the ProductManagement component when needed
-  }, []);
+  }, [fetchProducts]);
 
   // Listen for seller deletion event
   useEffect(() => {
     const handleSellerDeleted = () => {
       console.log("Seller deleted, refreshing products");
-      fetchProducts();
+      fetchProducts(true); // Force refresh when seller is deleted
     };
 
     window.addEventListener("sellerDeleted", handleSellerDeleted);
@@ -237,7 +262,7 @@ const ProductContextProvider = ({ children }) => {
     return () => {
       window.removeEventListener("sellerDeleted", handleSellerDeleted);
     };
-  }, []);
+  }, [fetchProducts]);
 
   // Context value
   const value = {
