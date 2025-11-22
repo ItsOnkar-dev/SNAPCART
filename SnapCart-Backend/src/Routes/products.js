@@ -24,9 +24,14 @@ const sendResponse = (res, { status = 'success', statusCode = 200, message = '',
 // Get All products (public)
 router.get('/products', catchAsync(async(req, res) => {
   Logger.info("Fetch all products request received")
-  const products = await Product.find({}).populate('sellerId', 'username').lean();
-  if (!products || products.length === 0) throw NotFoundError('Products not found');
-  return sendResponse(res, { message: 'Fetched all the products successfully', data: products });
+  // Optimize query: select only needed fields, limit population, add sort for consistency
+  const products = await Product.find({})
+    .populate('sellerId', 'username')
+    .select('title description image price sellerId createdAt')
+    .sort({ createdAt: -1 })
+    .lean();
+  // Return empty array instead of error if no products (better for frontend)
+  return sendResponse(res, { message: 'Fetched all the products successfully', data: products || [] });
 }));
 
 // Get products for the logged-in seller (private)

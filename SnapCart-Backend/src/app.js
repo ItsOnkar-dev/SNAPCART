@@ -28,8 +28,6 @@ if (process.env.FRONTEND_URL) {
   allowedOrigins = ['http://localhost:5173'];
 }
 
-console.log("CORS allowed origins:", allowedOrigins);
-
 app.use(cors({
   origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] ,
