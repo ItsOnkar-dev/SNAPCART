@@ -4,7 +4,6 @@ import catchAsync from '../Core/catchAsync.js'
 import { isLoggedIn } from '../Middlewares/Auth.js'
 import Product from '../Models/Product.js'
 import Review from '../Models/Reviews.js'
-import Seller from '../Models/Seller.js'
 
 const router = express.Router()
 
@@ -34,8 +33,7 @@ router.post('/products/:productId/reviews', isLoggedIn, catchAsync(async (req, r
   if (!product) throw NotFoundError('Product not found')
 
   // Check if the logged-in user is the seller of this product
-  const seller = await Seller.findById(product.sellerId)
-  if (seller && seller.userId.toString() === req.userId.toString()) {
+  if (product.sellerId.toString() === req.userId.toString()) {
     throw BadRequestError('You cannot review your own product')
   }
 

@@ -13,6 +13,8 @@ import productRoutes from './Routes/products.js'
 import reviewRoutes from './Routes/review.js'
 import sellerRoutes from './Routes/sellers.js'
 import userRoutes from './Routes/users.js'
+import cartRoutes from './Routes/cart.js'
+import orderRoutes from './Routes/orders.js'
 
 const app = express()
 
@@ -77,6 +79,8 @@ app.use(globalLimiter)
 
 app.use('/api', productRoutes) // Add product routes
 app.use('/api', reviewRoutes) // Add review routes
+app.use('/api', cartRoutes) // Add cart routes
+app.use('/api', orderRoutes) // Add order routes
 app.use('/user', userRoutes) // Add user routes
 app.use('/auth', authRoutes) // Add auth routes
 app.use(sellerRoutes)

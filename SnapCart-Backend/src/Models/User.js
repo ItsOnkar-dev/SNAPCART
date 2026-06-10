@@ -43,9 +43,23 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  sellerProfile: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Seller'
+  sellerDetails: {
+    phone: {
+      type: String,
+      trim: true
+    },
+    businessName: {
+      type: String,
+      trim: true
+    },
+    businessAddress: {
+      type: String,
+      trim: true
+    },
+    isVerified: {
+      type: Boolean,
+      default: false
+    }
   },
   avatar: {
     type: String
@@ -60,13 +74,20 @@ const userSchema = new mongoose.Schema({
   }
 }, { timestamps: true, versionKey: false })
 
-// Middleware to ensure role and isPlatformAdmin stay in sync
+// Middleware to ensure role, isPlatformAdmin, and isSeller stay in sync
 userSchema.pre('save', function(next) {
   if (this.role === 'PlatformAdmin') {
     this.isPlatformAdmin = true;
   } else {
     this.isPlatformAdmin = false;
   }
+  
+  if (this.role === 'Seller') {
+    this.isSeller = true;
+  } else {
+    this.isSeller = false;
+  }
+  
   next();
 });
 

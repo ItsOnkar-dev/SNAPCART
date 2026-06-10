@@ -1,19 +1,16 @@
-import bcrypt from 'bcrypt';
 import express from 'express';
 import { validationResult } from 'express-validator';
 import mongoose from 'mongoose';
 import Logger from '../Config/Logger.js';
-import { AuthenticationError, BadRequestError, InternalServerError, NotFoundError } from '../Core/ApiError.js';
+import { AuthenticationError, BadRequestError, NotFoundError } from '../Core/ApiError.js';
 import catchAsync from '../Core/catchAsync.js';
 import { isLoggedIn } from '../Middlewares/Auth.js';
 import Product from '../Models/Product.js';
-import Seller from '../Models/Seller.js';
 import User from '../Models/User.js';
-import { createSellerValidator, sellerLoginValidator } from '../Validators/sellerValidator.js';
+import { createSellerValidator } from '../Validators/sellerValidator.js';
 
 const router = express.Router();
 
-// Utility for standardized API responses
 const sendResponse = (res, { status = 'success', statusCode = 200, message = '', data = null, errors = null }) => {
   const response = { status, message };
   if (data !== null) response.data = data;
@@ -24,7 +21,7 @@ const sendResponse = (res, { status = 'success', statusCode = 200, message = '',
 // Get all the sellers
 router.get('/sellers', catchAsync(async (req, res) => {
   Logger.info("Fetching all sellers");
-  const sellers = await Seller.find({}).lean();
+  const sellers = await User.find({ role: 'Seller' }).select('username email sellerDetails createdAt').lean();
   
   if (!sellers || sellers.length === 0) {
     throw NotFoundError('No sellers found');
@@ -33,24 +30,29 @@ router.get('/sellers', catchAsync(async (req, res) => {
   return sendResponse(res, { message: 'Fetched all sellers successfully', data: sellers });
 }));
 
-// Get the seller of the current user
+// Get the seller data of the current user
 router.get('/sellers/current', isLoggedIn, catchAsync(async (req, res) => {
   Logger.info("Fetching the seller data of the current user");
   
-  // Make sure req.user exists and has an _id
-  if (!req.user || !req.userId) {
-    throw new AuthenticationError('User is not authenticated');
-  }
+  const user = await User.findById(req.userId).select('-password').lean();
   
-  const seller = await Seller.findOne({ userId: req.userId });
-  
-  if (!seller) {
-    throw InternalServerError('No seller found');
+  if (!user || user.role !== 'Seller' || !user.sellerDetails) {
+    throw NotFoundError('No seller profile found for your account');
   }
   
   return sendResponse(res, { 
     message: 'Fetched seller data successfully',
-    data: seller
+    data: {
+      _id: user._id,
+      userId: user._id,
+      username: user.username,
+      email: user.email,
+      phone: user.sellerDetails.phone,
+      businessName: user.sellerDetails.businessName,
+      businessAddress: user.sellerDetails.businessAddress,
+      isVerified: user.sellerDetails.isVerified,
+      createdAt: user.createdAt
+    }
   });   
 }));
 
@@ -59,25 +61,20 @@ router.get('/sellers/check-email', catchAsync(async (req, res) => {
   const { email } = req.query;
   
   if (!email) {
-    throw BadRequestError("Email parameter is required")
+    throw BadRequestError("Email parameter is required");
   }
   
-  const seller = await Seller.findOne({ email }).lean();
+  const user = await User.findOne({ email, role: 'Seller' }).lean();
   
   return sendResponse(res, { 
-    message: seller ? 'Email is associated with a seller account' : 'Email is not associated with a seller account',
-    data: { exists: !!seller }
+    message: user ? 'Email is associated with a seller account' : 'Email is not associated with a seller account',
+    data: { exists: !!user }
   });
 }));
 
-// Create a new seller profile for the logged-in user
+// Create a new seller profile for the logged-in user (role upgrade)
 router.post('/sellers', isLoggedIn, createSellerValidator, catchAsync(async (req, res) => {
-  Logger.info("Create seller profile request received", { userId: req.userId, body: req.body });
-
-  // Check if user is properly authenticated
-  if (!req.user || !req.userId) {
-    throw AuthenticationError("User not authenticated properly")
-  }
+  Logger.info("Upgrade user to seller request received", { userId: req.userId, body: req.body });
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -89,151 +86,124 @@ router.post('/sellers', isLoggedIn, createSellerValidator, catchAsync(async (req
     });
   }
 
-  const { username, email, phone, password } = req.body;
+  const { phone, businessName, businessAddress } = req.body;
 
-  // Check if the user already has a seller profile
-  const existingSeller = await Seller.findOne({ userId: req.userId });
-  if (existingSeller) {
+  // Find user
+  const user = await User.findById(req.userId);
+  if (!user) {
+    throw NotFoundError("User not found");
+  }
+
+  // Check if user is already a seller
+  if (user.role === 'Seller' && user.sellerDetails) {
     return sendResponse(res, {
       status: 'error',
       statusCode: 400,
-      message: 'You already have a seller account, please login from that account'
+      message: 'You already have a seller account'
     });
   }
 
-  // Check if email is already used by another seller
-  const emailExists = await Seller.findOne({ email });
-  if (emailExists) {
-    return sendResponse(res, {
-      status: 'error',
-      statusCode: 400,
-      message: 'This email is already registered as a seller'
-    });
-  }
-
-  // Hash the password
-  const passwordHash = await bcrypt.hash(password, 12);
-
-  // Create the seller profile
-  const newSeller = await Seller.create({
-    username,
-    email,
+  // Upgrade user's details and role
+  user.role = 'Seller';
+  user.isSeller = true;
+  user.sellerDetails = {
     phone,
-    password: passwordHash,
-    userId: req.userId // Link the seller profile to the logged-in user's ID
-  });
+    businessName,
+    businessAddress,
+    isVerified: false
+  };
 
-  // Update the user's role to Seller
-  await User.findByIdAndUpdate(req.userId, { role: 'Seller' });
+  await user.save();
 
-  // Remove password from response
-  const { password: _, ...sellerWithoutPassword } = newSeller.toObject();
+  const userObject = user.toObject();
+  delete userObject.password;
 
   return sendResponse(res, { 
     message: 'Seller account created successfully', 
-    data: sellerWithoutPassword 
+    data: {
+      _id: user._id,
+      userId: user._id,
+      username: user.username,
+      email: user.email,
+      phone: user.sellerDetails.phone,
+      businessName: user.sellerDetails.businessName,
+      businessAddress: user.sellerDetails.businessAddress,
+      isVerified: user.sellerDetails.isVerified,
+      createdAt: user.createdAt
+    }
   });
 }));
 
-// Login for seller
-router.post('/sellers/login', isLoggedIn, sellerLoginValidator, catchAsync(async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    throw BadRequestError("Email and password are required")
-  }
-
-  // Find seller by both email and userId (strict matching)
-  const seller = await Seller.findOne({ 
-    email: email,
-    userId: req.userId 
-  }).lean();
-  
-  if (!seller) {
+// Deprecated Login endpoint for compatibility with frontend code prior to refactor
+router.post('/sellers/login', isLoggedIn, catchAsync(async (req, res) => {
+  const user = await User.findById(req.userId).lean();
+  if (!user || user.role !== 'Seller') {
     return sendResponse(res, {
       status: 'error',
       statusCode: 401,
-      message: 'No seller account found with this email for your user account. Please register as a seller first.'
+      message: 'No seller profile found for your account. Please register.'
     });
   }
 
-  // Verify password
-  const isPasswordValid = await bcrypt.compare(password, seller.password);
-  if (!isPasswordValid) {
-    return sendResponse(res, {
-      status: 'error',
-      statusCode: 401,
-      message: 'Invalid password'
-    });
-  }
-  
-  // Remove password from response
-  const { password: _, ...sellerWithoutPassword } = seller;
-  
   return sendResponse(res, { 
+    message: 'Logged in successfully',
     data: { 
-      sellerId: seller._id,
-      sellerInfo: sellerWithoutPassword,
-      message: 'Logged in successfully',
+      sellerId: user._id,
+      sellerInfo: {
+        _id: user._id,
+        userId: user._id,
+        username: user.username,
+        email: user.email,
+        phone: user.sellerDetails?.phone,
+        businessName: user.sellerDetails?.businessName,
+        businessAddress: user.sellerDetails?.businessAddress,
+        isVerified: user.sellerDetails?.isVerified,
+      }
     } 
   });
 }));
 
-// Delete seller account
+// Delete seller account (revert back to buyer)
 router.delete('/sellers/current', isLoggedIn, catchAsync(async (req, res) => {
-  Logger.info("Delete seller account request received", { userId: req.userId });
+  Logger.info("Revert seller account request received", { userId: req.userId });
 
-  // Check if user is properly authenticated
-  if (!req.user || !req.userId) {
-    throw new AuthenticationError("User not authenticated properly");
-  }
-
-  // Find the seller profile
-  const seller = await Seller.findOne({ userId: req.userId });
-  if (!seller) {
+  const user = await User.findById(req.userId);
+  if (!user || user.role !== 'Seller') {
     throw new NotFoundError("Seller profile not found");
   }
 
-  // Start a session for transaction
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    // First, get all product IDs associated with this seller
-    const sellerProducts = await Product.find({ sellerId: seller._id }).select('_id');
-    const productIds = sellerProducts.map(product => product._id);
+    // Delete all products associated with this seller (sellerId is now user._id)
+    const deletedProducts = await Product.deleteMany({ sellerId: user._id }, { session });
 
-    // Delete all products associated with this seller
-    await Product.deleteMany({ sellerId: seller._id }, { session });
+    // Update user role back to Buyer and clear seller details
+    user.role = 'Buyer';
+    user.isSeller = false;
+    user.sellerDetails = undefined;
+    await user.save({ session });
 
-    // Delete the seller profile
-    await Seller.findByIdAndDelete(seller._id, { session });
-
-    // Update user role back to Buyer
-    await User.findByIdAndUpdate(req.userId, { role: 'Buyer' }, { session });
-
-    // Commit the transaction
     await session.commitTransaction();
 
-    Logger.info("Seller account and associated products deleted successfully", {
-      sellerId: seller._id,
-      deletedProductCount: productIds.length
+    Logger.info("Seller profile reverted and products deleted successfully", {
+      userId: user._id,
+      deletedProductCount: deletedProducts.deletedCount
     });
 
     return sendResponse(res, {
-      message: 'Seller account and all associated products deleted successfully',
+      message: 'Seller account reverted to buyer and products deleted successfully',
       status: 'success',
       data: {
-        deletedProductCount: productIds.length
+        deletedProductCount: deletedProducts.deletedCount
       }
     });
   } catch (error) {
-    // If an error occurs, abort the transaction
     await session.abortTransaction();
     Logger.error("Error deleting seller account:", error);
     throw error;
   } finally {
-    // End the session
     session.endSession();
   }
 }));

@@ -61,8 +61,7 @@ router.get('/recent-orders', isLoggedIn, platformAdminOnly, catchAsync(async (re
 // Get all sellers
 router.get('/sellers', isLoggedIn, platformAdminOnly, catchAsync(async (req, res) => {
   const sellers = await User.find({ role: 'Seller' })
-    .select('-password')
-    .populate('sellerProfile');
+    .select('-password');
 
   return sendResponse(res, {
     message: 'Sellers fetched successfully',

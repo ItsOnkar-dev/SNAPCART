@@ -19,7 +19,7 @@ const ProductSchema = new mongoose.Schema({
   },
   sellerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Seller',
+    ref: 'User',
     required: [true, 'Seller ID is required'],
     index: true
   },
@@ -31,6 +31,10 @@ const ProductSchema = new mongoose.Schema({
   versionKey: false,
   timestamps: true
 })
+
+ProductSchema.index({ title: 'text', description: 'text' })
+ProductSchema.index({ price: 1 })
+ProductSchema.index({ createdAt: -1 })
 
 const Product = mongoose.model('Product', ProductSchema)
 

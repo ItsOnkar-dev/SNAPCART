@@ -6,8 +6,9 @@ import catchAsync from '../Core/catchAsync.js'
 import { isLoggedIn } from '../Middlewares/Auth.js'
 import Product from '../Models/Product.js'
 import Review from '../Models/Reviews.js'
-import Seller from '../Models/Seller.js'
+import User from '../Models/User.js'
 import { createProductValidator, updateProductValidator } from '../Validators/productValidator.js'
+import { buildProductSearchFilter, getSortOption, parseSearchParams } from '../Utils/searchUtils.js'
 
 const router = express.Router(); // Creates a new instance of an Express Router. The Router in Express is like a mini Express application that you can use to handle routes separately instead of defining all routes in server.js.
 
@@ -34,18 +35,78 @@ router.get('/products', catchAsync(async(req, res) => {
   return sendResponse(res, { message: 'Fetched all the products successfully', data: products || [] });
 }));
 
+// Advanced product search (public) — must be registered before /products/:productId
+router.get('/products/search', catchAsync(async (req, res) => {
+  const { q, minPrice, maxPrice, sort, page, limit, suggest } = parseSearchParams(req.query)
+  const filter = buildProductSearchFilter({ q, minPrice, maxPrice })
+  const sortOption = getSortOption(sort, Boolean(q))
+  const skip = (page - 1) * limit
+  const effectiveLimit = suggest ? Math.min(limit, 8) : limit
+
+  const [products, total] = await Promise.all([
+    Product.find(filter)
+      .populate('sellerId', 'username')
+      .select('title description image price sellerId createdAt')
+      .sort(sortOption)
+      .skip(skip)
+      .limit(effectiveLimit)
+      .lean(),
+    Product.countDocuments(filter),
+  ])
+
+  return sendResponse(res, {
+    message: q ? `Found ${total} result${total !== 1 ? 's' : ''} for "${q}"` : 'Products fetched successfully',
+    data: {
+      products: products || [],
+      pagination: {
+        page,
+        limit: effectiveLimit,
+        total,
+        totalPages: Math.ceil(total / effectiveLimit) || 0,
+      },
+      meta: { query: q, minPrice, maxPrice, sort, suggest },
+    },
+  })
+}))
+
+// Get products by seller ID — must be registered before /products/:productId
+router.get('/products/seller/:sellerId', isLoggedIn, catchAsync(async (req, res) => {
+  const { sellerId } = req.params;
+
+  if (!sellerId) {
+    throw BadRequestError("Seller ID is required");
+  }
+
+  const seller = await User.findOne({
+    _id: sellerId,
+    role: 'Seller'
+  });
+
+  if (!seller) {
+    throw NotFoundError("Seller profile not found");
+  }
+
+  const products = await Product.find({ sellerId }).sort({ createdAt: -1 });
+
+  return res.status(200).json({
+    status: 'success',
+    message: 'Products fetched successfully',
+    data: products
+  });
+}));
+
 // Get products for the logged-in seller (private)
 router.get('/my-products', isLoggedIn, catchAsync(async(req, res) => {
   Logger.info("Fetch seller's own products request received")
   
   // Check if user has a seller profile
-  const seller = await Seller.findOne({ userId: req.userId });
-  if (!seller) {
+  const seller = await User.findById(req.userId);
+  if (!seller || seller.role !== 'Seller') {
     throw AuthenticationError("You need to create a seller profile first");
   }
 
-  // Use seller._id to find products
-  const products = await Product.find({ sellerId: seller._id }).lean();
+  // Use user id as sellerId
+  const products = await Product.find({ sellerId: req.userId }).lean();
   return sendResponse(res, { message: 'Fetched your products successfully', data: products });
 }));
 
@@ -65,8 +126,8 @@ router.post('/products', isLoggedIn, createProductValidator, (req, res, next) =>
   }
 
   // Get the seller profile first
-  const seller = await Seller.findOne({ userId: req.userId });
-  if (!seller) {
+  const seller = await User.findById(req.userId);
+  if (!seller || seller.role !== 'Seller') {
     throw AuthenticationError("You need to create a seller profile first");
   }
 
@@ -76,7 +137,7 @@ router.post('/products', isLoggedIn, createProductValidator, (req, res, next) =>
       description, 
       image, 
       price: parseFloat(price),
-      sellerId: seller._id // Use Seller's _id
+      sellerId: req.userId // Use User's _id
     }
   );
 
@@ -109,8 +170,8 @@ router.route('/products/:productId')
   const { title, description, image, price } = req.body;
   
   // Get the seller profile first
-  const seller = await Seller.findOne({ userId: req.userId });
-  if (!seller) {
+  const seller = await User.findById(req.userId);
+  if (!seller || seller.role !== 'Seller') {
     throw AuthenticationError("You need to create a seller profile first");
   }
   
@@ -118,8 +179,8 @@ router.route('/products/:productId')
   const productExists = await Product.findById(productId);
   if (!productExists) throw NotFoundError('Failed to update product');
 
-  // Then check if user owns the product using seller._id
-  if (productExists.sellerId.toString() !== seller._id.toString()) {
+  // Then check if user owns the product using sellerId
+  if (productExists.sellerId.toString() !== req.userId.toString()) {
     throw AuthorizationError('You do not have permission to update this product');
   }
 
@@ -142,8 +203,8 @@ router.route('/products/:productId')
   const { productId } = req.params;
   
   // Get the seller profile first
-  const seller = await Seller.findOne({ userId: req.userId });
-  if (!seller) {
+  const seller = await User.findById(req.userId);
+  if (!seller || seller.role !== 'Seller') {
     throw AuthenticationError("You need to create a seller profile first");
   }
 
@@ -153,8 +214,8 @@ router.route('/products/:productId')
     throw NotFoundError('Product not found');
   }
 
-  // Then check if user owns the product using seller._id
-  if (productExists.sellerId.toString() !== seller._id.toString()) {
+  // Then check if user owns the product using sellerId
+  if (productExists.sellerId.toString() !== req.userId.toString()) {
     throw AuthorizationError('You do not have permission to delete this product');
   }
 
@@ -171,33 +232,6 @@ router.route('/products/:productId')
   }
 
   return sendResponse(res, { message: 'Product deleted successfully' });
-}));
-
-// Get products by seller ID
-router.get('/products/seller/:sellerId', isLoggedIn, catchAsync(async (req, res) => {
-  const { sellerId } = req.params;
-  
-  if (!sellerId) {
-    throw BadRequestError("Seller ID is required");
-  }
-
-  // Find the seller to verify ownership
-  const seller = await Seller.findOne({ 
-    _id: sellerId,
-    userId: req.userId 
-  });
-
-  if (!seller) {
-    throw AuthenticationError("You are not authorized to view these products");
-  }
-
-  const products = await Product.find({ sellerId }).sort({ createdAt: -1 });
-
-  return res.status(200).json({
-    status: 'success',
-    message: 'Products fetched successfully',
-    data: products
-  });
 }));
 
 export default router;
