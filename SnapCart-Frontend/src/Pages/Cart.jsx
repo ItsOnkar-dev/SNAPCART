@@ -327,14 +327,7 @@ const Cart = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
-                onClick={() => {
-                  toast.info("Checkout functionality coming soon!", {
-                    position: "top-center",
-                    autoClose: 2000,
-                  });
-                  // TODO: Navigate to checkout page when implemented
-                  // navigate("/checkout");
-                }}
+                onClick={() => navigate("/checkout")}
               >
                 <CreditCard className="w-5 h-5" />
                 Proceed to Checkout

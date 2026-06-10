@@ -2,6 +2,7 @@
 /* eslint-disable react/prop-types */
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import UserContext from "./UserContext";
 
@@ -11,6 +12,7 @@ const UserContextProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchUserProfile = async () => {
     const token = window.localStorage.getItem("token");
@@ -114,11 +116,11 @@ const UserContextProvider = ({ children }) => {
 
       // Navigate based on user role
       if (userObj.role === "PlatformAdmin") {
-        window.location.href = "/";
+        navigate("/");
       } else if (userObj.role === "Seller") {
-        window.location.href = "/seller/dashboard";
+        navigate("/seller/dashboard");
       } else {
-        window.location.href = "/";
+        navigate("/");
       }
 
       return true;
@@ -260,6 +262,7 @@ const UserContextProvider = ({ children }) => {
     deletedAccount,
     downloadUserData,
     handleOAuthSuccess,
+    fetchUserProfile
   };
 
   return (

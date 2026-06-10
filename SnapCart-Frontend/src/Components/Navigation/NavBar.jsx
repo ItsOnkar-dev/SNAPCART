@@ -68,7 +68,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
         toggleSidebar();
       }
     },
-    [toggleDarkMode, isSidebarOpen, toggleSidebar]
+    [toggleDarkMode, isSidebarOpen, toggleSidebar],
   );
 
   const handleProfileHover = () => {
@@ -111,7 +111,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
       activeStyles:
         "flex items-center gap-3 md:gap-1 brightness-125 font-semibold tracking-wide duration-300",
     }),
-    []
+    [],
   );
 
   // Safely get the first character of the display name
@@ -214,6 +214,7 @@ const NavBar = ({ isDark, toggleDarkMode }) => {
                 </div>
               </div>
             </NavLink>
+            
             <NavLink
               to="/cart"
               className={({ isActive }) =>

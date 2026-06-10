@@ -16,8 +16,10 @@ import Cart from "./Pages/Cart";
 import Contact from "./Pages/Contact";
 import Home from "./Pages/Home";
 import ProductDetails from "./Pages/ProductDetails";
+import SearchResults from "./Pages/SearchResults";
 import Profile from "./Pages/Profile";
 import WishList from "./Pages/WishList";
+import Checkout from "./Pages/Checkout";
 import useUserContext from "./context/User/useUserContext";
 
 // Get initial theme from localStorage or system preference
@@ -68,6 +70,7 @@ const App = () => {
         <main>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/search" element={<SearchResults />} />
             <Route path="/registration" element={<Registration />} />
             <Route path="/oauth-success" element={<OAuthSuccess />} />
             <Route path="/about" element={<About />} />
@@ -108,10 +111,10 @@ const App = () => {
               }
             />
 
-            {/* Private routes starts here! */}
             <Route element={<PrivateRoute isAuthenticated={isLoggedIn} />}>
               <Route path="/products/:productId" element={<ProductDetails />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
               <Route path="/wishlist" element={<WishList />} />
             </Route>
           </Routes>

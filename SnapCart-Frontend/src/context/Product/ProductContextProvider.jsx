@@ -10,7 +10,12 @@ const ProductContextProvider = ({ children }) => {
   const [sellerProducts, setSellerProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState(null);
+  const [searchMeta, setSearchMeta] = useState(null);
   const fetchProductsPromiseRef = useRef(null);
+  const searchAbortRef = useRef(null);
   const hasFetchedRef = useRef(false);
 
   // Fetch all products (public) with request deduplication
@@ -237,6 +242,88 @@ const ProductContextProvider = ({ children }) => {
     }
   };
 
+  const searchProducts = useCallback(async (params = {}) => {
+    if (searchAbortRef.current) {
+      searchAbortRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    searchAbortRef.current = controller;
+
+    const {
+      q = "",
+      minPrice,
+      maxPrice,
+      sort = "relevance",
+      page = 1,
+      limit = 20,
+      suggest = false,
+    } = params;
+
+    const trimmedQuery = q.trim();
+    if (suggest && trimmedQuery.length < 2) {
+      setSearchResults([]);
+      setSearchMeta(null);
+      setSearchError(null);
+      setSearchLoading(false);
+      return { success: true, data: { products: [], pagination: { total: 0 } } };
+    }
+
+    try {
+      setSearchLoading(true);
+      setSearchError(null);
+
+      const queryParams = new URLSearchParams();
+      if (trimmedQuery) queryParams.set("q", trimmedQuery);
+      if (minPrice != null && minPrice !== "") queryParams.set("minPrice", minPrice);
+      if (maxPrice != null && maxPrice !== "") queryParams.set("maxPrice", maxPrice);
+      if (sort) queryParams.set("sort", sort);
+      queryParams.set("page", String(page));
+      queryParams.set("limit", String(limit));
+      if (suggest) queryParams.set("suggest", "true");
+
+      const res = await axios.get(
+        `${API_BASE_URL}/api/products/search?${queryParams.toString()}`,
+        { signal: controller.signal, timeout: 10000 }
+      );
+
+      if (res.data?.data) {
+        const { products: results, pagination, meta } = res.data.data;
+        setSearchResults(results || []);
+        setSearchMeta({ pagination, meta });
+        return { success: true, data: res.data.data };
+      }
+
+      setSearchResults([]);
+      setSearchMeta(null);
+      return { success: false, error: res.data?.message || "Search failed" };
+    } catch (err) {
+      if (err.name === "CanceledError" || err.code === "ERR_CANCELED") {
+        return { success: false, canceled: true };
+      }
+      const message =
+        err.response?.data?.message || "Search failed. Please try again.";
+      setSearchError(message);
+      setSearchResults([]);
+      setSearchMeta(null);
+      return { success: false, error: message };
+    } finally {
+      if (!controller.signal.aborted) {
+        setSearchLoading(false);
+      }
+    }
+  }, []);
+
+  const clearSearch = useCallback(() => {
+    if (searchAbortRef.current) {
+      searchAbortRef.current.abort();
+    }
+    setSearchResults([]);
+    setSearchMeta(null);
+    setSearchError(null);
+    setSearchLoading(false);
+  }, []);
+
   // Get related products (excluding the current product)
   const getRelatedProducts = (currentProductId, limit = 4) => {
     return products
@@ -270,8 +357,14 @@ const ProductContextProvider = ({ children }) => {
     sellerProducts, // only for logged-in seller
     loading,
     error,
+    searchResults,
+    searchLoading,
+    searchError,
+    searchMeta,
     fetchProducts,
     fetchSellerProducts,
+    searchProducts,
+    clearSearch,
     getProductById,
     addProduct,
     updateProduct,
