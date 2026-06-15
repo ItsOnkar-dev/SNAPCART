@@ -32,7 +32,7 @@ const Sidebar = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoggedIn, user } = useUserContext();
-  const { isLoggedInAsSeller, seller, isSellerLoggedOut } = useSellerContext();
+  const { isLoggedInAsSeller, seller } = useSellerContext();
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
   const handleLogin = useCallback(() => {
@@ -106,17 +106,6 @@ const Sidebar = ({
           icon: <Store size={20} />,
           title: "Manage Products",
           path: "/seller/dashboard",
-        },
-        ...items.slice(1),
-      ];
-    } else if (isLoggedIn && seller && isSellerLoggedOut) {
-      items = [
-        ...items.slice(0, 1),
-        {
-          id: 6,
-          icon: <Store size={20} />,
-          title: "Login as Seller",
-          path: "/become-seller",
         },
         ...items.slice(1),
       ];

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SellerContext from "./SellerContext";
+import useUserContext from "../User/useUserContext";
 
 const SellerContextProvider = ({ children }) => {
   const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
@@ -11,10 +12,7 @@ const SellerContextProvider = ({ children }) => {
   const [isSellerLoading, setIsSellerLoading] = useState(true);
   const [errors, setErrors] = useState({});
   const [hasCheckedSellerStatus, setHasCheckedSellerStatus] = useState(false);
-  const [isSellerLoggedOut, setIsSellerLoggedOut] = useState(() => {
-    // Initialize from localStorage
-    return localStorage.getItem("isSellerLoggedOut") === "true";
-  });
+  const { logout } = useUserContext();
 
   // Try to fetch current seller if user is logged in
   const fetchSellerData = async () => {
@@ -23,34 +21,27 @@ const SellerContextProvider = ({ children }) => {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        console.log("No token found, clearing seller state");
         setSeller(null);
         setIsSellerLoading(false);
         setHasCheckedSellerStatus(true);
         return;
       }
 
-      // Always fetch seller data if token exists, even if isSellerLoggedOut
-      console.log("Fetching seller data with token");
       const response = await axios.get(`${API_BASE_URL}/sellers/current`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        // Add timeout to prevent hanging requests
-        timeout: 10000, // 10 seconds
+        timeout: 10000,
       });
 
       if (response.data.status === "success" && response.data.data) {
-        console.log("Seller data fetched successfully:", response.data.data);
         setSeller(response.data.data);
       } else {
-        console.log("No seller data found in response");
         setSeller(null);
       }
     } catch (error) {
       console.error("Error fetching seller data:", error);
       setSeller(null);
-      // Only set error for non-404 errors (404 means user is not a seller, which is fine)
       if (error.response && error.response.status !== 404) {
         setErrors({ fetch: "Failed to fetch seller information" });
       }
@@ -60,60 +51,20 @@ const SellerContextProvider = ({ children }) => {
     }
   };
 
-  // Load seller data on initial mount - but only if we have a token
   useEffect(() => {
     const token = localStorage.getItem("token");
-    // Only fetch if token exists to avoid unnecessary API calls
     if (token) {
       fetchSellerData();
     } else {
-      // No token, so definitely no seller
       setIsSellerLoading(false);
       setHasCheckedSellerStatus(true);
     }
   }, []);
 
-  // Login as seller
+  // Login as seller is no longer needed since it's unified, but kept for compatibility
   const loginSeller = async (credentials) => {
-    setErrors(null);
-    try {
-      // Get the token from localStorage
-      const token = localStorage.getItem("token");
-      if (!token) {
-        const errorMsg = "You must be logged in to access seller features";
-        toast.error(errorMsg);
-        setErrors({ login: errorMsg });
-        throw new Error(errorMsg);
-      }
-
-      // Include the token in the request header
-      const response = await axios.post(
-        `${API_BASE_URL}/sellers/login`,
-        credentials,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data && response.data.data) {
-        // Update seller state immediately
-        setSeller(response.data.data);
-        setIsSellerLoggedOut(false);
-        localStorage.removeItem("isSellerLoggedOut"); // Clear the logout flag
-        toast.success(response.data.message || "Logged in successfully!");
-        return response.data.data;
-      } else {
-        throw new Error(response.data?.message || "Failed to login");
-      }
-    } catch (error) {
-      const errorMsg =
-        error.response?.data?.message || error.message || "Failed to login";
-      toast.error(errorMsg);
-      setErrors({ login: errorMsg });
-      throw error;
-    }
+    // Deprecated
+    return null;
   };
 
   // Create new seller
@@ -132,7 +83,6 @@ const SellerContextProvider = ({ children }) => {
       });
 
       if (response.data && response.data.data) {
-        // Update seller state immediately
         setSeller(response.data.data);
         toast.success(
           response.data.message || "Seller account created successfully!"
@@ -176,7 +126,7 @@ const SellerContextProvider = ({ children }) => {
   };
 
   // Helper to check if user is logged in as seller
-  const isLoggedInAsSeller = Boolean(seller) && !isSellerLoggedOut;
+  const isLoggedInAsSeller = Boolean(seller);
 
   // Update seller information
   const updateSeller = async (sellerId, sellerData) => {
@@ -222,17 +172,14 @@ const SellerContextProvider = ({ children }) => {
     }
   };
 
-  // Logout from seller account (but maintain user login)
+  // Logout from seller account actually logs out the user completely now
   const logoutSeller = () => {
     setSeller(null);
-    setIsSellerLoggedOut(true);
-    localStorage.setItem("isSellerLoggedOut", "true"); // Persist the logout state
-    toast.success("Successfully logged out from seller account!");
-    fetchSellerData(); // Immediately refresh seller info
+    logout(); // calls the UserContext logout
     return true;
   };
 
-  // Refresh seller data (can be called after login or other operations)
+  // Refresh seller data
   const refreshSellerData = () => {
     return fetchSellerData();
   };
@@ -253,13 +200,10 @@ const SellerContextProvider = ({ children }) => {
       });
 
       if (response.data && response.data.status === "success") {
-        // Clear seller state
         setSeller(null);
-        // Clear any cached product data
         localStorage.removeItem("sellerProducts");
         sessionStorage.removeItem("sellerProducts");
 
-        // Force a refresh of the public products list
         window.dispatchEvent(new CustomEvent("sellerDeleted"));
 
         toast.success(
@@ -289,7 +233,6 @@ const SellerContextProvider = ({ children }) => {
         isSellerLoading,
         errors,
         loginSeller,
-        isSellerLoggedOut,
         createSeller,
         checkSellerEmail,
         hasCheckedSellerStatus,
