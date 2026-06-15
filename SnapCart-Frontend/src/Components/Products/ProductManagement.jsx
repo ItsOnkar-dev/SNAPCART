@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Plus, Edit2, Trash2, Package, Tag, IndianRupee, Image as ImageIcon } from "lucide-react";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +26,6 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
   const [productToDelete, setProductToDelete] = useState(null);
   const [isDeleteSellerModalOpen, setIsDeleteSellerModalOpen] = useState(false);
 
-  // Use custom hook for scrolling
   const { ref: productFormRef, scrollToElement } = useScrollToElement({
     behavior: "smooth",
     block: "start",
@@ -34,7 +33,6 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
 
   const navigate = useNavigate();
 
-  // Get product and seller context
   const {
     sellerProducts,
     addProduct,
@@ -44,24 +42,18 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
   } = useProductContext();
   const { seller, logoutSeller } = useSellerContext();
 
-  // Fetch products when seller data is available
   useEffect(() => {
     let isMounted = true;
-
     const loadProducts = async () => {
       if (seller?._id && isMounted) {
         try {
-          console.log("Fetching products for seller:", seller._id);
-          const result = await fetchSellerProducts();
-          console.log("Fetched products result:", result);
+          await fetchSellerProducts();
         } catch (error) {
           console.error("Error loading products:", error);
         }
       }
     };
-
     loadProducts();
-
     return () => {
       isMounted = false;
     };
@@ -73,29 +65,17 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
   };
 
   const handleCreateProduct = async (e) => {
-    e.preventDefault(); // Prevent the default form submission
-
+    e.preventDefault();
     try {
-      console.log("Creating product with data:", newProduct);
       const result = await addProduct(newProduct);
-      console.log("Create product result:", result);
-
       if (result.success) {
         toast.success("Product created successfully!");
-        // Clear form or reset state as needed
-        setNewProduct({
-          title: "",
-          description: "",
-          image: "",
-          price: "",
-        });
-        // Refetch products after successful creation
+        setNewProduct({ title: "", description: "", image: "", price: "" });
         await fetchSellerProducts();
       } else {
         toast.error(result.error || "Failed to create product");
       }
     } catch (error) {
-      console.error("Error creating product:", error);
       toast.error(error.message || "Failed to create product");
     }
   };
@@ -113,23 +93,18 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
       image: product.image,
       price: product.price,
     });
-
     scrollToForm();
   };
 
   const handleUpdateProduct = async (e) => {
     e.preventDefault();
-
     if (!selectedProduct) return;
-
     const result = await updateProduct(selectedProduct._id, newProduct);
-
     if (result.success) {
       setNewProduct({ title: "", description: "", image: "", price: "" });
       setEditMode(false);
       setSelectedProduct(null);
       toast.success("Product updated successfully!");
-      // Refetch products after successful update
       await fetchSellerProducts();
     } else {
       toast.error(result.error || "Failed to update product");
@@ -146,7 +121,6 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
       const result = await deleteProduct(productToDelete);
       if (result.success) {
         toast.success("Product deleted successfully!");
-        // Refetch products after successful deletion
         await fetchSellerProducts();
       } else {
         toast.error(result.error || "Failed to delete product");
@@ -172,595 +146,374 @@ const ProductManagement = ({ isDark, toggleDarkMode }) => {
     navigate("/become-seller");
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+  };
+
   return (
     <>
       <SellerNavbar isDark={isDark} toggleDarkMode={toggleDarkMode} />
-      <div className="min-h-screen mt-16 pt-6 bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-slate-800">
-        <div className="container mx-auto p-6 md:p-8 max-w-7xl">
-          {/* Back Button and Header */}
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pt-24 pb-12 px-4 md:px-10 font-sans text-slate-800 dark:text-slate-200">
+        <div className="max-w-7xl mx-auto">
+          {/* Header Section */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10"
           >
-            <div className="flex items-center gap-4 mb-6">
-              <button
-                onClick={() => navigate("/")}
-                className="p-2 rounded-lg bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-shadow"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-            </div>
-          </motion.div>
-
-          {/* Header Section with Stats */}
-          <div className="mb-12 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex flex-col gap-2 items-center md:items-start">
-              <h1 className="text-3xl sm:text-5xl font-extrabold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400">
-                Product Management
-              </h1>
+            <div>
+              <div className="flex items-center gap-4 mb-2">
+                <button
+                  onClick={() => navigate("/")}
+                  className="p-2 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow text-slate-600 dark:text-slate-300"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Seller Dashboard
+                </h1>
+              </div>
+              
               {seller && (
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient flex items-center justify-center text-white text-xl font-bold">
-                      {seller.username?.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-lg font-medium text-gray-600 dark:text-white/70">
-                        Welcome back,{" "}
-                        <span className="text-blue-600 dark:text-blue-400 font-bold">
-                          {seller.username}
-                        </span>
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Manage your products with ease
-                      </p>
-                    </div>
+                <div className="mt-4 flex items-center gap-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-md p-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm inline-flex">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xl font-bold shadow-md">
+                    {seller.username?.charAt(0).toUpperCase()}
                   </div>
-                  {/* Mobile-only buttons */}
-                  <div className="flex sm:hidden items-center justify-center gap-4 mt-4">
+                  <div>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Welcome back,</p>
+                    <p className="text-lg font-bold text-slate-800 dark:text-white leading-tight">
+                      {seller.username}
+                    </p>
+                  </div>
+                  <div className="ml-4 pl-4 border-l border-slate-200 dark:border-slate-700 flex gap-2 hidden sm:flex">
                     <button
                       onClick={handleLogout}
-                      className="px-4 py-1.5 text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 border border-gray-600 dark:border-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900/20 rounded-md transition-colors"
+                      className="px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                     >
                       Logout
                     </button>
-
                     <button
                       onClick={() => setIsDeleteSellerModalOpen(true)}
-                      className="px-4 py-1.5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 border border-red-600 dark:border-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                      className="px-3 py-1.5 text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
                     >
                       Delete Account
                     </button>
                   </div>
                 </div>
               )}
-              <p className="text-gray-600 dark:text-white/70 max-w-2xl mt-4">
-                Create, update, and manage your product inventory with ease. Add
-                detailed descriptions and attractive images to showcase your
-                offerings to potential customers.
-              </p>
             </div>
-            <div className="flex flex-col gap-4">
-              {sellerProducts.length > 0 && (
-                <button
-                  onClick={scrollToForm}
-                  className="group bg-gradient text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 transition-transform duration-300 group-hover:rotate-90"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
-                  Add New Product
-                </button>
-              )}
-            </div>
-          </div>
+
+            {sellerProducts.length > 0 && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={scrollToForm}
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl shadow-md shadow-blue-500/20 transition-all"
+              >
+                <Plus size={20} />
+                Add New Product
+              </motion.button>
+            )}
+          </motion.div>
 
           {/* Quick Stats Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border-l-4 border-blue-500 transform hover:-translate-y-1 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Total Products
-                  </p>
-                  <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                    {sellerProducts.length}
-                  </h3>
-                </div>
-                <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 text-blue-600 dark:text-blue-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                    />
-                  </svg>
-                </div>
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
+          >
+            <motion.div variants={itemVariants} className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 flex items-center justify-between hover:shadow-md transition-shadow group">
+              <div>
+                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Total Products</p>
+                <h3 className="text-3xl font-bold tracking-tight text-slate-800 dark:text-white group-hover:text-blue-500 transition-colors">
+                  {sellerProducts.length}
+                </h3>
               </div>
-            </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border-l-4 border-green-500 transform hover:-translate-y-1 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Active Products
-                  </p>
-                  <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                    {sellerProducts.length}
-                  </h3>
-                </div>
-                <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 text-green-600 dark:text-green-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
+              <div className="p-4 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/40 dark:to-blue-800/20 rounded-2xl border border-blue-100 dark:border-blue-800/30">
+                <Package className="text-blue-600 dark:text-blue-400" size={28} />
               </div>
-            </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border-l-4 border-purple-500 transform hover:-translate-y-1 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Total Value
-                  </p>
-                  <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                    ₹
-                    {sellerProducts
-                      .reduce((sum, product) => sum + Number(product.price), 0)
-                      .toFixed(2)}
-                  </h3>
-                </div>
-                <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 text-purple-600 dark:text-purple-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 flex items-center justify-between hover:shadow-md transition-shadow group">
+              <div>
+                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Active Listings</p>
+                <h3 className="text-3xl font-bold tracking-tight text-slate-800 dark:text-white group-hover:text-emerald-500 transition-colors">
+                  {sellerProducts.length}
+                </h3>
               </div>
-            </div>
-          </div>
+              <div className="p-4 bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/40 dark:to-emerald-800/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
+                <Tag className="text-emerald-600 dark:text-emerald-400" size={28} />
+              </div>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 flex items-center justify-between hover:shadow-md transition-shadow group">
+              <div>
+                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Inventory Value</p>
+                <h3 className="text-3xl font-bold tracking-tight text-slate-800 dark:text-white group-hover:text-purple-500 transition-colors">
+                  ₹{sellerProducts.reduce((sum, product) => sum + Number(product.price), 0).toLocaleString()}
+                </h3>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/40 dark:to-purple-800/20 rounded-2xl border border-purple-100 dark:border-purple-800/30">
+                <IndianRupee className="text-purple-600 dark:text-purple-400" size={28} />
+              </div>
+            </motion.div>
+          </motion.div>
 
           {/* Product List Section */}
-          <div className="mb-8">
+          <div className="mb-12">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
-                Your Products
-                <span className="ml-3 inline-flex items-center justify-center px-3 py-1 text-sm font-bold leading-none text-blue-100 bg-blue-500 rounded-full">
-                  {Array.isArray(sellerProducts) ? sellerProducts.length : 0}
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
+                Your Inventory
+                <span className="inline-flex items-center justify-center px-3 py-1 text-sm font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full">
+                  {sellerProducts.length}
                 </span>
               </h2>
-              {sellerProducts.length > 0 && (
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>Click on a product to edit or delete</span>
-                </div>
-              )}
             </div>
 
-            {Array.isArray(sellerProducts) && sellerProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {sellerProducts.length > 0 ? (
+              <motion.div 
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              >
                 {sellerProducts.map((product) => (
-                  <div
+                  <motion.div
+                    variants={itemVariants}
                     key={product._id}
-                    className="bg-white dark:bg-slate-800 rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl transform hover:-translate-y-2 border-b-4 border-transparent hover:border-blue-500"
+                    className="group bg-white dark:bg-slate-800 rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 dark:border-slate-700/50 overflow-hidden transition-all duration-300 flex flex-col h-full"
                   >
-                    <div className="relative h-56 overflow-hidden group">
+                    <div className="relative h-48 overflow-hidden bg-slate-100 dark:bg-slate-700">
                       <img
                         src={product.image || "/api/placeholder/300/200"}
                         alt={product.title}
-                        className="w-full h-full object-cover transition-transform duration-500 transform group-hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-700 transform group-hover:scale-110"
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src = "/api/placeholder/300/200";
                         }}
                       />
-                      <div className="absolute top-0 right-0 mt-4 mr-4">
-                        <span className="bg-gradient-to-r from-green-400 to-green-500 text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-md">
-                          ₹{product.price}
-                        </span>
+                      <div className="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-slate-900 dark:text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+                        ₹{Number(product.price).toLocaleString()}
                       </div>
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300"></div>
                     </div>
 
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold mb-2 text-slate-800 dark:text-white">
+                    <div className="p-5 flex flex-col flex-grow">
+                      <h3 className="text-lg font-bold mb-2 text-slate-800 dark:text-white truncate">
                         {product.title}
                       </h3>
-                      <p className="text-slate-600 dark:text-white/60 mb-4 line-clamp-3">
+                      <p className="text-slate-500 dark:text-slate-400 text-sm mb-5 line-clamp-2 flex-grow">
                         {product.description}
                       </p>
 
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 mt-auto">
                         <button
                           onClick={() => handleEditClick(product)}
-                          className="flex-1 bg-gradient-to-r from-indigo-400 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-300 flex items-center justify-center transform hover:-translate-y-1"
+                          className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium py-2 rounded-xl transition-colors flex items-center justify-center gap-2"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 mr-1.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
+                          <Edit2 size={16} />
                           Edit
                         </button>
                         <button
                           onClick={() => handleDeleteProduct(product._id)}
-                          className="flex-1 bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-300 flex items-center justify-center transform hover:-translate-y-1"
+                          className="flex-1 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 font-medium py-2 rounded-xl transition-colors flex items-center justify-center gap-2 border border-rose-100 dark:border-rose-800/50"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 mr-1.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
+                          <Trash2 size={16} />
                           Delete
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             ) : (
-              <div className="flex flex-col items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-md p-12 text-center">
-                <div className="text-blue-500 dark:text-blue-400 mb-6">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-24 w-24"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1}
-                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                    />
-                  </svg>
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center justify-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 p-12 text-center"
+              >
+                <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-6">
+                  <Package className="w-10 h-10 text-blue-500" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-700 dark:text-white mb-3">
-                  No Products Found
+                <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
+                  No Products Yet
                 </h3>
-                <p className="text-gray-500 dark:text-gray-300 mb-8 max-w-md">
-                  You haven&apos;t created any products yet. Get started by
-                  creating your first product above!
+                <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm">
+                  Start building your inventory by adding your first product listing.
                 </p>
                 <button
                   onClick={scrollToForm}
-                  className="bg-gradient text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 transform hover:-translate-y-1 flex items-center"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
-                  Create Your First Product
+                  <Plus size={20} />
+                  Add First Product
                 </button>
-              </div>
+              </motion.div>
             )}
           </div>
 
-          {/* Create/Edit Product Form */}
-          <div
+          {/* Form Section */}
+          <motion.div
             ref={productFormRef}
-            className="bg-white dark:bg-slate-800 rounded-xl shadow-xl p-8 mb-12 transition-all duration-300 transform hover:shadow-2xl border-l-4 border-blue-500"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className={`bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6 md:p-8 relative overflow-hidden ${
+              editMode ? "ring-2 ring-indigo-500 ring-offset-2 dark:ring-offset-slate-900" : ""
+            }`}
           >
-            <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+            {editMode && (
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500" />
+            )}
+            
+            <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100 dark:border-slate-700/50">
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
                 {editMode ? (
                   <>
-                    <span className="text-blue-600 dark:text-blue-400">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6 inline mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
+                    <span className="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 p-2 rounded-xl">
+                      <Edit2 size={24} />
                     </span>
-                    Edit Product: {selectedProduct?.title}
+                    Edit Listing
                   </>
                 ) : (
                   <>
-                    <span className="text-green-600 dark:text-green-400">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6 inline mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                        />
-                      </svg>
+                    <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 p-2 rounded-xl">
+                      <Plus size={24} />
                     </span>
-                    Create New Product
+                    Create Listing
                   </>
                 )}
               </h2>
               {editMode && (
                 <button
                   onClick={resetForm}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-4 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-sm font-medium"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  Cancel Edit
                 </button>
               )}
             </div>
 
-            <form
-              onSubmit={editMode ? handleUpdateProduct : handleCreateProduct}
-            >
+            <form onSubmit={editMode ? handleUpdateProduct : handleCreateProduct}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1">
-                  <label
-                    htmlFor="title"
-                    className="block text-gray-700 dark:text-white/80 text-sm font-semibold mb-2"
-                  >
-                    Product Title <span className="text-red-500">*</span>
+                <div className="space-y-2">
+                  <label className="block text-slate-700 dark:text-slate-300 text-sm font-semibold">
+                    Product Title
                   </label>
                   <input
                     type="text"
-                    id="title"
                     name="title"
                     value={newProduct.title}
                     onChange={handleInputChange}
-                    className="shadow-sm appearance-none border border-gray-300 dark:border-gray-500 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-white/80 dark:bg-slate-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="Enter product name"
+                    className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    placeholder="E.g. Premium Wireless Headphones"
                     required
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label
-                    htmlFor="price"
-                    className="block text-gray-700 dark:text-white/80 text-sm font-semibold mb-2"
-                  >
-                    Price (₹) <span className="text-red-500">*</span>
+                <div className="space-y-2">
+                  <label className="block text-slate-700 dark:text-slate-300 text-sm font-semibold">
+                    Price (₹)
                   </label>
-                  <input
-                    type="number"
-                    id="price"
-                    name="price"
-                    value={newProduct.price}
-                    onChange={handleInputChange}
-                    className="shadow-sm appearance-none border border-gray-300 dark:border-gray-500 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-white dark:bg-slate-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0"
-                    required
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <span className="text-slate-500 font-medium">₹</span>
+                    </div>
+                    <input
+                      type="number"
+                      name="price"
+                      value={newProduct.price}
+                      onChange={handleInputChange}
+                      className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl pl-8 pr-4 py-3 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                      placeholder="0.00"
+                      step="0.01"
+                      min="0"
+                      required
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-1 md:col-span-2">
-                  <label
-                    htmlFor="image"
-                    className="block text-gray-700 dark:text-white/80 text-sm font-semibold mb-2"
-                  >
-                    Image URL <span className="text-red-500">*</span>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="block text-slate-700 dark:text-slate-300 text-sm font-semibold flex items-center gap-2">
+                    <ImageIcon size={16} className="text-slate-400" />
+                    Image URL
                   </label>
                   <input
-                    type="text"
-                    id="image"
+                    type="url"
                     name="image"
                     value={newProduct.image}
                     onChange={handleInputChange}
-                    className="shadow-sm appearance-none border border-gray-300 dark:border-gray-500 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-white dark:bg-slate-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                     placeholder="https://example.com/image.jpg"
                     required
                   />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Enter a valid URL for your product image
-                  </p>
                 </div>
 
-                <div className="space-y-1 md:col-span-2">
-                  <label
-                    htmlFor="description"
-                    className="block text-gray-700 dark:text-white/80 text-sm font-semibold mb-2"
-                  >
-                    Description <span className="text-red-500">*</span>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="block text-slate-700 dark:text-slate-300 text-sm font-semibold">
+                    Description
                   </label>
                   <textarea
-                    id="description"
                     name="description"
                     value={newProduct.description}
                     onChange={handleInputChange}
                     rows="4"
-                    className="shadow-sm appearance-none border border-gray-300 dark:border-gray-500 rounded-lg w-full py-3 px-4 text-gray-700 dark:text-white dark:bg-slate-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="Describe your product in detail..."
+                    className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none"
+                    placeholder="Describe your product's features, benefits, and specifications..."
                     required
                   />
                 </div>
               </div>
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                <button
+              <div className="mt-8">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="submit"
-                  className={`${
+                  className={`w-full md:w-auto px-8 py-3.5 rounded-xl font-bold shadow-md text-white transition-all ${
                     editMode
-                      ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:ring-blue-500"
-                      : "bg-gradient"
-                  } text-white font-bold py-3 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-300 transform hover:-translate-y-1 flex items-center`}
+                      ? "bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-indigo-500/20"
+                      : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 shadow-blue-500/20"
+                  }`}
                 >
-                  {editMode ? (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-                        />
-                      </svg>
-                      Update Product
-                    </>
-                  ) : (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                        />
-                      </svg>
-                      Create Product
-                    </>
-                  )}
-                </button>
-
-                {editMode && (
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-300 transform hover:-translate-y-1 flex items-center"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                    Cancel
-                  </button>
-                )}
+                  {editMode ? "Save Changes" : "Publish Listing"}
+                </motion.button>
               </div>
             </form>
-          </div>
+          </motion.div>
         </div>
       </div>
-      <DeleteModal
-        isOpen={isDeleteModalOpen}
-        onClose={handleCancelDelete}
-        onConfirm={handleConfirmDelete}
-        title="Delete Product"
-        message="Are you sure you want to delete this product? This action cannot be undone."
-      />
-      <DeleteSellerModal
-        isOpen={isDeleteSellerModalOpen}
-        onClose={() => setIsDeleteSellerModalOpen(false)}
-      />
+
+      <AnimatePresence>
+        {isDeleteModalOpen && (
+          <DeleteModal
+            isOpen={isDeleteModalOpen}
+            onClose={handleCancelDelete}
+            onConfirm={handleConfirmDelete}
+            title="Delete Listing"
+            message="Are you sure you want to delete this product? This action cannot be undone."
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isDeleteSellerModalOpen && (
+          <DeleteSellerModal
+            isOpen={isDeleteSellerModalOpen}
+            onClose={() => setIsDeleteSellerModalOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };

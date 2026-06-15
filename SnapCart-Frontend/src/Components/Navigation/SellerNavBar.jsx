@@ -48,7 +48,7 @@ const SellerNavBar = ({
 
   return (
     <>
-      <nav className="fixed top-0 w-full p-4 md:px-10 z-30 transition-colors duration-300 bg-[rgb(255,255,255)] dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800">
+      <nav className="fixed top-0 w-full p-4 md:px-10 z-30 transition-colors duration-300 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm">
         <div className="flex items-center justify-between">
           {/* Mobile Menu Button */}
           <button className="sm:hidden" onClick={toggleSidebar}>

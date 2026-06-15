@@ -2,6 +2,7 @@
 import { Heart, ShoppingCart } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import CartContext from "../../context/Cart/CartContext";
 
 const ProductCard = ({ product }) => {
@@ -62,55 +63,69 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      whileHover={{ y: -5 }}
       onClick={handleCardClick}
-      className="group border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden hover:shadow-md px-4 py-6 transition-shadow duration-300 cursor-pointer"
+      className="group bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl px-4 py-5 transition-all duration-300 cursor-pointer flex flex-col h-full"
     >
-      <div className="relative h-52 overflow-hidden bg-gray-100 rounded-lg">
+      <div className="relative h-56 overflow-hidden bg-slate-50 dark:bg-slate-700 rounded-xl">
         <img
           src={image}
           alt={title}
-          className="w-full h-full object-cover cursor-pointer group-hover:scale-125 transition-transform duration-500"
+          className="w-full h-full object-cover cursor-pointer group-hover:scale-110 transition-transform duration-700 ease-out"
         />
-        <button
+        
+        {/* Wishlist Button - Absolute position */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={handleToggleWishlist}
-          className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100"
+          className="absolute top-3 right-3 p-2.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-full shadow-sm hover:shadow-md transition-shadow z-10 border border-white/50 dark:border-slate-600/50"
           aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Heart
-            className={`w-5 h-5 ${
+            className={`w-4 h-4 ${
               isInWishlist
-                ? "text-red-500 fill-red-500"
-                : "text-gray-600 hover:text-red-500"
+                ? "text-rose-500 fill-rose-500"
+                : "text-slate-600 dark:text-slate-300 hover:text-rose-500"
             }`}
           />
-        </button>
+        </motion.button>
+
+        {/* Overlay gradient for dark mode */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
 
-      <div className="pt-5">
-        <h3 className="text-gray-900 dark:text-white font-semibold mb-1 truncate">
+      <div className="pt-5 flex flex-col flex-grow">
+        <h3 className="text-slate-800 dark:text-slate-100 font-bold mb-1 truncate text-lg tracking-tight">
           {truncateTitle(title, 40)}
         </h3>
 
-        <p className="text-gray-600 dark:text-white/70 text-sm mb-2 line-clamp-2">
+        <p className="text-slate-500 dark:text-slate-400 text-sm mb-4 line-clamp-2 flex-grow">
           {truncateDesc(description, 80)}
         </p>
 
-        <div className="flex items-center justify-between mt-5">
-          <span className="text-gray-900 dark:text-white font-bold">
+        <div className="flex items-center justify-between mt-auto">
+          <span className="text-slate-900 dark:text-white font-black text-xl tracking-tight">
             ₹ {price}
           </span>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleAddToCart}
-            className="flex items-center text-white bg-blue-500 hover:bg-blue-600 py-1.5 px-3 rounded-md text-sm font-medium"
+            className="flex items-center gap-1.5 text-white bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 py-2 px-4 rounded-xl text-sm font-semibold shadow-md shadow-blue-500/20 transition-all"
           >
-            <ShoppingCart className="w-4 h-4 mr-1" />
-            Add to Cart
-          </button>
+            <ShoppingCart className="w-4 h-4" />
+            <span>Add</span>
+          </motion.button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
