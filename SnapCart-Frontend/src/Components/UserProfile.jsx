@@ -26,7 +26,7 @@ const UserProfile = ({
   setShowLogoutConfirmation,
 }) => {
   const { isLoggedIn, user } = useUserContext();
-  const { isLoggedInAsSeller, seller } = useSellerContext();
+  const { isLoggedInAsSeller, seller, isSellerLoggedOut } = useSellerContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
@@ -63,7 +63,7 @@ const UserProfile = ({
       },
       ...profileTabs.slice(1),
     ];
-  } else if (isLoggedIn && !seller) {
+  } else if (isLoggedIn && !seller && isSellerLoggedOut) {
     tabs = [
       ...profileTabs.slice(0, 1),
       {
@@ -227,8 +227,8 @@ const UserProfile = ({
                 {userData.role === "PlatformAdmin"
                   ? "Admin"
                   : userData.role === "Seller" && isLoggedInAsSeller
-                  ? "Seller"
-                  : "Customer"} 
+                    ? "Seller"
+                    : "Customer"}
               </p>
             </div>
           </div>

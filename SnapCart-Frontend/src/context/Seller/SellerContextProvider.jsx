@@ -3,8 +3,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import SellerContext from "./SellerContext";
 import useUserContext from "../User/useUserContext";
+import SellerContext from "./SellerContext";
 
 const SellerContextProvider = ({ children }) => {
   const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
@@ -85,20 +85,20 @@ const SellerContextProvider = ({ children }) => {
       if (response.data && response.data.data) {
         setSeller(response.data.data);
         toast.success(
-          response.data.message || "Seller account created successfully!"
+          response.data.message || "Seller account created successfully!",
         );
         setTimeout(() => {
           toast.info(
             "You are now a seller! You can manage your products from your userprofile menu.",
             {
               autoClose: 5000,
-            }
+            },
           );
         }, 400);
         return response.data.data;
       } else {
         throw new Error(
-          response.data?.message || "Failed to create seller account"
+          response.data?.message || "Failed to create seller account",
         );
       }
     } catch (error) {
@@ -116,7 +116,7 @@ const SellerContextProvider = ({ children }) => {
   const checkSellerEmail = async (email) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/sellers/check-email?email=${email}`
+        `${API_BASE_URL}/sellers/check-email?email=${email}`,
       );
       return response.data.data.exists;
     } catch (error) {
@@ -147,18 +147,18 @@ const SellerContextProvider = ({ children }) => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.data && response.data.data) {
         setSeller(response.data.data);
         toast.success(
-          response.data.message || "Seller information updated successfully!"
+          response.data.message || "Seller information updated successfully!",
         );
         return response.data.data;
       } else {
         throw new Error(
-          response.data?.message || "Failed to update seller information"
+          response.data?.message || "Failed to update seller information",
         );
       }
     } catch (error) {
@@ -207,12 +207,12 @@ const SellerContextProvider = ({ children }) => {
         window.dispatchEvent(new CustomEvent("sellerDeleted"));
 
         toast.success(
-          response.data.message || "Seller account deleted successfully!"
+          response.data.message || "Seller account deleted successfully!",
         );
         return true;
       } else {
         throw new Error(
-          response.data?.message || "Failed to delete seller account"
+          response.data?.message || "Failed to delete seller account",
         );
       }
     } catch (error) {

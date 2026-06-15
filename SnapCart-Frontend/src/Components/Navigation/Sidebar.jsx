@@ -32,7 +32,7 @@ const Sidebar = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoggedIn, user } = useUserContext();
-  const { isLoggedInAsSeller, seller } = useSellerContext();
+  const { isLoggedInAsSeller, seller, isSellerLoggedOut } = useSellerContext();
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
   const handleLogin = useCallback(() => {
@@ -109,7 +109,7 @@ const Sidebar = ({
         },
         ...items.slice(1),
       ];
-    } else if (isLoggedIn && !seller) {
+    } else if (isLoggedIn && !seller ) {
       items = [
         ...items.slice(0, 1),
         {
